@@ -7,9 +7,6 @@
 #: core.mxfiles
 #: core.packages
 #: core.sources
-#: docs.sphinx
-#: i18n.gettext
-#: i18n.lingua
 #
 # SETTINGS (ALL CHANGES MADE BELOW SETTINGS WILL BE LOST)
 ##############################################################################
@@ -70,49 +67,11 @@ MXDEV?=mxdev
 # Default: mxmake
 MXMAKE?=mxmake
 
-## docs.sphinx
-
-# Documentation source folder.
-# Default: docs/source
-DOCS_SOURCE_FOLDER?=docs/source
-
-# Documentation generation target folder.
-# Default: docs/html
-DOCS_TARGET_FOLDER?=docs/html
-
-# Documentation Python requirements to be installed (via pip).
-# No default value.
-DOCS_REQUIREMENTS?=
-
 ## core.mxfiles
 
 # The config file to use.
 # Default: mx.ini
 PROJECT_CONFIG?=mx.ini
-
-## i18n.gettext
-
-# Path of directory containing the message catalogs.
-# Default: locale
-GETTEXT_LOCALES_PATH?=locale
-
-# Translation domain to use.
-# No default value.
-GETTEXT_DOMAIN?=
-
-# List of language identifiers.
-# No default value.
-GETTEXT_LANGUAGES?=
-
-## i18n.lingua
-
-# Path of directory to extract translatable texts from.
-# Default: src
-LINGUA_SEARCH_PATH?=src
-
-# Python packages containing lingua extensions.
-# No default value.
-LINGUA_PLUGINS?=
 
 ##############################################################################
 # END SETTINGS - DO NOT EDIT BELOW THIS LINE
@@ -200,44 +159,6 @@ endif
 INSTALL_TARGETS+=mxenv
 DIRTY_TARGETS+=mxenv-dirty
 CLEAN_TARGETS+=mxenv-clean
-
-##############################################################################
-# sphinx
-##############################################################################
-
-# additional targets required for building docs.
-DOCS_TARGETS+=
-
-SPHINX_BIN=$(MXENV_PATH)sphinx-build
-SPHINX_AUTOBUILD_BIN=$(MXENV_PATH)sphinx-autobuild
-
-DOCS_TARGET:=$(SENTINEL_FOLDER)/sphinx.sentinel
-$(DOCS_TARGET): $(MXENV_TARGET)
-	@echo "Install Sphinx"
-	@$(MXENV_PATH)pip install -U sphinx sphinx-autobuild $(DOCS_REQUIREMENTS)
-	@touch $(DOCS_TARGET)
-
-.PHONY: docs
-docs: $(DOCS_TARGET) $(DOCS_TARGETS)
-	@echo "Build sphinx docs"
-	@$(SPHINX_BIN) $(DOCS_SOURCE_FOLDER) $(DOCS_TARGET_FOLDER)
-
-.PHONY: docs-live
-docs-live: $(DOCS_TARGET) $(DOCS_TARGETS)
-	@echo "Rebuild Sphinx documentation on changes, with live-reload in the browser"
-	@$(SPHINX_AUTOBUILD_BIN) $(DOCS_SOURCE_FOLDER) $(DOCS_TARGET_FOLDER)
-
-.PHONY: docs-dirty
-docs-dirty:
-	@rm -f $(DOCS_TARGET)
-
-.PHONY: docs-clean
-docs-clean: docs-dirty
-	@rm -rf $(DOCS_TARGET_FOLDER)
-
-INSTALL_TARGETS+=$(DOCS_TARGET)
-DIRTY_TARGETS+=docs-dirty
-CLEAN_TARGETS+=docs-clean
 
 ##############################################################################
 # sources
@@ -354,82 +275,6 @@ packages-clean:
 INSTALL_TARGETS+=packages
 DIRTY_TARGETS+=packages-dirty
 CLEAN_TARGETS+=packages-clean
-
-##############################################################################
-# gettext
-##############################################################################
-
-# case `system.dependencies` domain is included
-SYSTEM_DEPENDENCIES+=gettext
-
-.PHONY: gettext-create
-gettext-create:
-	@if [ ! -e "$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot" ]; then \
-		echo "Create pot file"; \
-		mkdir -p "$(GETTEXT_LOCALES_PATH)"; \
-		touch "$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot"; \
-	fi
-	@for lang in $(GETTEXT_LANGUAGES); do \
-		if [ ! -e "$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po" ]; then \
-			mkdir -p "$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES"; \
-			msginit \
-				-i "$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot" \
-				-o "$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po" \
-				-l $$lang; \
-		fi \
-	done
-
-.PHONY: gettext-update
-gettext-update:
-	@echo "Update translations"
-	@for lang in $(GETTEXT_LANGUAGES); do \
-		msgmerge -o \
-			"$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po" \
-			"$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po" \
-			"$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot"; \
-	done
-
-.PHONY: gettext-compile
-gettext-compile:
-	@echo "Compile message catalogs"
-	@for lang in $(GETTEXT_LANGUAGES); do \
-		msgfmt --statistics -o \
-			"$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).mo" \
-			"$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po"; \
-	done
-
-##############################################################################
-# lingua
-##############################################################################
-
-LINGUA_TARGET:=$(SENTINEL_FOLDER)/lingua.sentinel
-$(LINGUA_TARGET): $(MXENV_TARGET)
-	@echo "Install Lingua"
-	@$(MXENV_PATH)pip install chameleon lingua $(LINGUA_PLUGINS)
-	@touch $(LINGUA_TARGET)
-
-PHONY: lingua-extract
-lingua-extract: $(LINGUA_TARGET)
-	@echo "Extract messages"
-	@$(MXENV_PATH)pot-create \
-		"$(LINGUA_SEARCH_PATH)" \
-		-o "$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot"
-
-PHONY: lingua
-lingua: gettext-create lingua-extract gettext-update gettext-compile
-
-.PHONY: lingua-dirty
-lingua-dirty:
-	@rm -f $(LINGUA_TARGET)
-
-.PHONY: lingua-clean
-lingua-clean: lingua-dirty
-	@test -e $(MXENV_PATH)pip && $(MXENV_PATH)pip uninstall -y \
-		chameleon lingua $(LINGUA_PLUGINS) || :
-
-INSTALL_TARGETS+=$(LINGUA_TARGET)
-DIRTY_TARGETS+=lingua-dirty
-CLEAN_TARGETS+=lingua-clean
 
 -include $(INCLUDE_MAKEFILE)
 
