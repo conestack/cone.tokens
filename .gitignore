@@ -2,3 +2,5 @@
 /venv/
 .mxmake
 /sources/
+/requirements.txt
+/requirements-mxdev.txt
