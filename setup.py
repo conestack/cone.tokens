@@ -47,7 +47,6 @@ setup(
     zip_safe=False,
     install_requires=[
         'setuptools',
-        'cone.app',
         'cone.sql'
     ],
     extras_require=dict(

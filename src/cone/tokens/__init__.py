@@ -1,5 +1,7 @@
 from cone.app import main_hook
+from cone.tokens.model import Tokens
 import logging
+import cone.app
 
 logger = logging.getLogger('cone.tokens')
 
@@ -12,4 +14,5 @@ def initialize_tokens(config, global_config, settings):
 
     # scan browser package
     #config.scan('cone.tokens.browser')
+    cone.app.register_entry('tokens', Tokens)
     pass
