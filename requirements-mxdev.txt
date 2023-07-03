@@ -1,0 +1,6 @@
+###############################################################################
+# mxdev development sources
+-e ./sources/cone.app[test] --pre
+-e ./sources/cone.sql --pre
+
+
