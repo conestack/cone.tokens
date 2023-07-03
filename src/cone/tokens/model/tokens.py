@@ -5,9 +5,8 @@ from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import INTEGER
 from pyramid.i18n import TranslationStringFactory
-import decimal
-import uuid
-from datetime import datetime, timedelta
+from datetime import datetime 
+from datetime import timedelta
 
 _ = TranslationStringFactory('cone.tokens')
 
@@ -52,7 +51,7 @@ class Tokens(object):
         if not existing.usage_count == -1:
             existing.usage_count =-1
         existing.last_used = current_time
-        # alter table
+        session.commit()
         return True
         
 
