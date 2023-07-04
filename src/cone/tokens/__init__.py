@@ -1,7 +1,7 @@
 from cone.app import main_hook
 from cone.tokens.model import TokenContainer
-import logging
 import cone.app
+import logging
 
 logger = logging.getLogger('cone.tokens')
 
