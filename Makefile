@@ -7,6 +7,7 @@
 #: core.mxfiles
 #: core.packages
 #: core.sources
+#: qa.test
 #
 # SETTINGS (ALL CHANGES MADE BELOW SETTINGS WILL BE LOST)
 ##############################################################################
@@ -73,6 +74,22 @@ MXMAKE?=mxmake
 # Default: mx.ini
 PROJECT_CONFIG?=mx.ini
 
+## qa.test
+
+# The command which gets executed. Defaults to the location the
+# :ref:`run-tests` template gets rendered to if configured.
+# Default: .mxmake/files/run-tests.sh
+TEST_COMMAND?=./venv/bin/python3 -m cone.tokens.tests --auto-color --auto-progress
+
+# Additional Python requirements for running tests to be
+# installed (via pip).
+# Default: pytest
+TEST_REQUIREMENTS?=pytest
+
+# Additional make targets the test target depends on.
+# No default value.
+TEST_DEPENDENCY_TARGETS?=
+
 ##############################################################################
 # END SETTINGS - DO NOT EDIT BELOW THIS LINE
 ##############################################################################
@@ -81,6 +98,8 @@ INSTALL_TARGETS?=
 DIRTY_TARGETS?=
 CLEAN_TARGETS?=
 PURGE_TARGETS?=
+CHECK_TARGETS?=
+FORMAT_TARGETS?=
 
 # Defensive settings for make: https://tech.davis-hansson.com/p/make/
 SHELL:=bash
@@ -276,6 +295,35 @@ INSTALL_TARGETS+=packages
 DIRTY_TARGETS+=packages-dirty
 CLEAN_TARGETS+=packages-clean
 
+##############################################################################
+# test
+##############################################################################
+
+TEST_TARGET:=$(SENTINEL_FOLDER)/test.sentinel
+$(TEST_TARGET): $(MXENV_TARGET)
+	@echo "Install $(TEST_REQUIREMENTS)"
+	@$(MXENV_PATH)pip install $(TEST_REQUIREMENTS)
+	@touch $(TEST_TARGET)
+
+.PHONY: test
+test: $(FILES_TARGET) $(SOURCES_TARGET) $(PACKAGES_TARGET) $(TEST_TARGET) $(TEST_DEPENDENCY_TARGETS)
+	@echo "Run tests"
+	@test -z "$(TEST_COMMAND)" && echo "No test command defined"
+	@test -z "$(TEST_COMMAND)" || bash -c "$(TEST_COMMAND)"
+
+.PHONY: test-dirty
+test-dirty:
+	@rm -f $(TEST_TARGET)
+
+.PHONY: test-clean
+test-clean: test-dirty
+	@test -e $(MXENV_PATH)pip && $(MXENV_PATH)pip uninstall -y $(TEST_REQUIREMENTS) || :
+	@rm -rf .pytest_cache
+
+INSTALL_TARGETS+=$(TEST_TARGET)
+CLEAN_TARGETS+=test-clean
+DIRTY_TARGETS+=test-dirty
+
 -include $(INCLUDE_MAKEFILE)
 
 ##############################################################################
@@ -314,3 +362,8 @@ runtime-clean:
 	@find . -name '*~' -exec rm -f {} +
 	@find . -name '__pycache__' -exec rm -fr {} +
 
+.PHONY: check
+check: $(CHECK_TARGETS)
+
+.PHONY: format
+format: $(FORMAT_TARGETS)

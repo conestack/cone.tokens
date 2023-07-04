@@ -4,3 +4,6 @@
 /sources/
 /requirements.txt
 /requirements-mxdev.txt
+constraints-mxdev.txt
+*egg-info
+*pyc

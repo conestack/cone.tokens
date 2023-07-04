@@ -39,8 +39,8 @@ class Tokens(object):
             raise TokenLockTimeViolation(self.token_uid)
         if current_time > existing.valid_to or current_time < existing.valid_from:
             raise TokenTimeRangeViolation(self.token_uid)
-        if not existing.usage_count == -1:
-            existing.usage_count =-1
+        if existing.usage_count != -1:
+            existing.usage_count -= 1
         existing.last_used = current_time
         session.commit()
         return True
