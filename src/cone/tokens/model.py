@@ -41,6 +41,6 @@ class TokenNode(SQLRowNode):
         return md
 
 
-class Tokens(SQLTableNode):
+class TokenContainer(SQLTableNode):
     record_class = TokenRecord
     child_factory = TokenNode

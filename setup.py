@@ -48,7 +48,7 @@ setup(
     install_requires=[
         'setuptools',
         'cone.sql'
-    ],
+        ],
     extras_require=dict(
         test=[
             'zope.testrunner'
