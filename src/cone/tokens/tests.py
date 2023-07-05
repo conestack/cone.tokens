@@ -31,7 +31,7 @@ class TestTokens(NodeTestCase):
     layer = tokens_layer
 
     @sql_testing.delete_table_records(TokenRecord)
-    def test_tokens(self):
+    def test_token_consume(self):
         request = self.layer.new_request()
         session = get_session(request)
         token = TokenRecord()
@@ -43,26 +43,26 @@ class TestTokens(NodeTestCase):
         token.usage_count = 2
         session.add(token)
         token_api = Tokens(request,uid)
-        self.assertEqual(token_api(),True)
+        self.assertEqual(token_api.consume(),True)
         self.assertNotEqual(last_used,token.last_used)
         self.assertEqual(token.usage_count,1)
         token.usage_count = 0
         session.commit()
-        self.assertRaises(TokenUsageCountExceeded,token_api.__call__)
+        self.assertRaises(TokenUsageCountExceeded,token_api.consume)
         token.usage_count = -1
         token.lock_time = 120
         session.commit()
-        self.assertRaises(TokenLockTimeViolation,token_api.__call__)
+        self.assertRaises(TokenLockTimeViolation,token_api.consume)
         token.lock_time = 0
         token.valid_to = datetime(1999,1,1)
         session.commit()
-        self.assertRaises(TokenTimeRangeViolation,token_api.__call__)
+        self.assertRaises(TokenTimeRangeViolation,token_api.consume)
         token.valid_to = datetime.now() + timedelta(2)
         token.valid_from = datetime.now() + timedelta(1)
         session.commit()
-        self.assertRaises(TokenTimeRangeViolation,token_api.__call__)
+        self.assertRaises(TokenTimeRangeViolation,token_api.consume)
         session.delete(token)
-        self.assertRaises(TokenNotExists,token_api.__call__)
+        self.assertRaises(TokenNotExists,token_api.consume)
 
 
 
