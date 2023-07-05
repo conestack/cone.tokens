@@ -1,13 +1,21 @@
-from cone.app.model import Metadata
+from cone.app.model import Metadata, Properties
 from cone.sql import SQLBase
 from cone.sql.model import GUID
 from cone.sql.model import SQLRowNode
 from cone.sql.model import SQLTableNode
+from cone.app.model import node_info
 from node.utils import instance_property
+from cone.sql.acl import SQLPrincipalACL
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
 from sqlalchemy import String
+from plumber import plumbing
+from pyramid.i18n import TranslationStringFactory
+
+
+_ = TranslationStringFactory('touch.personcounter')
+
 
 class TokenRecord(SQLBase):
     __tablename__ = 'tokens'
@@ -23,6 +31,13 @@ class TokenRecord(SQLBase):
     modified = Column(DateTime)
 
 
+@node_info(
+    name='token_node',
+    title=_('token_node_title', default='Token'),
+    description=_(
+        'token_node_description',
+        default='Token'
+    ))
 class TokenNode(SQLRowNode):
     record_class = TokenRecord
 
@@ -39,8 +54,30 @@ class TokenNode(SQLRowNode):
         md.created = self.attrs.get('created')
         md.modified = self.attrs.get('modified')
         return md
-
-
+    
+    
+@node_info(
+    name='token_container',
+    title=_('token_container_title', default='Tokens'),
+    description=_('token_container_description', default='Tokens'),
+    addables=['token_node'])
+@plumbing(SQLPrincipalACL)
 class TokenContainer(SQLTableNode):
     record_class = TokenRecord
     child_factory = TokenNode
+
+    @property
+    def properties(self):
+        props = Properties()
+        props.default_content_tile = 'sharing'
+        props.in_navtree = True
+        props.action_up = True
+        return props
+
+    @property
+    def metadata(self):
+        md = Metadata()
+        info = self.nodeinfo
+        md.title = info.title
+        md.description = info.description
+        return md
