@@ -1,16 +1,3 @@
-#
-# SQUAREWAVE COMPUTING
-#
-# 2022 Squarewave Computing, Robert Niederreiter
-# All Rights Reserved
-#
-# NOTICE: All information contained herein is, and remains the property of
-# Squarewave Computing and its suppliers, if any. The intellectual and technical
-# concepts contained herein are proprietary to Squarewave Computing and its
-# suppliers. Dissemination of this information or reproduction of this material
-# is strictly forbidden unless prior written permission is obtained from
-# Squarewave Computing.
-#
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
 from cone.app.browser.form import Form
