@@ -1,4 +1,3 @@
-
 from cone.sql import get_session
 from cone.sql import testing as sql_testing
 from cone.sql.testing import SQLLayer
@@ -15,6 +14,8 @@ import os
 import sys
 import unittest
 import uuid
+
+
 class TokensLayer(SQLLayer):
 
     def make_app(self):

@@ -1,21 +1,20 @@
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
+from cone.app.browser.contents import ContentsTile
 from cone.app.browser.form import Form
 from cone.app.browser.layout import ProtectedContentTile
-from cone.app.browser.contents import ContentsTile
 from cone.app.browser.utils import make_url
 from cone.app.utils import add_creation_metadata
 from cone.app.utils import update_creation_metadata
 from cone.tile import tile
+from cone.tokens.model import TokenContainer
+from cone.tokens.model import TokenNode
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
-from cone.tokens.model import TokenContainer
-from cone.tokens.model import TokenNode
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer
 import uuid
-
 
 _ = TranslationStringFactory('cone.tokens')
 

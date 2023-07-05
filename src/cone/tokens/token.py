@@ -7,7 +7,6 @@ from cone.tokens.model import TokenRecord
 from datetime import datetime 
 from datetime import timedelta
 from pyramid.i18n import TranslationStringFactory
-from typing import Any
 
 _ = TranslationStringFactory('cone.tokens')
 
