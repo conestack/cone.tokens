@@ -14,7 +14,7 @@ from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
 
 
-_ = TranslationStringFactory('touch.personcounter')
+_ = TranslationStringFactory('cone.tokens')
 
 
 class TokenRecord(SQLBase):
