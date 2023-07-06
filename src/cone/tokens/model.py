@@ -69,9 +69,10 @@ class TokenContainer(SQLTableNode):
     @property
     def properties(self):
         props = Properties()
-        props.default_content_tile = 'sharing'
+        props.default_content_tile = 'listing'
         props.in_navtree = True
         props.action_up = True
+        props.action_sharing = True
         return props
 
     @property
