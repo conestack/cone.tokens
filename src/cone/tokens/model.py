@@ -12,7 +12,8 @@ from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
 from sqlalchemy import String
-
+from zope.interface import implementer
+from node.interfaces import IUUID
 
 _ = TranslationStringFactory('cone.tokens')
 
@@ -55,7 +56,7 @@ class TokenNode(SQLRowNode):
         md.modified = self.attrs.get('modified')
         return md
     
-    
+@implementer(IUUID)
 @node_info(
     name='token_container',
     title=_('token_container_title', default='Tokens'),

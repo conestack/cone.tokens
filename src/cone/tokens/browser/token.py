@@ -134,7 +134,7 @@ class TokenEditForm(TokenForm):
 @tile(
     name='contents',
     path='templates/tokens.pt',
-    interface=TokenContainer,
+    interface=TokenNode,
     permission='view')
 class TokenCotainerTile(ContentsTile):
     #XXX: needs testing

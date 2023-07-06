@@ -13,6 +13,5 @@ def initialize_tokens(config, global_config, settings):
     #configure_resources(config, settings)
 
     # scan browser package
-    #config.scan('cone.tokens.browser')
+    config.scan('cone.tokens.browser')
     cone.app.register_entry('tokens', TokenContainer)
-    pass
