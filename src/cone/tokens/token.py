@@ -1,4 +1,5 @@
 from cone.sql import get_session
+from cone.sql import use_tm
 from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
@@ -45,7 +46,10 @@ class Tokens(object):
         if existing.usage_count != -1:
             existing.usage_count -= 1
         existing.last_used = current_time
-        session.commit()
+        if use_tm():
+            self.session.flush()
+        else:
+            self.session.commit()
         return True
     
     def add(self, token_uid, valid_to, usage_count, lock_time, valid_from=datetime.now()):
@@ -57,7 +61,10 @@ class Tokens(object):
         token.lock_time = lock_time
         token.usage_count = usage_count
         session.add(token)
-        session.commit()
+        if use_tm():
+            self.session.flush()
+        else:
+            self.session.commit()
 
     def update(self, token_uid, valid_from=None, valid_to=None, usage_count=None, lock_time=None):
         token = self._get_token(token_uid)
@@ -70,10 +77,16 @@ class Tokens(object):
             token.lock_time = lock_time
         if usage_count:
             token.usage_count = usage_count
-        session.commit()
+        if use_tm():
+            self.session.flush()
+        else:
+            self.session.commit()
     
     def delete(self, token_uid):
         session = self.session
         token = self._get_token(token_uid)
         session.delete(token)
-        session.commit()
+        if use_tm():
+            self.session.flush()
+        else:
+            self.session.commit()
