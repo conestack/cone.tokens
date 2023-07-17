@@ -45,12 +45,7 @@ class TokenNode(SQLRowNode):
     @instance_property
     def metadata(self):
         md = Metadata()
-        md.uid = self.attrs.get('uid')
-        md.last_used = self.attrs.get('last_used')
-        md.valid_from = self.attrs.get('valid_from')
-        md.valid_to = self.attrs.get('valid_to')
-        md.usage_count = self.attrs.get('usage_count')
-        md.lock_time = self.attrs.get('lock_time')
+        md.title = str(self.attrs.get('uid'))
         md.creator = self.attrs.get('creator')
         md.created = self.attrs.get('created')
         md.modified = self.attrs.get('modified')
