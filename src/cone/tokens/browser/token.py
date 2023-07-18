@@ -1,3 +1,4 @@
+from base64 import b64encode
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
 from cone.app.browser.contents import ContentsTile
@@ -9,17 +10,18 @@ from cone.app.utils import update_creation_metadata
 from cone.tile import tile
 from cone.tokens.model import TokenNode
 from cone.tokens.token import Tokens
+from datetime import datetime 
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
+from pyramid.response import Response
+from pyramid.view import view_config
 from typing import Any
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer
-from pyramid.view import view_config
-from pyramid.response import Response
+import io
+import qrcode
 import uuid
-from datetime import datetime 
-
 
 _ = TranslationStringFactory('cone.tokens')
 
@@ -30,7 +32,16 @@ _ = TranslationStringFactory('cone.tokens')
     interface=TokenNode,
     permission='view')
 class TokenTile(ProtectedContentTile):
-    ...
+
+    def stream_qrcode_token(self):
+        img = qrcode.make(self.model.attrs['uid'])
+        img_byte_arr = io.BytesIO()
+        img.save(img_byte_arr,format='PNG')
+        img_byte_arr = b64encode(img_byte_arr.getvalue()).decode("utf-8")
+        qr_src = "data:image/png;base64," + img_byte_arr
+        return qr_src
+
+
 
 
 class TokenForm(Form):
