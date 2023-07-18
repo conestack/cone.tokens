@@ -48,9 +48,9 @@ class Tokens(object):
             existing.usage_count -= 1
         existing.last_used = current_time
         if use_tm():
-            self.session.flush()
+            session.flush()
         else:
-            self.session.commit()
+            session.commit()
         return True
     
     def add(self, token_uid, valid_to, usage_count, lock_time, valid_from=datetime.now()):
@@ -63,9 +63,9 @@ class Tokens(object):
         token.usage_count = usage_count
         session.add(token)
         if use_tm():
-            self.session.flush()
+            session.flush()
         else:
-            self.session.commit()
+            session.commit()
 
     def update(self, token_uid, valid_from=None, valid_to=None, usage_count=None, lock_time=None):
         token = self._get_token(token_uid)
@@ -79,15 +79,15 @@ class Tokens(object):
         if usage_count:
             token.usage_count = usage_count
         if use_tm():
-            self.session.flush()
+            session.flush()
         else:
-            self.session.commit()
+            session.commit()
     
     def delete(self, token_uid):
         session = self.session
         token = self._get_token(token_uid)
         session.delete(token)
         if use_tm():
-            self.session.flush()
+            session.flush()
         else:
-            self.session.commit()
+            session.commit()

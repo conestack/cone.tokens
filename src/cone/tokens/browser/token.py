@@ -182,12 +182,12 @@ class TokenAdd(object):
             result.json = "No Param lock_time"
             return result
         token_api.add(
-                    token_uid,
-                    params.get('valid_to'),
-                    params.get('usage_count'),
-                    params.get('lock_time'),
-                    valid_from=valid_from
-                )
+            token_uid,
+            params.get('valid_to'),
+            params.get('usage_count'),
+            params.get('lock_time'),
+            valid_from=valid_from
+        )
         result.status_code = 200
         result.json =  {'token_uid': token_api}
         return result
@@ -215,8 +215,8 @@ class TokenDelete(object):
             return result
         token_uid = params.get('uuid')
         token_api.delete(
-                    token_uid
-                )
+            token_uid
+        )
         result.status_code = 200
         result.json =  {'token_uid': token_api}
         return result
@@ -248,12 +248,12 @@ class TokenEdit(object):
         valid_from = params.get('valid_from') if params.get('valid_from') else None
 
         token_api.update(
-                    token_uid,
-                    valid_to = valid_to,
-                    usage_count = usage_count,
-                    lock_time = lock_time,
-                    valid_from = valid_from
-                )
+            token_uid,
+            valid_to = valid_to,
+            usage_count = usage_count,
+            lock_time = lock_time,
+            valid_from = valid_from
+        )
         result.status_code = 200
         result.json =  {'token_uid': token_api}
         return result
@@ -279,7 +279,11 @@ class TokenConsume(object):
             result.json = "No Param uuid"
             return result
         token_uid = params.get('uuid')
-        token_api.consume(token_uid)
-        result.status_code = 200
-        result.json = {'consumed':token_uid}
-        return result
+        consumed = token_api.consume(token_uid)
+        if consumed:
+            result.status_code = 200
+            result.json = {'consumed':token_uid}
+            return result
+        else:
+            result.status_code = 301
+            return result
