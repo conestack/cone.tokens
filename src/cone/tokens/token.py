@@ -39,8 +39,9 @@ class Tokens(object):
         if existing.usage_count == 0:
             raise TokenUsageCountExceeded(token_uid)
         current_time = datetime.now()
-        if existing.last_used + timedelta(0, existing.lock_time) > current_time:
-            raise TokenLockTimeViolation(token_uid)
+        if existing.last_used:
+            if existing.last_used + timedelta(0, existing.lock_time) > current_time:
+                raise TokenLockTimeViolation(token_uid)
         if current_time > existing.valid_to or current_time < existing.valid_from:
             raise TokenTimeRangeViolation(token_uid)
         if existing.usage_count != -1:

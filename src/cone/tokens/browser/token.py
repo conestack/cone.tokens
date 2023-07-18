@@ -7,14 +7,19 @@ from cone.app.browser.utils import make_url
 from cone.app.utils import add_creation_metadata
 from cone.app.utils import update_creation_metadata
 from cone.tile import tile
-from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
+from cone.tokens.token import Tokens
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
+from typing import Any
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer
+from pyramid.view import view_config
+from pyramid.response import Response
 import uuid
+from datetime import datetime 
+
 
 _ = TranslationStringFactory('cone.tokens')
 
@@ -133,9 +138,140 @@ class TokenEditForm(TokenForm):
 
 @tile(
     name='contents',
-    path='templates/tokens.pt',
     interface=TokenNode,
     permission='view')
-class TokenCotainerTile(ContentsTile):
-    #XXX: needs testing
+class TokenContainerTile(ContentsTile):
     ...
+
+@view_config(
+    name='token_add',
+    accept='application/json',
+    renderer='json',
+    permission='add')
+class TokenAdd(object):
+    
+    def __init__(self, model, request):
+        self.model = model
+        self.request = request
+
+    def __call__(self):
+        result = self.request.response
+        params = self.request.params
+        result.content_type = 'application/json'
+        token_api = Tokens(self.request)
+        token_uid = params.get('uuid') if params.get('uuid') else uuid.uuid4()
+        valid_from = params.get('valid_from') if params.get('valid_from') else datetime.now()
+        if not params.get('valid_to'):
+            result.status_code = 400
+            result.json = "No Param valid_to"
+            return result
+        if not params.get('usage_count'):
+            result.status_code = 400
+            result.json = "No Param usage_count"
+            return result
+        if not params.get('lock_time'):
+            result.status_code = 400
+            result.json = "No Param lock_time"
+            return result
+        token_api.add(
+                    token_uid,
+                    params.get('valid_to'),
+                    params.get('usage_count'),
+                    params.get('lock_time'),
+                    valid_from=valid_from
+                )
+        result.status_code = 200
+        result.json =  {'token_uid': token_api}
+        return result
+        
+
+@view_config(
+    name='token_delete',
+    accept='application/json',
+    renderer='json',
+    permission='delete')
+class TokenDelete(object):
+    
+    def __init__(self, model, request):
+        self.model = model
+        self.request = request
+
+    def __call__(self):
+        result = self.request.response
+        params = self.request.params
+        result.content_type = 'application/json'
+        token_api = Tokens(self.request)
+        if not params.get('uuid'):
+            result.status_code = 400
+            result.json = "No Param uuid"
+            return result
+        token_uid = params.get('uuid')
+        token_api.delete(
+                    token_uid
+                )
+        result.status_code = 200
+        result.json =  {'token_uid': token_api}
+        return result
+
+@view_config(
+    name='token_edit',
+    accept='application/json',
+    renderer='json',
+    permission='edit')
+class TokenEdit(object):
+    
+    def __init__(self, model, request):
+        self.model = model
+        self.request = request
+
+    def __call__(self):
+        result = self.request.response
+        params = self.request.params
+        result.content_type = 'application/json'
+        token_api = Tokens(self.request)
+        if not params.get('uuid'):
+            result.status_code = 400
+            result.json = "No Param uuid"
+            return result
+        token_uid = params.get('uuid')
+        valid_to = params.get('valid_to') if params.get('valid_to') else None
+        usage_count = params.get('usage_count') if params.get('usage_count') else None
+        lock_time = params.get('lock_time') if params.get('lock_time') else None
+        valid_from = params.get('valid_from') if params.get('valid_from') else None
+
+        token_api.update(
+                    token_uid,
+                    valid_to = valid_to,
+                    usage_count = usage_count,
+                    lock_time = lock_time,
+                    valid_from = valid_from
+                )
+        result.status_code = 200
+        result.json =  {'token_uid': token_api}
+        return result
+
+@view_config(
+    name='token_consume',
+    accept='application/json',
+    renderer='json',
+    permission='view')
+class TokenConsume(object):
+    
+    def __init__(self, model, request):
+        self.model = model
+        self.request = request
+
+    def __call__(self):
+        result = self.request.response
+        params = self.request.params
+        result.content_type = 'application/json'
+        token_api = Tokens(self.request)
+        if not params.get('uuid'):
+            result.status_code = 400
+            result.json = "No Param uuid"
+            return result
+        token_uid = params.get('uuid')
+        token_api.consume(token_uid)
+        result.status_code = 200
+        result.json = {'consumed':token_uid}
+        return result
