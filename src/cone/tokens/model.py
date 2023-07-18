@@ -5,6 +5,7 @@ from cone.sql.acl import SQLPrincipalACL
 from cone.sql.model import GUID
 from cone.sql.model import SQLRowNode
 from cone.sql.model import SQLTableNode
+from node.interfaces import IUUID
 from node.utils import instance_property
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
@@ -13,7 +14,6 @@ from sqlalchemy import DateTime
 from sqlalchemy import Integer
 from sqlalchemy import String
 from zope.interface import implementer
-from node.interfaces import IUUID
 
 _ = TranslationStringFactory('cone.tokens')
 

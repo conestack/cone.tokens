@@ -22,7 +22,6 @@ from yafowil.persistence import node_attribute_writer
 import io
 import qrcode
 import uuid
-
 _ = TranslationStringFactory('cone.tokens')
 
 
@@ -40,8 +39,6 @@ class TokenTile(ProtectedContentTile):
         img_byte_arr = b64encode(img_byte_arr.getvalue()).decode("utf-8")
         qr_src = "data:image/png;base64," + img_byte_arr
         return qr_src
-
-
 
 
 class TokenForm(Form):
