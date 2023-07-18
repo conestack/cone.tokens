@@ -43,34 +43,34 @@ class TestTokens(NodeTestCase):
         token.lock_time = 0
         token.usage_count = 2
         session.add(token)
-        token_api = Tokens(request,uid)
-        self.assertEqual(token_api.consume(),True)
+        token_api = Tokens(request)
+        self.assertEqual(token_api.consume(uid),True)
         self.assertNotEqual(last_used,token.last_used)
         self.assertEqual(token.usage_count,1)
         token.usage_count = 0
         session.commit()
-        self.assertRaises(TokenUsageCountExceeded,token_api.consume)
+        self.assertRaises(TokenUsageCountExceeded,token_api.consume,uid)
         token.usage_count = -1
         token.lock_time = 120
         session.commit()
-        self.assertRaises(TokenLockTimeViolation,token_api.consume)
+        self.assertRaises(TokenLockTimeViolation,token_api.consume,uid)
         token.lock_time = 0
         token.valid_to = datetime(1999,1,1)
         session.commit()
-        self.assertRaises(TokenTimeRangeViolation,token_api.consume)
+        self.assertRaises(TokenTimeRangeViolation,token_api.consume,uid)
         token.valid_to = datetime.now() + timedelta(2)
         token.valid_from = datetime.now() + timedelta(1)
         session.commit()
-        self.assertRaises(TokenTimeRangeViolation,token_api.consume)
+        self.assertRaises(TokenTimeRangeViolation,token_api.consume,uid)
         session.delete(token)
-        self.assertRaises(TokenNotExists,token_api.consume)
+        self.assertRaises(TokenNotExists,token_api.consume,uid)
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_token_add(self):
         request = self.layer.new_request()
         session = get_session(request)
-        token_api = Tokens(request,uuid.uuid4())
-        token_api.add(datetime.now()+timedelta(1),-1,0)
+        token_api = Tokens(request)
+        token_api.add(uuid.uuid4(),datetime.now()+timedelta(1),-1,0)
         result = session.query(TokenRecord).one()
         self.assertEqual(isinstance(result, TokenRecord), True)
     
@@ -86,8 +86,8 @@ class TestTokens(NodeTestCase):
         token.usage_count = -1
         session.add(token)
         session.commit()
-        token_api = Tokens(request, token.uid)
-        token_api.delete()
+        token_api = Tokens(request)
+        token_api.delete(token.uid)
         result = session.query(TokenRecord).all()
         self.assertEqual(result, [])
     
@@ -102,8 +102,8 @@ class TestTokens(NodeTestCase):
         token.usage_count = -1
         session.add(token)
         session.commit()
-        token_api = Tokens(request, token.uid)
-        token_api.update(datetime(2022,1,1),datetime(2022,1,2),1,120)
+        token_api = Tokens(request)
+        token_api.update(token.uid,datetime(2022,1,1),datetime(2022,1,2),1,120)
         result = session.query(TokenRecord).one()
         self.assertEqual(isinstance(result, TokenRecord), True)
         self.assertEqual(result.valid_from,datetime(2022,1,1))
