@@ -47,7 +47,8 @@ setup(
     zip_safe=False,
     install_requires=[
         'setuptools',
-        'cone.sql'
+        'cone.sql',
+        'qrcode[pil]'
         ],
     extras_require=dict(
         test=[
