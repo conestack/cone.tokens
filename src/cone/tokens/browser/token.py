@@ -166,6 +166,11 @@ class TokenAdd(object):
         result = self.request.response
         params = self.request.params
         result.content_type = 'application/json'
+        if not self.request.method == 'POST':
+            result = self.request.response
+            result.status_code = 405
+            result.json = "Method not allowed"
+            return result
         token_api = Tokens(self.request)
         token_uid = params.get('uuid') if params.get('uuid') else uuid.uuid4()
         valid_from = params.get('valid_from') if params.get('valid_from') else datetime.now()
@@ -208,6 +213,11 @@ class TokenDelete(object):
         result = self.request.response
         params = self.request.params
         result.content_type = 'application/json'
+        if not self.request.method == 'POST':
+            result = self.request.response
+            result.status_code = 405
+            result.json = "Method not allowed"
+            return result
         token_api = Tokens(self.request)
         if not params.get('uuid'):
             result.status_code = 400
@@ -236,6 +246,11 @@ class TokenEdit(object):
         result = self.request.response
         params = self.request.params
         result.content_type = 'application/json'
+        if not self.request.method == 'POST':
+            result = self.request.response
+            result.status_code = 405
+            result.json = "Method not allowed"
+            return result
         token_api = Tokens(self.request)
         if not params.get('uuid'):
             result.status_code = 400
@@ -273,6 +288,11 @@ class TokenConsume(object):
         result = self.request.response
         params = self.request.params
         result.content_type = 'application/json'
+        if not self.request.method == 'GET':
+            result = self.request.response
+            result.status_code = 405
+            result.json = "Method not allowed"
+            return result
         token_api = Tokens(self.request)
         if not params.get('uuid'):
             result.status_code = 400
