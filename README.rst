@@ -15,8 +15,8 @@
 
 This package provides a unique token generator for ``cone.app``.
 Features:
-    * QR Code generation
-    * API for token generation
+* QR Code generation
+* API for token generation
 
 API
 ===
