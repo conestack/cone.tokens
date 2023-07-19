@@ -1,7 +1,7 @@
 from cone.sql import get_session
 from cone.sql import testing as sql_testing
 from cone.sql.testing import SQLLayer
-from cone.tokens.browser.token import TokenAddForm, TokenEditForm, TokenForm
+from cone.tokens.browser.token import TokenAdd, TokenAddForm, TokenConsume, TokenDelete, TokenEdit, TokenEditForm, TokenForm
 from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
@@ -233,6 +233,30 @@ class TestTokens(NodeTestCase):
         self.assertEqual(token.attrs['valid_to'], datetime(2022,1,2))
         self.assertEqual(token.attrs['usage_count'], -1)
         self.assertEqual(token.attrs['lock_time'], 0)
+
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_browser_jsonview_token(self):
+        request = self.layer.new_request()
+        token = TokenRecord()
+        uid = request.params['uuid'] = uuid.uuid4()
+        request.params['valid_from'] = datetime.now()
+        request.params['valid_to'] = datetime.now() + timedelta(1)
+        request.params['usage_count'] = -1
+        request.params['lock_time'] = 1
+        json_tile = TokenAdd(token,request)
+        result = json_tile()
+        self.assertEqual(result.json['token_uid'], str(uid))
+        json_tile = TokenEdit(token,request)
+        result = json_tile()
+        self.assertEqual(result.json['token_uid'], str(uid))
+        json_tile = TokenConsume(token,request)
+        result = json_tile()
+        self.assertEqual(result.json['consumed'], str(uid))
+        json_tile = TokenDelete(token,request)
+        result = json_tile()
+        self.assertEqual(result.json['token_uid'], str(uid))
+
+
 
 
 def run_tests():

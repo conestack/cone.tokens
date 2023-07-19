@@ -189,7 +189,7 @@ class TokenAdd(object):
             valid_from=valid_from
         )
         result.status_code = 200
-        result.json =  {'token_uid': token_api}
+        result.json =  {'token_uid': str(token_uid)}
         return result
         
 
@@ -218,7 +218,7 @@ class TokenDelete(object):
             token_uid
         )
         result.status_code = 200
-        result.json =  {'token_uid': token_api}
+        result.json =  {'token_uid': str(token_uid)}
         return result
 
 @view_config(
@@ -255,7 +255,7 @@ class TokenEdit(object):
             valid_from = valid_from
         )
         result.status_code = 200
-        result.json =  {'token_uid': token_api}
+        result.json =  {'token_uid': str(token_uid)}
         return result
 
 @view_config(
@@ -282,7 +282,7 @@ class TokenConsume(object):
         consumed = token_api.consume(token_uid)
         if consumed:
             result.status_code = 200
-            result.json = {'consumed':token_uid}
+            result.json = {'consumed':str(token_uid)}
             return result
         else:
             result.status_code = 301
