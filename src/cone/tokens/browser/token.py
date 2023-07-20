@@ -192,7 +192,7 @@ def token_add(model, request):
         valid_from=valid_from
     )
     result.status_code = 200
-    result.json =  {'token_uid': token_uid}
+    result.json = {'token_uid': token_uid}
     return result
 
 
@@ -218,7 +218,7 @@ def token_delete(model, request):
     token_uid = params.get('uuid')
     token_api.delete(token_uid)
     result.status_code = 200
-    result.json =  {'token_uid': token_uid}
+    result.json = {'token_uid': token_uid}
     return result
 
 

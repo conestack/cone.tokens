@@ -1,11 +1,11 @@
 from cone.sql import get_session
 from cone.sql import testing as sql_testing
 from cone.sql.testing import SQLLayer
-from cone.tokens.browser.token import TokenAdd
+from cone.tokens.browser.token import token_add
 from cone.tokens.browser.token import TokenAddForm
-from cone.tokens.browser.token import TokenConsume
-from cone.tokens.browser.token import TokenDelete
-from cone.tokens.browser.token import TokenEdit
+from cone.tokens.browser.token import token_consume
+from cone.tokens.browser.token import token_delete
+from cone.tokens.browser.token import token_edit
 from cone.tokens.browser.token import TokenEditForm
 from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
@@ -14,6 +14,7 @@ from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenRecord
 from cone.tokens.token import Tokens
+from cone.ugm.testing import principals
 from datetime import datetime 
 from datetime import timedelta
 from node.tests import NodeTestCase
@@ -26,7 +27,11 @@ import uuid
 class TokensLayer(SQLLayer):
 
     def make_app(self):
-        plugins = ['cone.tokens']
+        plugins = [
+            'cone.ugm',
+            'cone.sql',
+            'cone.tokens'
+        ]
         kw = dict()
         kw['cone.plugins'] = '\n'.join(plugins)
         super().make_app(**kw)
@@ -138,6 +143,7 @@ class TestTokens(NodeTestCase):
         self.assertEqual(result.lock_time, 120)
         self.assertEqual(result.usage_count, 1)
 
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
     def test_token_addform(self):
         request = self.layer.new_request()
@@ -194,7 +200,8 @@ class TestTokens(NodeTestCase):
         request.params['tokenform.usage_count'] = -1
         request.params['tokenform.lock_time'] = 0
         request.params['action.tokenform.save'] = '1'
-        form_tile(token, request)
+        with self.layer.authenticated('admin'):
+            form_tile(token, request)
 
         # check if data is saved
         self.assertEqual(token.attrs['valid_from'], datetime(2022, 1, 1))
@@ -202,6 +209,7 @@ class TestTokens(NodeTestCase):
         self.assertEqual(token.attrs['usage_count'], -1)
         self.assertEqual(token.attrs['lock_time'], 0)
 
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
     def test_token_editform(self):
         request = self.layer.new_request()
@@ -257,7 +265,8 @@ class TestTokens(NodeTestCase):
         request.params['tokenform.usage_count'] = -1
         request.params['tokenform.lock_time'] = 0
         request.params['action.tokenform.save'] = '1'
-        form_tile(token, request)
+        with self.layer.authenticated('admin'):
+            form_tile(token, request)
 
         # check if data is saved
         self.assertEqual(token.attrs['valid_from'], datetime(2022, 1, 1))
@@ -276,20 +285,16 @@ class TestTokens(NodeTestCase):
         request.params['usage_count'] = -1
         request.params['lock_time'] = 1
 
-        json_tile = TokenAdd(token, request)
-        result = json_tile()
+        result = token_add(token, request)
         self.assertEqual(result.json['token_uid'], str(uid))
 
-        json_tile = TokenEdit(token, request)
-        result = json_tile()
+        result = token_edit(token, request)
         self.assertEqual(result.json['token_uid'], str(uid))
 
-        json_tile = TokenConsume(token, request)
-        result = json_tile()
+        result = token_consume(token, request)
         self.assertEqual(result.json['consumed'], str(uid))
 
-        json_tile = TokenDelete(token, request)
-        result = json_tile()
+        result = token_delete(token, request)
         self.assertEqual(result.json['token_uid'], str(uid))
 
 
