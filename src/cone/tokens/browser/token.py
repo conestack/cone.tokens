@@ -169,22 +169,22 @@ class TokenAdd(object):
         if not self.request.method == 'POST':
             result = self.request.response
             result.status_code = 405
-            result.json = "Method not allowed"
+            result.json = {'reason':"Method not allowed"}
             return result
         token_api = Tokens(self.request)
         token_uid = params.get('uuid') if params.get('uuid') else uuid.uuid4()
         valid_from = params.get('valid_from') if params.get('valid_from') else datetime.now()
         if not params.get('valid_to'):
             result.status_code = 400
-            result.json = "No Param valid_to"
+            result.json = {'reason':"No Param valid_to"}
             return result
         if not params.get('usage_count'):
             result.status_code = 400
-            result.json = "No Param usage_count"
+            result.json = {'reason':"No Param usage_count"}
             return result
         if not params.get('lock_time'):
             result.status_code = 400
-            result.json = "No Param lock_time"
+            result.json = {'reason':"No Param lock_time"}
             return result
         token_api.add(
             token_uid,
@@ -216,12 +216,12 @@ class TokenDelete(object):
         if not self.request.method == 'POST':
             result = self.request.response
             result.status_code = 405
-            result.json = "Method not allowed"
+            result.json = {'reason':"Method not allowed"}
             return result
         token_api = Tokens(self.request)
         if not params.get('uuid'):
             result.status_code = 400
-            result.json = "No Param uuid"
+            result.json = {'reason':"No Param uuid"}
             return result
         token_uid = params.get('uuid')
         token_api.delete(
@@ -249,12 +249,12 @@ class TokenEdit(object):
         if not self.request.method == 'POST':
             result = self.request.response
             result.status_code = 405
-            result.json = "Method not allowed"
+            result.json = {'reason':"Method not allowed"}
             return result
         token_api = Tokens(self.request)
         if not params.get('uuid'):
             result.status_code = 400
-            result.json = "No Param uuid"
+            result.json = {'reason':"No Param uuid"}
             return result
         token_uid = params.get('uuid')
         valid_to = params.get('valid_to') if params.get('valid_to') else None
@@ -291,12 +291,12 @@ class TokenConsume(object):
         if not self.request.method == 'GET':
             result = self.request.response
             result.status_code = 405
-            result.json = "Method not allowed"
+            result.json = {'reason':"Method not allowed"}
             return result
         token_api = Tokens(self.request)
         if not params.get('uuid'):
             result.status_code = 400
-            result.json = "No Param uuid"
+            result.json = {'reason':"No Param uuid"}
             return result
         token_uid = params.get('uuid')
         consumed = token_api.consume(token_uid)
