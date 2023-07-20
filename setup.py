@@ -49,7 +49,7 @@ setup(
         'setuptools',
         'cone.sql',
         'qrcode[pil]'
-        ],
+    ],
     extras_require=dict(
         test=[
             'zope.testrunner'

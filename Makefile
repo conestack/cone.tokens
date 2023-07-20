@@ -79,12 +79,12 @@ PROJECT_CONFIG?=mx.ini
 # The command which gets executed. Defaults to the location the
 # :ref:`run-tests` template gets rendered to if configured.
 # Default: .mxmake/files/run-tests.sh
-TEST_COMMAND?=./venv/bin/python3 -m cone.tokens.tests --auto-color --auto-progress
+TEST_COMMAND?=.mxmake/files/run-tests.sh
 
 # Additional Python requirements for running tests to be
 # installed (via pip).
 # Default: pytest
-TEST_REQUIREMENTS?=pytest
+TEST_REQUIREMENTS?=zope.testrunner
 
 # Additional make targets the test target depends on.
 # No default value.

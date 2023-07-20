@@ -1,11 +1,11 @@
-from cone.app.model import Metadata, Properties
+from cone.app.model import Metadata
+from cone.app.model import Properties
 from cone.app.model import node_info
 from cone.sql import SQLBase
 from cone.sql.acl import SQLPrincipalACL
 from cone.sql.model import GUID
 from cone.sql.model import SQLRowNode
 from cone.sql.model import SQLTableNode
-from node.interfaces import IUUID
 from node.utils import instance_property
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
@@ -13,7 +13,7 @@ from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
 from sqlalchemy import String
-from zope.interface import implementer
+
 
 _ = TranslationStringFactory('cone.tokens')
 
@@ -26,7 +26,7 @@ class TokenRecord(SQLBase):
     valid_from = Column(DateTime)
     valid_to = Column(DateTime)
     usage_count = Column(Integer)
-    lock_time = Column(Integer) # in seconds
+    lock_time = Column(Integer)  # in seconds
     creator = Column(String)
     created = Column(DateTime)
     modified = Column(DateTime)
@@ -50,8 +50,8 @@ class TokenNode(SQLRowNode):
         md.created = self.attrs.get('created')
         md.modified = self.attrs.get('modified')
         return md
-    
-@implementer(IUUID)
+
+
 @node_info(
     name='token_container',
     title=_('token_container_title', default='Tokens'),

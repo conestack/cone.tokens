@@ -3,32 +3,32 @@ class TokenException(Exception):
 
 
 class TokenNotExists(TokenException):
-    
+
     def __init__(self, token_uid):
         self.token_uid = token_uid
-        self.message = f"The token {self.token_uid} doesn't exists"
+        self.message = f'The token {self.token_uid} doesn\'t exists'
         super().__init__(self.message)
 
 
 class TokenUsageCountExceeded(TokenException):
-        
+
     def __init__(self, token_uid):
         self.token_uid = token_uid
-        self.message = f"The token {self.token_uid} has exceeded its durability"
+        self.message = f'The token {self.token_uid} has exceeded its durability'
         super().__init__(self.message)
 
 
 class TokenLockTimeViolation(TokenException):
-        
+
     def __init__(self, token_uid):
         self.token_uid = token_uid
-        self.message = f"The token {self.token_uid} has been recently used and is on cooldown"
+        self.message = f'The token {self.token_uid} has been recently used and is on cooldown'
         super().__init__(self.message)
 
 
 class TokenTimeRangeViolation(TokenException):
-        
+
     def __init__(self, token_uid):
         self.token_uid = token_uid
-        self.message = f"The token {self.token_uid} isn't in his valid Date Range"
+        self.message = f'The token {self.token_uid} isn\'t in his valid Date Range'
         super().__init__(self.message)

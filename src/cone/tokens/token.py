@@ -9,12 +9,11 @@ from datetime import datetime
 from datetime import timedelta
 from pyramid.i18n import TranslationStringFactory
 
+
 _ = TranslationStringFactory('cone.tokens')
 
 
 class Tokens(object):
-    """cone.tokens API
-    """
 
     def __init__(self, request):
        self.request = request
@@ -22,17 +21,17 @@ class Tokens(object):
     @property
     def session(self):
         return get_session(self.request)
-    
+
     def _get_token(self,token_uid):
         session = self.session
         token = session\
             .query(TokenRecord)\
             .filter(TokenRecord.uid == token_uid)\
-            .first()
+            .one_or_none()
         if not token:
             raise TokenNotExists(token_uid)
         return token
-    
+
     def consume(self, token_uid):
         session = self.session
         existing = self._get_token(token_uid)
@@ -52,8 +51,15 @@ class Tokens(object):
         else:
             session.commit()
         return True
-    
-    def add(self, token_uid, valid_to, usage_count, lock_time, valid_from=datetime.now()):
+
+    def add(
+        self,
+        token_uid,
+        valid_to,
+        usage_count,
+        lock_time,
+        valid_from=datetime.now()
+    ):
         session = self.session
         token = TokenRecord()
         token.uid = token_uid
@@ -67,7 +73,14 @@ class Tokens(object):
         else:
             session.commit()
 
-    def update(self, token_uid, valid_from=None, valid_to=None, usage_count=None, lock_time=None):
+    def update(
+        self,
+        token_uid,
+        valid_from=None,
+        valid_to=None,
+        usage_count=None,
+        lock_time=None
+    ):
         token = self._get_token(token_uid)
         session = self.session
         if valid_from:
@@ -82,7 +95,7 @@ class Tokens(object):
             session.flush()
         else:
             session.commit()
-    
+
     def delete(self, token_uid):
         session = self.session
         token = self._get_token(token_uid)
