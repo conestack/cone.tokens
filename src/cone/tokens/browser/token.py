@@ -65,7 +65,7 @@ class TokenForm(Form):
         )
         attrs = self.model.attrs
         form['valid_from'] = factory(
-            '#field:label:error:datetime',
+            '#field:datetime',
             value=attrs.get('valid_from', UNSET),
             props={
                 'label': 'Valid from',
@@ -75,7 +75,7 @@ class TokenForm(Form):
             }
         )
         form['valid_to'] = factory(
-            '#field:label:error:datetime',
+            '#field:datetime',
             value=attrs.get('valid_to', UNSET),
             props={
                 'label': 'Valid to',
@@ -86,7 +86,7 @@ class TokenForm(Form):
             }
         )
         form['usage_count'] = factory(
-            '#field:label:error:number',
+            '#field:number',
             value=attrs.get('usage_count', UNSET),
             props={
                 'label': 'Usage Count',
@@ -94,7 +94,7 @@ class TokenForm(Form):
             }
         )
         form['lock_time'] = factory(
-            '#field:label:error:number',
+            '#field:number',
             value=attrs.get('lock_time', UNSET),
             props={
                 'label': 'Lock Time',

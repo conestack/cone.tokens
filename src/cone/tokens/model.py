@@ -6,6 +6,7 @@ from cone.sql.acl import SQLPrincipalACL
 from cone.sql.model import GUID
 from cone.sql.model import SQLRowNode
 from cone.sql.model import SQLTableNode
+from node.interfaces import IUUID
 from node.utils import instance_property
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
@@ -13,6 +14,8 @@ from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
 from sqlalchemy import String
+from zope.interface import implementer
+import uuid
 
 
 _ = TranslationStringFactory('cone.tokens')
@@ -58,9 +61,11 @@ class TokenNode(SQLRowNode):
     description=_('token_container_description', default='Tokens'),
     addables=['token_node'])
 @plumbing(SQLPrincipalACL)
+@implementer(IUUID)
 class TokenContainer(SQLTableNode):
     record_class = TokenRecord
     child_factory = TokenNode
+    uuid = uuid.UUID('c40ef458-832f-42e6-9add-2dda2afb8920')
 
     @property
     def properties(self):

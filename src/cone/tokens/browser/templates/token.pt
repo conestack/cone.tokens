@@ -44,10 +44,10 @@
       <strong>Modified:</strong>
       <span tal:content="model.attrs['modified']"></span>
     </li>
-    <li class="list-group-item" tal:condition="context.stream_qrcode_token()">
+    <li class="list-group-item" tal:condition="context.stream_qrcode_token">
       <strong>QR CODE</strong>:
       <div class="stream_image">
-        <object data="${context.stream_qrcode_token()}"
+        <object data="${context.stream_qrcode_token}"
                 type="image/png"
                 height="512px"
                 width="512px" />

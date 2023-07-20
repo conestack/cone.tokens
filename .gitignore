@@ -1,9 +1,10 @@
-.vscode
-/venv/
-.mxmake
-/sources/
-/requirements.txt
-/requirements-mxdev.txt
-constraints-mxdev.txt
 *egg-info
 *pyc
+.mxmake
+.vscode
+/requirements-mxdev.txt
+/requirements.txt
+/sources/
+/var/
+/venv/
+constraints-mxdev.txt
