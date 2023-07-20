@@ -1,7 +1,12 @@
 from cone.sql import get_session
 from cone.sql import testing as sql_testing
 from cone.sql.testing import SQLLayer
-from cone.tokens.browser.token import TokenAdd, TokenAddForm, TokenConsume, TokenDelete, TokenEdit, TokenEditForm, TokenForm
+from cone.tokens.browser.token import TokenAdd
+from cone.tokens.browser.token import TokenAddForm
+from cone.tokens.browser.token import TokenConsume
+from cone.tokens.browser.token import TokenDelete
+from cone.tokens.browser.token import TokenEdit
+from cone.tokens.browser.token import TokenEditForm
 from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
@@ -16,7 +21,6 @@ import os
 import sys
 import unittest
 import uuid
-
 
 class TokensLayer(SQLLayer):
 

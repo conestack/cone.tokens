@@ -14,14 +14,13 @@ from datetime import datetime
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
-from pyramid.response import Response
 from pyramid.view import view_config
-from typing import Any
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer
 import io
 import qrcode
 import uuid
+
 _ = TranslationStringFactory('cone.tokens')
 
 
