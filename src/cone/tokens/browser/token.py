@@ -125,6 +125,10 @@ class TokenForm(Form):
     def save(self, widget, data):
         data.write(self.model)
 
+    def next(self, request):
+        # method stub for tests
+        ...
+
 
 @tile(name='addform', interface=TokenNode, permission='add')
 @plumbing(ContentAddForm)
