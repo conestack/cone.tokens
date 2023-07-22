@@ -10,14 +10,17 @@ from cone.app.utils import add_creation_metadata
 from cone.app.utils import update_creation_metadata
 from cone.tile import tile
 from cone.tokens.model import TokenNode
+from cone.tokens.model import TokenContainer
 from cone.tokens.token import Tokens
-from datetime import datetime 
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
+from pyramid.i18n import get_localizer
 from pyramid.view import view_config
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer
+import datetime
+import dateutil.parser
 import io
 import qrcode
 import uuid
@@ -68,7 +71,7 @@ class TokenForm(Form):
             '#field:datetime',
             value=attrs.get('valid_from', UNSET),
             props={
-                'label': 'Valid from',
+                'label': _('valid_from', default='Valid from'),
                 'datepicker': True,
                 'locale': 'de',
                 'persist': True
@@ -78,27 +81,36 @@ class TokenForm(Form):
             '#field:datetime',
             value=attrs.get('valid_to', UNSET),
             props={
-                'label': 'Valid to',
+                'label': _('valid_to', default='Valid to'),
+                'required': _(
+                    'valid_to_required',
+                    default='Valid to field cannot be empty'
+                ),
                 'datepicker': True,
                 'locale': 'de',
-                'persist': True,
-                'required': 'Valid to field cannot be empty'
+                'persist': True
             }
         )
         form['usage_count'] = factory(
             '#field:number',
             value=attrs.get('usage_count', UNSET),
             props={
-                'label': 'Usage Count',
-                'required': 'Usage Count field cannot be empty'
+                'label': _('usage_count', default='Usage Count'),
+                'required': _(
+                    'usage_count_required',
+                    default='Usage Count field cannot be empty'
+                )
             }
         )
         form['lock_time'] = factory(
             '#field:number',
             value=attrs.get('lock_time', UNSET),
             props={
-                'label': 'Lock Time',
-                'required': 'Lock time field cannot be empty'
+                'label': _('lock_time', default='Lock Time'),
+                'required': _(
+                    'lock_time_required',
+                    default='Lock time field cannot be empty'
+                )
             }
         )
         form['save'] = factory(
@@ -108,7 +120,7 @@ class TokenForm(Form):
                 'expression': True,
                 'handler': self.save,
                 'next': self.next,
-                'label': 'Save'
+                'label': _('save', default='Save')
             }
         )
         form['cancel'] = factory(
@@ -118,7 +130,7 @@ class TokenForm(Form):
                 'expression': True,
                 'skip': True,
                 'next': self.next,
-                'label': 'Cancel'
+                'label': _('cancel', default='Cancel')
             }
         )
 
@@ -151,57 +163,82 @@ class TokenEditForm(TokenForm):
         self.model()
 
 
-@tile(
-    name='contents',
-    interface=TokenNode,
-    permission='view')
-class TokenContainerTile(ContentsTile):
-    ...
+class TokenAPIError(Exception):
+
+    def __init__(self, message):
+        self.message = message
+
+    def as_json(self):
+        return dict(success=False, message=self.message)
+
+
+def get_token_uid(request):
+    try:
+        return uuid.UUID(request.params['token_uid'])
+    except KeyError:
+        raise TokenAPIError('`token_uid` missing on request')
+    except ValueError:
+        raise TokenAPIError('Invalid token UID format')
+
+
+def get_datetime(request, name, now_when_missing=False):
+    # dateutil.parser.isoparse(datetime.datetime.now().isoformat())
+    try:
+        return dateutil.parser.isoparse(request.params[name])
+    except KeyError:
+        if now_when_missing:
+            return datetime.datetime.now()
+        raise TokenAPIError(f'`{name}` missing on request')
+    except ValueError:
+        raise TokenAPIError('Invalid datetime format')
+
+
+def get_int(request, name):
+    try:
+        return int(request.params[name])
+    except KeyError:
+        raise TokenAPIError(f'`{name}` missing on request')
+    except ValueError:
+        raise TokenAPIError('Value is no integer')
+
 
 
 @view_config(
-    name='token_add',
+    name='json_add',
+    request_method='POST',
     accept='application/json',
     renderer='json',
+    context=TokenContainer,
     permission='add')
 def token_add(model, request):
-    result = request.response
-    params = request.params
-    result.content_type = 'application/json'
-    if not request.method == 'POST':
-        result = request.response
-        result.status_code = 405
-        result.json = {'reason': 'Method not allowed'}
-        return result
     token_api = Tokens(request)
-    token_uid = params.get('uuid') if params.get('uuid') else uuid.uuid4()
-    valid_from = params.get('valid_from') if params.get('valid_from') else datetime.now()
-    if not params.get('valid_to'):
-        result.status_code = 400
-        result.json = {'reason': 'No Param valid_to'}
-        return result
-    if not params.get('usage_count'):
-        result.status_code = 400
-        result.json = {'reason': 'No Param usage_count'}
-        return result
-    if not params.get('lock_time'):
-        result.status_code = 400
-        result.json = {'reason': 'No Param lock_time'}
-        return result
+    token_uid = uuid.uuid4()
+    valid_from = get_datetime(request, 'valid_from', now_when_missing=True)
+    try:
+        valid_to = get_datetime(request, 'valid_to')
+    except TokenAPIError as e:
+        return e.as_json()
+    try:
+        usage_count = get_int(request, 'usage_count')
+    except TokenAPIError as e:
+        return e.as_json()
+    try:
+        lock_time = get_int(request, 'lock_time')
+    except TokenAPIError as e:
+        return e.as_json()
     token_api.add(
         token_uid,
-        params.get('valid_to'),
-        params.get('usage_count'),
-        params.get('lock_time'),
+        valid_to,
+        usage_count,
+        lock_time,
         valid_from=valid_from
     )
-    result.status_code = 200
-    result.json = {'token_uid': token_uid}
-    return result
+    return dict(success=True, token_uid=token_uid)
 
 
 @view_config(
     name='token_delete',
+    request_method='POST',
     accept='application/json',
     renderer='json',
     permission='delete')
@@ -228,6 +265,7 @@ def token_delete(model, request):
 
 @view_config(
     name='token_edit',
+    request_method='POST',
     accept='application/json',
     renderer='json',
     permission='edit')
@@ -264,6 +302,7 @@ def token_edit(model, request):
 
 @view_config(
     name='token_consume',
+    request_method='GET',
     accept='application/json',
     renderer='json',
     permission='view')
