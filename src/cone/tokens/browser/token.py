@@ -172,15 +172,6 @@ class TokenAPIError(Exception):
         return dict(success=False, message=self.message)
 
 
-def get_token_uid(request):
-    try:
-        return uuid.UUID(request.params['token_uid'])
-    except KeyError:
-        raise TokenAPIError('`token_uid` missing on request')
-    except ValueError:
-        raise TokenAPIError('Invalid token UID format')
-
-
 def get_datetime(request, name, now_when_missing=False):
     # dateutil.parser.isoparse(datetime.datetime.now().isoformat())
     try:
@@ -202,7 +193,6 @@ def get_int(request, name):
         raise TokenAPIError('Value is no integer')
 
 
-
 @view_config(
     name='json_add',
     request_method='POST',
@@ -210,7 +200,7 @@ def get_int(request, name):
     renderer='json',
     context=TokenContainer,
     permission='add')
-def token_add(model, request):
+def json_add(model, request):
     token_api = Tokens(request)
     token_uid = uuid.uuid4()
     valid_from = get_datetime(request, 'valid_from', now_when_missing=True)
@@ -237,57 +227,45 @@ def token_add(model, request):
 
 
 @view_config(
-    name='token_delete',
+    name='json_delete',
     request_method='POST',
     accept='application/json',
     renderer='json',
+    context=TokenNode,
     permission='delete')
-def token_delete(model, request):
-    result = request.response
-    params = request.params
-    result.content_type = 'application/json'
-    if not request.method == 'POST':
-        result = request.response
-        result.status_code = 405
-        result.json = {'reason': 'Method not allowed'}
-        return result
+def json_delete(model, request):
     token_api = Tokens(request)
-    if not params.get('uuid'):
-        result.status_code = 400
-        result.json = {'reason': 'No Param uuid'}
-        return result
-    token_uid = params.get('uuid')
+    token_uid = uuid.UUID(model.name)
     token_api.delete(token_uid)
-    result.status_code = 200
-    result.json = {'token_uid': token_uid}
-    return result
+    return dict(success=True)
 
 
 @view_config(
-    name='token_edit',
+    name='json_edit',
     request_method='POST',
     accept='application/json',
     renderer='json',
+    context=TokenNode,
     permission='edit')
-def token_edit(model, request):
-    result = request.response
-    params = request.params
-    result.content_type = 'application/json'
-    if not request.method == 'POST':
-        result = request.response
-        result.status_code = 405
-        result.json = {'reason': 'Method not allowed'}
-        return result
+def json_edit(model, request):
     token_api = Tokens(request)
-    if not params.get('uuid'):
-        result.status_code = 400
-        result.json = {'reason': 'No Param uuid'}
-        return result
-    token_uid = params.get('uuid')
-    valid_to = params.get('valid_to') if params.get('valid_to') else None
-    usage_count = params.get('usage_count') if params.get('usage_count') else None
-    lock_time = params.get('lock_time') if params.get('lock_time') else None
-    valid_from = params.get('valid_from') if params.get('valid_from') else None
+    token_uid = uuid.UUID(model.name)
+    try:
+        valid_from = get_datetime(request, 'valid_from')
+    except TokenAPIError as e:
+        return e.as_json()
+    try:
+        valid_to = get_datetime(request, 'valid_to')
+    except TokenAPIError as e:
+        return e.as_json()
+    try:
+        usage_count = get_int(request, 'usage_count')
+    except TokenAPIError as e:
+        return e.as_json()
+    try:
+        lock_time = get_int(request, 'lock_time')
+    except TokenAPIError as e:
+        return e.as_json()
     token_api.update(
         token_uid,
         valid_to=valid_to,
@@ -295,37 +273,21 @@ def token_edit(model, request):
         lock_time=lock_time,
         valid_from=valid_from
     )
-    result.status_code = 200
-    result.json = {'token_uid': token_uid}
-    return result
+    return dict(success=True)
 
 
 @view_config(
-    name='token_consume',
+    name='json_consume',
     request_method='GET',
     accept='application/json',
     renderer='json',
+    context=TokenNode,
     permission='view')
-def token_consume(model, request):
-    result = request.response
-    params = request.params
-    result.content_type = 'application/json'
-    if not request.method == 'GET':
-        result = request.response
-        result.status_code = 405
-        result.json = {'reason': 'Method not allowed'}
-        return result
+def json_consume(model, request):
     token_api = Tokens(request)
-    if not params.get('uuid'):
-        result.status_code = 400
-        result.json = {'reason': 'No Param uuid'}
-        return result
-    token_uid = params.get('uuid')
+    token_uid = uuid.UUID(model.name)
     consumed = token_api.consume(token_uid)
     if consumed:
-        result.status_code = 200
-        result.json = {'consumed': token_uid}
-        return result
+        return dict(success=True)
     else:
-        result.status_code = 301
-        return result
+        return dict(success=False)
