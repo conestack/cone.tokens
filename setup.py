@@ -48,6 +48,7 @@ setup(
     install_requires=[
         'setuptools',
         'cone.sql',
+        'python-dateutil',
         'qrcode[pil]'
     ],
     extras_require=dict(

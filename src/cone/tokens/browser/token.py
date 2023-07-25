@@ -194,13 +194,13 @@ def get_int(request, name):
 
 
 @view_config(
-    name='json_add',
+    name='add_token',
     request_method='POST',
     accept='application/json',
     renderer='json',
     context=TokenContainer,
     permission='add')
-def json_add(model, request):
+def add_token(model, request):
     token_api = Tokens(request)
     token_uid = uuid.uuid4()
     valid_from = get_datetime(request, 'valid_from', now_when_missing=True)
@@ -223,17 +223,17 @@ def json_add(model, request):
         lock_time,
         valid_from=valid_from
     )
-    return dict(success=True, token_uid=token_uid)
+    return dict(success=True, token_uid=str(token_uid))
 
 
 @view_config(
-    name='json_delete',
+    name='delete_token',
     request_method='POST',
     accept='application/json',
     renderer='json',
     context=TokenNode,
     permission='delete')
-def json_delete(model, request):
+def delete_token(model, request):
     token_api = Tokens(request)
     token_uid = uuid.UUID(model.name)
     token_api.delete(token_uid)
@@ -241,13 +241,13 @@ def json_delete(model, request):
 
 
 @view_config(
-    name='json_edit',
+    name='edit_token',
     request_method='POST',
     accept='application/json',
     renderer='json',
     context=TokenNode,
     permission='edit')
-def json_edit(model, request):
+def edit_token(model, request):
     token_api = Tokens(request)
     token_uid = uuid.UUID(model.name)
     try:
@@ -277,17 +277,14 @@ def json_edit(model, request):
 
 
 @view_config(
-    name='json_consume',
+    name='consume_token',
     request_method='GET',
     accept='application/json',
     renderer='json',
     context=TokenNode,
     permission='view')
-def json_consume(model, request):
+def consume_token(model, request):
     token_api = Tokens(request)
     token_uid = uuid.UUID(model.name)
     consumed = token_api.consume(token_uid)
-    if consumed:
-        return dict(success=True)
-    else:
-        return dict(success=False)
+    return dict(success=True, consumed=consumed)

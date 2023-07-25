@@ -2,13 +2,12 @@ from cone.app import get_root
 from cone.sql import get_session
 from cone.sql import testing as sql_testing
 from cone.sql.testing import SQLLayer
+from cone.tokens.browser.token import TokenAPIError
 from cone.tokens.browser.token import TokenAddForm
 from cone.tokens.browser.token import TokenEditForm
 from cone.tokens.browser.token import TokenForm
-from cone.tokens.browser.token import token_add
-from cone.tokens.browser.token import token_consume
-from cone.tokens.browser.token import token_delete
-from cone.tokens.browser.token import token_edit
+from cone.tokens.browser.token import get_datetime
+from cone.tokens.browser.token import get_int
 from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
@@ -21,6 +20,8 @@ from datetime import datetime
 from datetime import timedelta
 from node.tests import NodeTestCase
 from node.utils import UNSET
+from pyramid.httpexceptions import HTTPForbidden
+from pyramid.view import render_view_to_response
 import sys
 import unittest
 import uuid
@@ -268,28 +269,117 @@ class TestTokens(NodeTestCase):
         self.assertEqual(token.attrs['usage_count'], -1)
         self.assertEqual(token.attrs['lock_time'], 0)
 
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def _test_browser_jsonview_token(self):
+    def test_json_api(self):
+        err = TokenAPIError('Error message')
+        self.assertEqual(err.message, 'Error message')
+        self.assertEqual(
+            err.as_json(),
+            dict(success=False, message='Error message')
+        )
+
         request = self.layer.new_request()
-        token = TokenRecord()
 
-        uid = request.params['uuid'] = uuid.uuid4()
-        request.params['valid_from'] = datetime.now()
-        request.params['valid_to'] = datetime.now() + timedelta(1)
-        request.params['usage_count'] = -1
-        request.params['lock_time'] = 1
+        with self.assertRaises(TokenAPIError) as arc:
+            get_datetime(request, 'dt')
+        self.assertEqual(arc.exception.message, '`dt` missing on request')
 
-        result = token_add(token, request)
-        self.assertEqual(result.json['token_uid'], str(uid))
+        request.params['dt'] = 'invalid'
+        with self.assertRaises(TokenAPIError) as arc:
+            get_datetime(request, 'dt')
+        self.assertEqual(arc.exception.message, 'Invalid datetime format')
 
-        result = token_edit(token, request)
-        self.assertEqual(result.json['token_uid'], str(uid))
+        request.params['dt'] = datetime(2023, 7, 25, 7, 39).isoformat()
+        self.assertEqual(
+            get_datetime(request, 'dt'),
+            datetime(2023, 7, 25, 7, 39)
+        )
 
-        result = token_consume(token, request)
-        self.assertEqual(result.json['consumed'], str(uid))
+        del request.params['dt']
+        self.assertIsInstance(
+            get_datetime(request, 'dt', now_when_missing=True),
+            datetime
+        )
 
-        result = token_delete(token, request)
-        self.assertEqual(result.json['token_uid'], str(uid))
+        with self.assertRaises(TokenAPIError) as arc:
+            get_int(request, 'int')
+        self.assertEqual(arc.exception.message, '`int` missing on request')
+
+        request.params['int'] = 'invalid'
+        with self.assertRaises(TokenAPIError) as arc:
+            get_int(request, 'int')
+        self.assertEqual(arc.exception.message, 'Value is no integer')
+
+        request.params['int'] = '1'
+        self.assertEqual(get_int(request, 'int'), 1)
+
+        tokens = get_root()['tokens']
+        request = self.layer.new_request(type='json')
+        request.method = 'POST'
+
+        with self.assertRaises(HTTPForbidden) as arc:
+            render_view_to_response(tokens, request, 'add_token')
+        self.assertEqual(
+            str(arc.exception),
+            'Unauthorized: add_token failed permission check'
+        )
+
+        request.params['valid_from'] = datetime(2023, 7, 25, 8, 0).isoformat()
+        request.params['valid_to'] = datetime(2023, 7, 25, 8, 0).isoformat()
+        request.params['usage_count'] = '-1'
+        request.params['lock_time'] = '1'
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'add_token')
+        self.assertTrue(res.json['success'])
+
+        token_uid = res.json['token_uid']
+        token = tokens[token_uid]
+
+        with self.assertRaises(HTTPForbidden) as arc:
+            render_view_to_response(token, request, 'edit_token')
+        self.assertEqual(
+            str(arc.exception),
+            'Unauthorized: edit_token failed permission check'
+        )
+
+        request.params['valid_from'] = datetime.now().isoformat()
+        request.params['valid_to'] = (datetime.now() + timedelta(1)).isoformat()
+        request.params['usage_count'] = '1'
+        request.params['lock_time'] = '1'
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'edit_token')
+        self.assertTrue(res.json['success'])
+        self.assertEqual(token.attrs['usage_count'], 1)
+
+        request.method = 'GET'
+        with self.assertRaises(HTTPForbidden) as arc:
+            render_view_to_response(token, request, 'consume_token')
+        self.assertEqual(
+            str(arc.exception),
+            'Unauthorized: consume_token failed permission check'
+        )
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'consume_token')
+        self.assertTrue(res.json['success'])
+        self.assertTrue(res.json['consumed'])
+        self.assertEqual(token.attrs['usage_count'], 0)
+
+        request.method = 'POST'
+        with self.assertRaises(HTTPForbidden) as arc:
+            render_view_to_response(token, request, 'delete_token')
+        self.assertEqual(
+            str(arc.exception),
+            'Unauthorized: delete_token failed permission check'
+        )
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'delete_token')
+        self.assertTrue(res.json['success'])
+        self.assertFalse(token_uid in tokens)
 
 
 def run_tests():
