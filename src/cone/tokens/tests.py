@@ -93,7 +93,7 @@ class TestTokens(NodeTestCase):
         session = get_session(request)
 
         token_api = Tokens(request)
-        token_api.add(uuid.uuid4(), datetime.now() + timedelta(1), -1, 0)
+        token_api.add(uuid.uuid4(),datetime.now(), datetime.now() + timedelta(1), -1, 0)
 
         result = session.query(TokenRecord).one()
         self.assertEqual(isinstance(result, TokenRecord), True)
@@ -314,10 +314,13 @@ class TestTokens(NodeTestCase):
         request.params['int'] = '1'
         self.assertEqual(get_int(request, 'int'), 1)
 
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_json_api_add(self):
         tokens = get_root()['tokens']
         request = self.layer.new_request(type='json')
         request.method = 'POST'
-
+        
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(tokens, request, 'add_token')
         self.assertEqual(
@@ -325,17 +328,69 @@ class TestTokens(NodeTestCase):
             'Unauthorized: add_token failed permission check'
         )
 
-        request.params['valid_from'] = datetime(2023, 7, 25, 8, 0).isoformat()
+        request.params['valid_from'] = datetime(2023, 7, 24, 8, 0).isoformat()
         request.params['valid_to'] = datetime(2023, 7, 25, 8, 0).isoformat()
         request.params['usage_count'] = '-1'
         request.params['lock_time'] = '1'
-
         with self.layer.authenticated('admin'):
             res = render_view_to_response(tokens, request, 'add_token')
         self.assertTrue(res.json['success'])
 
-        token_uid = res.json['token_uid']
-        token = tokens[token_uid]
+        request.params['valid_from'] = datetime(2023, 7, 25, 8, 0).isoformat()
+        request.params['valid_to'] = datetime(2023, 7, 24, 8, 0).isoformat()
+        request.params['usage_count'] = '-1'
+        request.params['lock_time'] = '1'
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'add_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            'valid_from must be before valid_to'
+        )
+
+        del request.params['lock_time']
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'add_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            '`lock_time` missing on request'
+        )
+
+        del request.params['usage_count']
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'add_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            '`usage_count` missing on request'
+        )
+
+        del request.params['valid_to']
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'add_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            '`valid_to` missing on request'
+        )
+
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_json_api_edit(self):
+        request = self.layer.new_request(type='json')
+        request.method = 'POST'
+        token_api = Tokens(request)
+        token_uid = uuid.uuid4()
+        token_api.add(
+            token_uid,
+            datetime.now(),
+            datetime.now() + timedelta(1),
+            -1,
+            0
+        )
+        tokens = get_root()['tokens']
+        token = tokens[str(token_uid)]
 
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(token, request, 'edit_token')
@@ -348,27 +403,87 @@ class TestTokens(NodeTestCase):
         request.params['valid_to'] = (datetime.now() + timedelta(1)).isoformat()
         request.params['usage_count'] = '1'
         request.params['lock_time'] = '1'
-
         with self.layer.authenticated('admin'):
             res = render_view_to_response(token, request, 'edit_token')
         self.assertTrue(res.json['success'])
         self.assertEqual(token.attrs['usage_count'], 1)
 
-        request.method = 'GET'
-        with self.assertRaises(HTTPForbidden) as arc:
-            render_view_to_response(token, request, 'consume_token')
+        request.params['valid_from'] = datetime.now().isoformat()
+        request.params['valid_to'] = (datetime.now() - timedelta(1)).isoformat()
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'edit_token')
+        self.assertFalse(res.json['success'])
         self.assertEqual(
-            str(arc.exception),
-            'Unauthorized: consume_token failed permission check'
+            res.json['message'],
+            'valid_from must be before valid_to'
         )
 
+        del request.params['lock_time']
         with self.layer.authenticated('admin'):
-            res = render_view_to_response(token, request, 'consume_token')
-        self.assertTrue(res.json['success'])
-        self.assertTrue(res.json['consumed'])
-        self.assertEqual(token.attrs['usage_count'], 0)
+            res = render_view_to_response(token, request, 'edit_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            '`lock_time` missing on request'
+        )
 
+        del request.params['usage_count']
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'edit_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            '`usage_count` missing on request'
+        )
+
+        del request.params['valid_to']
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'edit_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            '`valid_to` missing on request'
+        )
+
+        del request.params['valid_from']
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'edit_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            '`valid_from` missing on request'
+        )
+
+        request.params['valid_from'] = datetime.now().isoformat()
+        request.params['valid_to'] = (datetime.now() + timedelta(1)).isoformat()
+        request.params['usage_count'] = '1'
+        request.params['lock_time'] = '1'
+        token_api.delete(token_uid)
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'edit_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            f'The token {token_uid} doesn\'t exists'
+        )
+
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_json_api_delete(self):
+        request = self.layer.new_request(type='json')
         request.method = 'POST'
+        token_api = Tokens(request)
+        token_uid = uuid.uuid4()
+        token_api.add(
+            token_uid,
+            datetime.now(),
+            datetime.now() + timedelta(1),
+            -1,
+            0
+        )
+        tokens = get_root()['tokens']
+        token = tokens[str(token_uid)]
+
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(token, request, 'delete_token')
         self.assertEqual(
@@ -380,6 +495,79 @@ class TestTokens(NodeTestCase):
             res = render_view_to_response(token, request, 'delete_token')
         self.assertTrue(res.json['success'])
         self.assertFalse(token_uid in tokens)
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'delete_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            f'The token {token_uid} doesn\'t exists'
+        )
+
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_json_api_consume(self):
+        request = self.layer.new_request(type='json')
+        request.method = 'GET'
+        token_api = Tokens(request)
+        token_uid = uuid.uuid4()
+        token_api.add(
+            token_uid,
+            datetime.now(),
+            datetime.now() + timedelta(2),
+            -1,
+            0
+        )
+        tokens = get_root()['tokens']
+        token = tokens[str(token_uid)]
+
+        with self.assertRaises(HTTPForbidden) as arc:
+            render_view_to_response(token, request, 'consume_token')
+        self.assertEqual(
+            str(arc.exception),
+            'Unauthorized: consume_token failed permission check'
+        )
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'consume_token')
+        self.assertTrue(res.json['success'])
+        self.assertTrue(res.json['consumed'])
+
+        token.attrs['valid_from'] = datetime.now() + timedelta(1)
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'consume_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            f'The token {str(token_uid)} isn\'t in his valid Date Range'
+        )
+
+        token.attrs['lock_time'] = 10000000
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'consume_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            f'The token {str(token_uid)} has been recently used and is on cooldown'
+        )
+
+        token.attrs['usage_count'] = 0
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'consume_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            f'The token {str(token_uid)} has exceeded its durability'
+        )
+
+        del tokens[str(token_uid)]
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'consume_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(
+            res.json['message'],
+            f'The token {token_uid} doesn\'t exists'
+        )
 
 
 def run_tests():
