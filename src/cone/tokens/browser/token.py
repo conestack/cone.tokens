@@ -9,6 +9,7 @@ from cone.app.browser.utils import request_property
 from cone.app.utils import add_creation_metadata
 from cone.app.utils import update_creation_metadata
 from cone.tile import tile
+from cone.tokens.exceptions import TokenLockTimeViolation, TokenNotExists, TokenTimeRangeViolation, TokenUsageCountExceeded, TokenValueError
 from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenContainer
 from cone.tokens.token import Tokens
@@ -216,13 +217,16 @@ def add_token(model, request):
         lock_time = get_int(request, 'lock_time')
     except TokenAPIError as e:
         return e.as_json()
-    token_api.add(
-        token_uid,
-        valid_to,
-        valid_from,
-        usage_count,
-        lock_time,
-    )
+    try:
+        token_api.add(
+            token_uid,
+            valid_from,
+            valid_to,
+            usage_count,
+            lock_time,
+        )
+    except TokenValueError as e:
+        return e.as_json()
     return dict(success=True, token_uid=str(token_uid))
 
 
@@ -236,7 +240,10 @@ def add_token(model, request):
 def delete_token(model, request):
     token_api = Tokens(request)
     token_uid = uuid.UUID(model.name)
-    token_api.delete(token_uid)
+    try:
+        token_api.delete(token_uid)
+    except TokenNotExists as e:
+        return e.as_json()
     return dict(success=True)
 
 
@@ -266,13 +273,18 @@ def edit_token(model, request):
         lock_time = get_int(request, 'lock_time')
     except TokenAPIError as e:
         return e.as_json()
-    token_api.update(
-        token_uid,
-        valid_to=valid_to,
-        usage_count=usage_count,
-        lock_time=lock_time,
-        valid_from=valid_from
-    )
+    try:
+        token_api.update(
+            token_uid,
+            valid_to=valid_to,
+            usage_count=usage_count,
+            lock_time=lock_time,
+            valid_from=valid_from
+        )
+    except TokenValueError as e:
+        return e.as_json()
+    except TokenNotExists as e:
+        return e.as_json()
     return dict(success=True)
 
 
@@ -286,5 +298,14 @@ def edit_token(model, request):
 def consume_token(model, request):
     token_api = Tokens(request)
     token_uid = uuid.UUID(model.name)
-    consumed = token_api.consume(token_uid)
+    try:
+        consumed = token_api.consume(token_uid)
+    except TokenUsageCountExceeded as e:
+        return e.as_json()
+    except TokenLockTimeViolation as e:
+        return e.as_json()
+    except TokenTimeRangeViolation as e:
+        return e.as_json()
+    except TokenNotExists as e:
+        return e.as_json()
     return dict(success=True, consumed=consumed)

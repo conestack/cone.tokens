@@ -1,6 +1,7 @@
 from cone.sql import get_session
 from cone.sql import use_tm
 from cone.tokens.exceptions import TokenLockTimeViolation
+from cone.tokens.exceptions import TokenValueError
 from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
@@ -55,12 +56,14 @@ class Tokens(object):
     def add(
         self,
         token_uid,
-        valid_to,
         valid_from,
+        valid_to,
         usage_count,
         lock_time
     ):
         session = self.session
+        if valid_from >= valid_to:
+            raise TokenValueError('valid_from must be before valid_to')
         token = TokenRecord()
         token.uid = token_uid
         token.valid_from = valid_from
@@ -91,6 +94,8 @@ class Tokens(object):
             token.lock_time = lock_time
         if usage_count:
             token.usage_count = usage_count
+        if token.valid_from >= token.valid_to:
+            raise TokenValueError('valid_from must be before valid_to')
         if use_tm():
             session.flush()
         else:

@@ -1,6 +1,7 @@
 class TokenException(Exception):
-    ...
 
+    def as_json(self):
+        return dict(success=False, message=self.message)
 
 class TokenNotExists(TokenException):
 
@@ -31,4 +32,11 @@ class TokenTimeRangeViolation(TokenException):
     def __init__(self, token_uid):
         self.token_uid = token_uid
         self.message = f'The token {self.token_uid} isn\'t in his valid Date Range'
+        super().__init__(self.message)
+
+
+class TokenValueError(TokenException):
+
+    def __init__(self, message):
+        self.message = message
         super().__init__(self.message)
