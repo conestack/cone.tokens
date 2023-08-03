@@ -56,9 +56,9 @@ class Tokens(object):
         self,
         token_uid,
         valid_to,
+        valid_from,
         usage_count,
-        lock_time,
-        valid_from=datetime.now()
+        lock_time
     ):
         session = self.session
         token = TokenRecord()

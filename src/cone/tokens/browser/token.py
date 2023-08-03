@@ -219,9 +219,9 @@ def add_token(model, request):
     token_api.add(
         token_uid,
         valid_to,
+        valid_from,
         usage_count,
         lock_time,
-        valid_from=valid_from
     )
     return dict(success=True, token_uid=str(token_uid))
 
