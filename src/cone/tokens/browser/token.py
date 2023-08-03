@@ -227,6 +227,8 @@ def add_token(model, request):
         )
     except TokenValueError as e:
         return e.as_json()
+    except Exception as e:
+        return dict(success=False,message=e)
     return dict(success=True, token_uid=str(token_uid))
 
 
@@ -244,6 +246,8 @@ def delete_token(model, request):
         token_api.delete(token_uid)
     except TokenNotExists as e:
         return e.as_json()
+    except Exception as e:
+        return dict(success=False,message=e)
     return dict(success=True)
 
 
@@ -285,6 +289,8 @@ def edit_token(model, request):
         return e.as_json()
     except TokenNotExists as e:
         return e.as_json()
+    except Exception as e:
+        return dict(success=False,message=e)
     return dict(success=True)
 
 
@@ -308,4 +314,6 @@ def consume_token(model, request):
         return e.as_json()
     except TokenNotExists as e:
         return e.as_json()
+    except Exception as e:
+        return dict(success=False,message=e)
     return dict(success=True, consumed=consumed)
