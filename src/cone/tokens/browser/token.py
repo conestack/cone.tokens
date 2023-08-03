@@ -61,6 +61,19 @@ class TokenForm(Form):
             node=self.model,
             resource=self.action_resource
         )
+    
+    def valid_extractor(self, widget, data):
+        print('valid_extractor')
+        extracted = data.extracted
+        print(data)
+        if extracted is UNSET:
+            return extracted
+        breakpoint()
+        valid_from = data.fetch('tokenform.valid_from').extracted
+        valid_to = data.fetch('tokenform.valid_to').extracted
+        if valid_from >= valid_to:
+            raise TokenValueError('valid_from must be before valid_to')
+        return extracted
 
     def prepare(self):
         form = self.form = factory(
@@ -83,7 +96,7 @@ class TokenForm(Form):
             }
         )
         form['valid_to'] = factory(
-            '#field:datetime',
+            '#field:datetime:*valid_to',
             value=attrs.get('valid_to', UNSET),
             props={
                 'label': _('valid_to', default='Valid to'),
@@ -94,6 +107,11 @@ class TokenForm(Form):
                 'datepicker': True,
                 'locale': 'de',
                 'persist': True
+            },
+            custom={
+                'valid_to': {
+                    'extractors': [self.valid_extractor]
+                }
             }
         )
         form['usage_count'] = factory(
@@ -104,7 +122,8 @@ class TokenForm(Form):
                 'required': _(
                     'usage_count_required',
                     default='Usage Count field cannot be empty'
-                )
+                ),
+                'datatype': 'integer'
             }
         )
         form['lock_time'] = factory(
@@ -115,7 +134,8 @@ class TokenForm(Form):
                 'required': _(
                     'lock_time_required',
                     default='Lock time field cannot be empty'
-                )
+                ),
+                'datatype': 'integer'
             }
         )
         form['save'] = factory(
