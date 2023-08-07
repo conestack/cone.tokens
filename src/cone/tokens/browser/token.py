@@ -1,7 +1,6 @@
 from base64 import b64encode
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
-from cone.app.browser.contents import ContentsTile
 from cone.app.browser.form import Form
 from cone.app.browser.layout import ProtectedContentTile
 from cone.app.browser.utils import make_url
@@ -20,7 +19,6 @@ from cone.tokens.token import Tokens
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
-from pyramid.i18n import get_localizer
 from pyramid.view import view_config
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer

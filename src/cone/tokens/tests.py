@@ -12,6 +12,7 @@ from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
+from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenRecord
 from cone.tokens.token import Tokens
@@ -195,6 +196,14 @@ class TestTokens(NodeTestCase):
         )
         self.assertEqual(data.fetch('tokenform.usage_count').extracted, -1.)
         self.assertEqual(data.fetch('tokenform.lock_time').extracted, 0)
+
+        request.params['tokenform.valid_from'] = '2.1.2022'
+        request.params['tokenform.valid_to'] = '1.1.2022'
+        self.assertRaises(
+            TokenValueError,
+            form_tile.form.extract,
+            request=request
+        )
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
