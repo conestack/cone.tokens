@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE 1.0\n"
-"POT-Creation-Date: 2023-08-07 11:33+0200\n"
+"POT-Creation-Date: 2023-08-07 12:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,22 +17,22 @@ msgstr ""
 "Generated-By: Lingua 4.15.0\n"
 
 #. Default: Token
-#: ./src/cone/tokens/model.py:40
+#: ./src/cone/tokens/model.py:42
 msgid "token_node_title"
 msgstr ""
 
 #. Default: Token
-#: ./src/cone/tokens/model.py:41
+#: ./src/cone/tokens/model.py:43
 msgid "token_node_description"
 msgstr ""
 
 #. Default: Tokens
-#: ./src/cone/tokens/model.py:68
+#: ./src/cone/tokens/model.py:70
 msgid "token_container_title"
 msgstr ""
 
 #. Default: Tokens
-#: ./src/cone/tokens/model.py:69
+#: ./src/cone/tokens/model.py:71
 msgid "token_container_description"
 msgstr ""
 

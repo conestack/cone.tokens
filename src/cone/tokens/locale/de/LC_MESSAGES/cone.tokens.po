@@ -11,7 +11,7 @@ msgstr ""
 #. Default: Tokens
 #: src/cone/tokens/model.py:68
 msgid "token_container_title"
-msgstr ""
+msgstr "Token Container"
 
 #. Default: Tokens
 #: src/cone/tokens/model.py:69
@@ -21,44 +21,44 @@ msgstr ""
 #. Default: Valid from
 #: src/cone/tokens/browser/token.py:77
 msgid "valid_from"
-msgstr ""
+msgstr "Gültig ab"
 
 #. Default: Valid to
 #: src/cone/tokens/browser/token.py:87
 msgid "valid_to"
-msgstr ""
+msgstr "Gültig bis"
 
 #. Default: Valid to field cannot be empty
 #: src/cone/tokens/browser/token.py:88
 msgid "valid_to_required"
-msgstr ""
+msgstr "Gültig bis Feld darf nicht leer sein"
 
 #. Default: Usage Count
 #: src/cone/tokens/browser/token.py:101
 msgid "usage_count"
-msgstr ""
+msgstr "Benutzungen"
 
 #. Default: Usage Count field cannot be empty
 #: src/cone/tokens/browser/token.py:102
 msgid "usage_count_required"
-msgstr ""
+msgstr "Benutzungen Feld darf nicht leer sein"
 
 #. Default: Lock Time
 #: src/cone/tokens/browser/token.py:113
 msgid "lock_time"
-msgstr ""
+msgstr "Speerzeit"
 
 #. Default: Lock time field cannot be empty
 #: src/cone/tokens/browser/token.py:114
 msgid "lock_time_required"
-msgstr ""
+msgstr "Speerzeit Feld darf nicht leer sein"
 
 #. Default: Save
 #: src/cone/tokens/browser/token.py:128
 msgid "save"
-msgstr ""
+msgstr "Speichern"
 
 #. Default: Cancel
 #: src/cone/tokens/browser/token.py:143
 msgid "cancel"
-msgstr ""
+msgstr "Abbrechen"

@@ -5,7 +5,7 @@ from cone.sql.testing import SQLLayer
 from cone.tokens.browser.api import get_datetime
 from cone.tokens.browser.api import get_int
 from cone.tokens.browser.api import get_int
-from cone.tokens.browser.token import TokenAddForm
+from cone.tokens.browser.token import TokenAddForm, TokenTile
 from cone.tokens.browser.token import TokenEditForm
 from cone.tokens.browser.token import TokenForm
 from cone.tokens.exceptions import TokenAPIError
@@ -14,7 +14,7 @@ from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
-from cone.tokens.model import TokenNode
+from cone.tokens.model import TokenContainer, TokenNode
 from cone.tokens.model import TokenRecord
 from cone.tokens.token import Tokens
 from cone.ugm.testing import principals
@@ -27,7 +27,7 @@ from pyramid.view import render_view_to_response
 import sys
 import unittest
 import uuid
-
+from unittest.mock import patch
 
 class TokensLayer(SQLLayer):
 
@@ -47,6 +47,44 @@ tokens_layer = TokensLayer()
 
 class TestTokens(NodeTestCase):
     layer = tokens_layer
+
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_model(self):
+        tokens = get_root()['tokens']
+        self.assertEqual(isinstance(tokens, TokenContainer), True)
+        # add token to tokens container
+        token = TokenNode()
+        valid_from = token.attrs['valid_from'] = datetime.now()
+        valid_to = token.attrs['valid_to'] = datetime.now() + timedelta(1)
+        token.attrs['lock_time'] = 0
+        token.attrs['usage_count'] = -1
+        token_uuid = str(uuid.uuid4())
+        tokens[token_uuid] = token
+        token()
+        # check if token has been added
+        self.assertEqual(len(tokens), 1)
+        token = tokens.values()[0]
+        self.assertEqual(isinstance(token, TokenNode), True)
+        self.assertEqual(token.attrs['valid_from'], valid_from)
+        self.assertEqual(token.attrs['valid_to'],valid_to)
+        self.assertEqual(token.attrs['lock_time'], 0)
+        self.assertEqual(token.attrs['usage_count'], -1)
+        # check metadata
+        self.assertEqual(token.metadata.title, token_uuid)
+        self.assertEqual(token.metadata.creator, None)
+        self.assertEqual(token.metadata.created, None)
+        self.assertEqual(token.metadata.modified, None)
+        # check properties
+        self.assertEqual(token.properties.action_up, True)
+        self.assertEqual(token.properties.action_edit, True)
+        self.assertEqual(token.properties.action_view, True)
+        # check container metadata
+        self.assertEqual(tokens.metadata.title, 'token_container_title')
+        self.assertEqual(
+            tokens.metadata.description,
+            'token_container_description'
+        )
+
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_token_consume(self):
@@ -279,6 +317,17 @@ class TestTokens(NodeTestCase):
         self.assertEqual(token.attrs['usage_count'], -1)
         self.assertEqual(token.attrs['lock_time'], 0)
 
+    def test_qr_code_generator(self):
+        request = self.layer.new_request()
+        session = get_session(request)
+        token_tile = TokenTile(attribute='render')
+        token_tile.model = TokenNode()
+        token_tile.request = request
+        token_tile.prepare()
+        token_tile.model.attrs['uid'] = str(uuid.uuid4())
+        result = token_tile.stream_qrcode_token
+        self.assertEqual(result[:22], 'data:image/png;base64,')
+
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
     def test_json_api(self):
@@ -346,6 +395,15 @@ class TestTokens(NodeTestCase):
             res = render_view_to_response(tokens, request, 'add_token')
         self.assertTrue(res.json['success'])
 
+        with patch.object(Tokens, 'add', side_effect=KeyError('Error')):
+            with self.layer.authenticated('admin'):
+                res = render_view_to_response(tokens, request, 'add_token')
+            self.assertFalse(res.json['success'])
+            self.assertEqual(
+                res.json['message'],
+                "'Error'"
+            )
+
         request.params['valid_from'] = datetime(2023, 7, 25, 8, 0).isoformat()
         request.params['valid_to'] = datetime(2023, 7, 24, 8, 0).isoformat()
         request.params['usage_count'] = '-1'
@@ -385,6 +443,7 @@ class TestTokens(NodeTestCase):
             '`valid_to` missing on request'
         )
 
+
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
     def test_json_api_edit(self):
@@ -417,6 +476,15 @@ class TestTokens(NodeTestCase):
             res = render_view_to_response(token, request, 'edit_token')
         self.assertTrue(res.json['success'])
         self.assertEqual(token.attrs['usage_count'], 1)
+
+        with patch.object(Tokens, 'update', side_effect=KeyError('Error')):
+            with self.layer.authenticated('admin'):
+                res = render_view_to_response(token, request, 'edit_token')
+            self.assertFalse(res.json['success'])
+            self.assertEqual(
+                res.json['message'],
+                "'Error'"
+            )
 
         request.params['valid_from'] = datetime.now().isoformat()
         request.params['valid_to'] = (datetime.now() - timedelta(1)).isoformat()
@@ -506,6 +574,15 @@ class TestTokens(NodeTestCase):
         self.assertTrue(res.json['success'])
         self.assertFalse(token_uid in tokens)
 
+        with patch.object(Tokens, 'delete', side_effect=KeyError('Error')):
+            with self.layer.authenticated('admin'):
+                res = render_view_to_response(token, request, 'delete_token')
+            self.assertFalse(res.json['success'])
+            self.assertEqual(
+                res.json['message'],
+                "'Error'"
+            )
+
         with self.layer.authenticated('admin'):
             res = render_view_to_response(token, request, 'delete_token')
         self.assertFalse(res.json['success'])
@@ -542,6 +619,15 @@ class TestTokens(NodeTestCase):
             res = render_view_to_response(token, request, 'consume_token')
         self.assertTrue(res.json['success'])
         self.assertTrue(res.json['consumed'])
+
+        with patch.object(Tokens, 'consume', side_effect=KeyError('Error')):
+            with self.layer.authenticated('admin'):
+                res = render_view_to_response(token, request, 'consume_token')
+            self.assertFalse(res.json['success'])
+            self.assertEqual(
+                res.json['message'],
+                "'Error'"
+            )
 
         token.attrs['valid_from'] = datetime.now() + timedelta(1)
         with self.layer.authenticated('admin'):
@@ -581,16 +667,17 @@ class TestTokens(NodeTestCase):
 
 
 def run_tests():
-    from cone.tokens import tests
-    from zope.testrunner.runner import Runner
+    # pragma: no cover
+    from cone.tokens import tests # pragma: no cover
+    from zope.testrunner.runner import Runner # pragma: no cover
 
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.findTestCases(tests))
+    suite = unittest.TestSuite() # pragma: no cover
+    suite.addTest(unittest.findTestCases(tests)) # pragma: no cover
 
-    runner = Runner(found_suites=[suite])
-    runner.run()
-    sys.exit(int(runner.failed))
+    runner = Runner(found_suites=[suite]) # pragma: no cover
+    runner.run() # pragma: no cover
+    sys.exit(int(runner.failed)) # pragma: no cover
 
 
-if __name__ == '__main__':
-    run_tests()
+if __name__ == '__main__': # pragma: no cover
+    run_tests() # pragma: no cover

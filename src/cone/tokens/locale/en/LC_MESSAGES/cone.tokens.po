@@ -1,20 +1,20 @@
 #. Default: Token
-#: src/cone/tokens/model.py:40
+#: src/cone/tokens/model.py:42
 msgid "token_node_title"
 msgstr ""
 
 #. Default: Token
-#: src/cone/tokens/model.py:41
+#: src/cone/tokens/model.py:43
 msgid "token_node_description"
 msgstr ""
 
 #. Default: Tokens
-#: src/cone/tokens/model.py:68
+#: src/cone/tokens/model.py:70
 msgid "token_container_title"
 msgstr ""
 
 #. Default: Tokens
-#: src/cone/tokens/model.py:69
+#: src/cone/tokens/model.py:71
 msgid "token_container_description"
 msgstr ""
 

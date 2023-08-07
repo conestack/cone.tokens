@@ -10,3 +10,5 @@
 /venv/
 constraints-mxdev.txt
 __pycache__
+htmlcov
+```

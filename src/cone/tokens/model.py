@@ -1,3 +1,4 @@
+from cone.app.interfaces import ILeafNode
 from cone.app.model import Metadata
 from cone.app.model import Properties
 from cone.app.model import node_info
@@ -6,6 +7,7 @@ from cone.sql.acl import SQLPrincipalACL
 from cone.sql.model import GUID
 from cone.sql.model import SQLRowNode
 from cone.sql.model import SQLTableNode
+from node.interfaces import ILeaf
 from node.interfaces import IUUID
 from node.utils import instance_property
 from plumber import plumbing
@@ -34,7 +36,7 @@ class TokenRecord(SQLBase):
     created = Column(DateTime)
     modified = Column(DateTime)
 
-
+@plumbing(ILeaf)
 @node_info(
     name='token_node',
     title=_('token_node_title', default='Token'),

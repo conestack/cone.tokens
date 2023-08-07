@@ -48,7 +48,7 @@ class Tokens(object):
             existing.usage_count -= 1
         existing.last_used = current_time
         if use_tm():
-            session.flush()
+            session.flush() # pragma: no cover
         else:
             session.commit()
         return True
@@ -72,7 +72,7 @@ class Tokens(object):
         token.usage_count = usage_count
         session.add(token)
         if use_tm():
-            session.flush()
+            session.flush() # pragma: no cover
         else:
             session.commit()
 
@@ -97,7 +97,7 @@ class Tokens(object):
         if token.valid_from >= token.valid_to:
             raise TokenValueError('valid_from must be before valid_to')
         if use_tm():
-            session.flush()
+            session.flush() # pragma: no cover
         else:
             session.commit()
 
@@ -106,6 +106,6 @@ class Tokens(object):
         token = self._get_token(token_uid)
         session.delete(token)
         if use_tm():
-            session.flush()
+            session.flush() # pragma: no cover
         else:
             session.commit()
