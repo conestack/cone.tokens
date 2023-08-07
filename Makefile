@@ -7,6 +7,9 @@
 #: core.mxfiles
 #: core.packages
 #: core.sources
+#: i18n.gettext
+#: i18n.lingua
+#: qa.coverage
 #: qa.test
 #
 # SETTINGS (ALL CHANGES MADE BELOW SETTINGS WILL BE LOST)
@@ -89,6 +92,37 @@ TEST_REQUIREMENTS?=zope.testrunner
 # Additional make targets the test target depends on.
 # No default value.
 TEST_DEPENDENCY_TARGETS?=
+
+## qa.coverage
+
+# The command which gets executed. Defaults to the location the
+# :ref:`run-coverage` template gets rendered to if configured.
+# Default: .mxmake/files/run-coverage.sh
+COVERAGE_COMMAND?=.mxmake/files/run-coverage.sh
+
+## i18n.gettext
+
+# Path of directory containing the message catalogs.
+# Default: locale
+GETTEXT_LOCALES_PATH?=src/cone/tokens/locale
+
+# Translation domain to use.
+# No default value.
+GETTEXT_DOMAIN?=cone.tokens
+
+# Space separated list of language identifiers.
+# No default value.
+GETTEXT_LANGUAGES?=en de
+
+## i18n.lingua
+
+# Path of directory to extract translatable texts from.
+# Default: src
+LINGUA_SEARCH_PATH?=src/cone/tokens
+
+# Python packages containing lingua extensions.
+# No default value.
+LINGUA_PLUGINS?=
 
 ##############################################################################
 # END SETTINGS - DO NOT EDIT BELOW THIS LINE
@@ -328,6 +362,111 @@ test-clean: test-dirty
 INSTALL_TARGETS+=$(TEST_TARGET)
 CLEAN_TARGETS+=test-clean
 DIRTY_TARGETS+=test-dirty
+
+##############################################################################
+# coverage
+##############################################################################
+
+COVERAGE_TARGET:=$(SENTINEL_FOLDER)/coverage.sentinel
+$(COVERAGE_TARGET): $(TEST_TARGET)
+	@echo "Install Coverage"
+	@$(MXENV_PATH)pip install -U coverage
+	@touch $(COVERAGE_TARGET)
+
+.PHONY: coverage
+coverage: $(FILES_TARGET) $(SOURCES_TARGET) $(PACKAGES_TARGET) $(COVERAGE_TARGET)
+	@echo "Run coverage"
+	@test -z "$(COVERAGE_COMMAND)" && echo "No coverage command defined"
+	@test -z "$(COVERAGE_COMMAND)" || bash -c "$(COVERAGE_COMMAND)"
+
+.PHONY: coverage-dirty
+coverage-dirty:
+	@rm -f $(COVERAGE_TARGET)
+
+.PHONY: coverage-clean
+coverage-clean: coverage-dirty
+	@test -e $(MXENV_PATH)pip && $(MXENV_PATH)pip uninstall -y coverage || :
+	@rm -rf .coverage htmlcov
+
+INSTALL_TARGETS+=$(COVERAGE_TARGET)
+DIRTY_TARGETS+=coverage-dirty
+CLEAN_TARGETS+=coverage-clean
+
+##############################################################################
+# gettext
+##############################################################################
+
+# case `system.dependencies` domain is included
+SYSTEM_DEPENDENCIES+=gettext
+
+.PHONY: gettext-create
+gettext-create:
+	@if [ ! -e "$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot" ]; then \
+		echo "Create pot file"; \
+		mkdir -p "$(GETTEXT_LOCALES_PATH)"; \
+		touch "$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot"; \
+	fi
+	@for lang in $(GETTEXT_LANGUAGES); do \
+		if [ ! -e "$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po" ]; then \
+			mkdir -p "$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES"; \
+			msginit \
+				-i "$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot" \
+				-o "$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po" \
+				-l $$lang; \
+		fi \
+	done
+
+.PHONY: gettext-update
+gettext-update:
+	@echo "Update translations"
+	@for lang in $(GETTEXT_LANGUAGES); do \
+		msgmerge -o \
+			"$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po" \
+			"$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po" \
+			"$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot"; \
+	done
+
+.PHONY: gettext-compile
+gettext-compile:
+	@echo "Compile message catalogs"
+	@for lang in $(GETTEXT_LANGUAGES); do \
+		msgfmt --statistics -o \
+			"$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).mo" \
+			"$(GETTEXT_LOCALES_PATH)/$$lang/LC_MESSAGES/$(GETTEXT_DOMAIN).po"; \
+	done
+
+##############################################################################
+# lingua
+##############################################################################
+
+LINGUA_TARGET:=$(SENTINEL_FOLDER)/lingua.sentinel
+$(LINGUA_TARGET): $(MXENV_TARGET)
+	@echo "Install Lingua"
+	@$(MXENV_PATH)pip install chameleon lingua $(LINGUA_PLUGINS)
+	@touch $(LINGUA_TARGET)
+
+PHONY: lingua-extract
+lingua-extract: $(LINGUA_TARGET)
+	@echo "Extract messages"
+	@$(MXENV_PATH)pot-create \
+		"$(LINGUA_SEARCH_PATH)" \
+		-o "$(GETTEXT_LOCALES_PATH)/$(GETTEXT_DOMAIN).pot"
+
+PHONY: lingua
+lingua: gettext-create lingua-extract gettext-update gettext-compile
+
+.PHONY: lingua-dirty
+lingua-dirty:
+	@rm -f $(LINGUA_TARGET)
+
+.PHONY: lingua-clean
+lingua-clean: lingua-dirty
+	@test -e $(MXENV_PATH)pip && $(MXENV_PATH)pip uninstall -y \
+		chameleon lingua $(LINGUA_PLUGINS) || :
+
+INSTALL_TARGETS+=$(LINGUA_TARGET)
+DIRTY_TARGETS+=lingua-dirty
+CLEAN_TARGETS+=lingua-clean
 
 -include $(INCLUDE_MAKEFILE)
 

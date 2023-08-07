@@ -45,6 +45,14 @@ class TokenRecord(SQLBase):
 class TokenNode(SQLRowNode):
     record_class = TokenRecord
 
+    @property
+    def properties(self):
+        props = Properties()
+        props.action_up = True
+        props.action_edit = True
+        props.action_view = True
+        return props
+
     @instance_property
     def metadata(self):
         md = Metadata()

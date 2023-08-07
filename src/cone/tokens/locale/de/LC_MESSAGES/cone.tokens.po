@@ -1,0 +1,64 @@
+#. Default: Token
+#: src/cone/tokens/model.py:40
+msgid "token_node_title"
+msgstr ""
+
+#. Default: Token
+#: src/cone/tokens/model.py:41
+msgid "token_node_description"
+msgstr ""
+
+#. Default: Tokens
+#: src/cone/tokens/model.py:68
+msgid "token_container_title"
+msgstr ""
+
+#. Default: Tokens
+#: src/cone/tokens/model.py:69
+msgid "token_container_description"
+msgstr ""
+
+#. Default: Valid from
+#: src/cone/tokens/browser/token.py:77
+msgid "valid_from"
+msgstr ""
+
+#. Default: Valid to
+#: src/cone/tokens/browser/token.py:87
+msgid "valid_to"
+msgstr ""
+
+#. Default: Valid to field cannot be empty
+#: src/cone/tokens/browser/token.py:88
+msgid "valid_to_required"
+msgstr ""
+
+#. Default: Usage Count
+#: src/cone/tokens/browser/token.py:101
+msgid "usage_count"
+msgstr ""
+
+#. Default: Usage Count field cannot be empty
+#: src/cone/tokens/browser/token.py:102
+msgid "usage_count_required"
+msgstr ""
+
+#. Default: Lock Time
+#: src/cone/tokens/browser/token.py:113
+msgid "lock_time"
+msgstr ""
+
+#. Default: Lock time field cannot be empty
+#: src/cone/tokens/browser/token.py:114
+msgid "lock_time_required"
+msgstr ""
+
+#. Default: Save
+#: src/cone/tokens/browser/token.py:128
+msgid "save"
+msgstr ""
+
+#. Default: Cancel
+#: src/cone/tokens/browser/token.py:143
+msgid "cancel"
+msgstr ""

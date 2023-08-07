@@ -55,7 +55,7 @@ class TokenForm(Form):
     def timerange_extractor(self, widget, data):
         valid_from = data.fetch('tokenform.valid_from').extracted
         valid_to = data.fetch('tokenform.valid_to').extracted
-        if valid_from is '':
+        if valid_from == '':
             valid_from = datetime.datetime.now()
         if valid_from >= valid_to:
             raise TokenValueError('valid_from must be before valid_to')

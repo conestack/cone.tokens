@@ -14,6 +14,9 @@ def initialize_tokens(config, global_config, settings):
     # static resources
     #configure_resources(config, settings)
 
+    # add translation
+    config.add_translation_dirs('cone.tokens:locale/')
+
     # scan browser package
     config.scan('cone.tokens.browser')
 

@@ -1,5 +1,6 @@
 *egg-info
 *pyc
+.coverage
 .mxmake
 .vscode
 /requirements-mxdev.txt
@@ -8,3 +9,4 @@
 /var/
 /venv/
 constraints-mxdev.txt
+__pycache__
