@@ -1,64 +1,62 @@
-#. Default: Token
-#: src/cone/tokens/model.py:40
-msgid "token_node_title"
+msgid ""
 msgstr ""
+"Project-Id-Version: cone.tokens 1.0\n"
+"POT-Creation-Date: 2023-08-08 08:51+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Lingua 4.15.0\n"
 
 #. Default: Token
 #: src/cone/tokens/model.py:41
+msgid "token_node_title"
+msgstr "Token"
+
+#. Default: Token
+#: src/cone/tokens/model.py:42
 msgid "token_node_description"
-msgstr ""
+msgstr "Token"
 
 #. Default: Tokens
-#: src/cone/tokens/model.py:68
+#: src/cone/tokens/model.py:70
 msgid "token_container_title"
 msgstr "Token Container"
 
 #. Default: Tokens
-#: src/cone/tokens/model.py:69
+#: src/cone/tokens/model.py:71
 msgid "token_container_description"
-msgstr ""
+msgstr "Tokens"
 
 #. Default: Valid from
-#: src/cone/tokens/browser/token.py:77
+#: src/cone/tokens/browser/token.py:76
 msgid "valid_from"
 msgstr "Gültig ab"
 
 #. Default: Valid to
-#: src/cone/tokens/browser/token.py:87
+#: src/cone/tokens/browser/token.py:86
 msgid "valid_to"
 msgstr "Gültig bis"
 
-#. Default: Valid to field cannot be empty
-#: src/cone/tokens/browser/token.py:88
-msgid "valid_to_required"
-msgstr "Gültig bis Feld darf nicht leer sein"
-
 #. Default: Usage Count
-#: src/cone/tokens/browser/token.py:101
+#: src/cone/tokens/browser/token.py:96
 msgid "usage_count"
 msgstr "Benutzungen"
 
-#. Default: Usage Count field cannot be empty
-#: src/cone/tokens/browser/token.py:102
-msgid "usage_count_required"
-msgstr "Benutzungen Feld darf nicht leer sein"
-
 #. Default: Lock Time
-#: src/cone/tokens/browser/token.py:113
+#: src/cone/tokens/browser/token.py:105
 msgid "lock_time"
 msgstr "Speerzeit"
 
-#. Default: Lock time field cannot be empty
-#: src/cone/tokens/browser/token.py:114
-msgid "lock_time_required"
-msgstr "Speerzeit Feld darf nicht leer sein"
-
 #. Default: Save
-#: src/cone/tokens/browser/token.py:128
+#: src/cone/tokens/browser/token.py:117
 msgid "save"
 msgstr "Speichern"
 
 #. Default: Cancel
-#: src/cone/tokens/browser/token.py:143
+#: src/cone/tokens/browser/token.py:132
 msgid "cancel"
 msgstr "Abbrechen"
