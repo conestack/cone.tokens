@@ -1,4 +1,3 @@
-from cone.app.interfaces import ILeafNode
 from cone.app.model import Metadata
 from cone.app.model import Properties
 from cone.app.model import node_info
@@ -36,7 +35,7 @@ class TokenRecord(SQLBase):
     created = Column(DateTime)
     modified = Column(DateTime)
 
-@plumbing(ILeaf)
+
 @node_info(
     name='token_node',
     title=_('token_node_title', default='Token'),
@@ -44,6 +43,7 @@ class TokenRecord(SQLBase):
         'token_node_description',
         default='Token'
     ))
+@implementer(ILeaf)
 class TokenNode(SQLRowNode):
     record_class = TokenRecord
 

@@ -15,7 +15,6 @@ from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer
-import datetime
 import io
 import qrcode
 import uuid
@@ -51,12 +50,12 @@ class TokenForm(Form):
             node=self.model,
             resource=self.action_resource
         )
-    
+
     def timerange_extractor(self, widget, data):
         valid_from = data.fetch('tokenform.valid_from').extracted
         valid_to = data.fetch('tokenform.valid_to').extracted
-        if valid_from == '':
-            valid_from = datetime.datetime.now()
+        if not valid_from or not valid_to:
+            return
         if valid_from >= valid_to:
             raise TokenValueError('valid_from must be before valid_to')
 
@@ -85,10 +84,6 @@ class TokenForm(Form):
             value=attrs.get('valid_to', UNSET),
             props={
                 'label': _('valid_to', default='Valid to'),
-                'required': _(
-                    'valid_to_required',
-                    default='Valid to field cannot be empty'
-                ),
                 'datepicker': True,
                 'locale': 'de',
                 'persist': True
@@ -99,11 +94,8 @@ class TokenForm(Form):
             value=attrs.get('usage_count', UNSET),
             props={
                 'label': _('usage_count', default='Usage Count'),
-                'required': _(
-                    'usage_count_required',
-                    default='Usage Count field cannot be empty'
-                ),
-                'datatype': 'integer'
+                'datatype': 'integer',
+                'emptyvalue': -1
             }
         )
         form['lock_time'] = factory(
@@ -111,11 +103,8 @@ class TokenForm(Form):
             value=attrs.get('lock_time', UNSET),
             props={
                 'label': _('lock_time', default='Lock Time'),
-                'required': _(
-                    'lock_time_required',
-                    default='Lock time field cannot be empty'
-                ),
-                'datatype': 'integer'
+                'datatype': 'integer',
+                'emptyvalue': 0
             }
         )
         form['save'] = factory(
@@ -146,10 +135,6 @@ class TokenForm(Form):
 
     def save(self, widget, data):
         data.write(self.model)
-
-    def next(self, request):
-        # method stub for tests
-        ...
 
 
 @tile(name='addform', interface=TokenNode, permission='add')

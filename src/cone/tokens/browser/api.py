@@ -14,7 +14,6 @@ import uuid
 
 
 def get_datetime(request, name, now_when_missing=False):
-    # dateutil.parser.isoparse(datetime.datetime.now().isoformat())
     try:
         return dateutil.parser.isoparse(request.params[name])
     except KeyError:
@@ -63,12 +62,12 @@ def add_token(model, request):
             valid_from,
             valid_to,
             usage_count,
-            lock_time,
+            lock_time
         )
     except TokenValueError as e:
         return e.as_json()
     except Exception as e:
-        return dict(success=False,message=str(e))
+        return dict(success=False, message=str(e))
     return dict(success=True, token_uid=str(token_uid))
 
 
@@ -87,7 +86,7 @@ def delete_token(model, request):
     except TokenNotExists as e:
         return e.as_json()
     except Exception as e:
-        return dict(success=False,message=str(e))
+        return dict(success=False, message=str(e))
     return dict(success=True)
 
 
@@ -130,7 +129,7 @@ def edit_token(model, request):
     except TokenNotExists as e:
         return e.as_json()
     except Exception as e:
-        return dict(success=False,message=str(e))
+        return dict(success=False, message=str(e))
     return dict(success=True)
 
 
@@ -155,5 +154,5 @@ def consume_token(model, request):
     except TokenNotExists as e:
         return e.as_json()
     except Exception as e:
-        return dict(success=False,message=str(e))
+        return dict(success=False, message=str(e))
     return dict(success=True, consumed=consumed)

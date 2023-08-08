@@ -24,10 +24,11 @@ from node.tests import NodeTestCase
 from node.utils import UNSET
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.view import render_view_to_response
+from unittest.mock import patch
 import sys
 import unittest
 import uuid
-from unittest.mock import patch
+
 
 class TokensLayer(SQLLayer):
 
@@ -52,6 +53,7 @@ class TestTokens(NodeTestCase):
     def test_model(self):
         tokens = get_root()['tokens']
         self.assertEqual(isinstance(tokens, TokenContainer), True)
+
         # add token to tokens container
         token = TokenNode()
         valid_from = token.attrs['valid_from'] = datetime.now()
@@ -61,6 +63,7 @@ class TestTokens(NodeTestCase):
         token_uuid = str(uuid.uuid4())
         tokens[token_uuid] = token
         token()
+
         # check if token has been added
         self.assertEqual(len(tokens), 1)
         token = tokens.values()[0]
@@ -69,22 +72,24 @@ class TestTokens(NodeTestCase):
         self.assertEqual(token.attrs['valid_to'],valid_to)
         self.assertEqual(token.attrs['lock_time'], 0)
         self.assertEqual(token.attrs['usage_count'], -1)
+
         # check metadata
         self.assertEqual(token.metadata.title, token_uuid)
         self.assertEqual(token.metadata.creator, None)
         self.assertEqual(token.metadata.created, None)
         self.assertEqual(token.metadata.modified, None)
+
         # check properties
         self.assertEqual(token.properties.action_up, True)
         self.assertEqual(token.properties.action_edit, True)
         self.assertEqual(token.properties.action_view, True)
+
         # check container metadata
         self.assertEqual(tokens.metadata.title, 'token_container_title')
         self.assertEqual(
             tokens.metadata.description,
             'token_container_description'
         )
-
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_token_consume(self):
@@ -192,8 +197,12 @@ class TestTokens(NodeTestCase):
         # create token
         token = TokenNode()
 
+        class TestTokenForm(TokenForm):
+            def next(self, request):
+                ...
+
         # prepare token form
-        form_tile = TokenForm(attribute='render')
+        form_tile = TestTokenForm(attribute='render')
         form_tile.model = token
         form_tile.request = request
         form_tile.action_resource = 'tokenform'
@@ -213,8 +222,8 @@ class TestTokens(NodeTestCase):
 
         # empty extraction
         data = form_tile.form.extract(request=request)
-        self.assertEqual(data.fetch('tokenform.valid_from').extracted, '')
-        self.assertEqual(data.fetch('tokenform.valid_to').extracted, UNSET)
+        self.assertEqual(data.fetch('tokenform.valid_from').extracted, None)
+        self.assertEqual(data.fetch('tokenform.valid_to').extracted, None)
         self.assertEqual(data.fetch('tokenform.usage_count').extracted, UNSET)
         self.assertEqual(data.fetch('tokenform.lock_time').extracted, UNSET)
 
@@ -319,7 +328,6 @@ class TestTokens(NodeTestCase):
 
     def test_qr_code_generator(self):
         request = self.layer.new_request()
-        session = get_session(request)
         token_tile = TokenTile(attribute='render')
         token_tile.model = TokenNode()
         token_tile.request = request
@@ -330,7 +338,7 @@ class TestTokens(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_json_api(self):
+    def test_json_api_common(self):
         err = TokenAPIError('Error message')
         self.assertEqual(err.message, 'Error message')
         self.assertEqual(
@@ -379,7 +387,7 @@ class TestTokens(NodeTestCase):
         tokens = get_root()['tokens']
         request = self.layer.new_request(type='json')
         request.method = 'POST'
-        
+
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(tokens, request, 'add_token')
         self.assertEqual(
@@ -442,7 +450,6 @@ class TestTokens(NodeTestCase):
             res.json['message'],
             '`valid_to` missing on request'
         )
-
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
@@ -666,18 +673,17 @@ class TestTokens(NodeTestCase):
         )
 
 
-def run_tests():
-    # pragma: no cover
-    from cone.tokens import tests # pragma: no cover
-    from zope.testrunner.runner import Runner # pragma: no cover
+def run_tests(): # pragma: no cover
+    from cone.tokens import tests
+    from zope.testrunner.runner import Runner
 
-    suite = unittest.TestSuite() # pragma: no cover
-    suite.addTest(unittest.findTestCases(tests)) # pragma: no cover
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.findTestCases(tests))
 
-    runner = Runner(found_suites=[suite]) # pragma: no cover
-    runner.run() # pragma: no cover
-    sys.exit(int(runner.failed)) # pragma: no cover
+    runner = Runner(found_suites=[suite])
+    runner.run()
+    sys.exit(int(runner.failed))
 
 
 if __name__ == '__main__': # pragma: no cover
-    run_tests() # pragma: no cover
+    run_tests()
