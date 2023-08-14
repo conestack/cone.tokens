@@ -42,20 +42,20 @@ add_token
 Results
 ^^^^^^^
     
-      ``success``: True or False
-    
-      ``token_uid``: on success the token uid is returned
-    
-      ``message``: on failure the error message is returned
+    ``success``: True or False
+
+    ``token_uid``: on success the token uid is returned
+
+    ``message``: on failure the error message is returned
 
 Errors
 ^^^^^^
     
-      ``TokenAPIError``: if a param is missing 
-    
-      ``TokenValueError``: if a param has an invalid value
+    ``TokenAPIError``: if a param is missing 
 
-      ``Exception``: if something else goes wrong
+    ``TokenValueError``: if a param has an invalid value
+    
+    ``Exception``: if something else goes wrong
 
 
 consume_token
@@ -70,18 +70,18 @@ consume_token
 Results
 ^^^^^^^
     
-      ``success``: True or False
-    
-      ``message``: on failure the error message is returned
+    ``success``: True or False
+
+    ``message``: on failure the error message is returned
 
 Errors
 ^^^^^^
     
-      ``TokenAPIError``: if a param is missing 
-    
-      ``TokenValueError``: if a param has an invalid value
+    ``TokenAPIError``: if a param is missing 
 
-      ``Exception``: if something else goes wrong
+    ``TokenValueError``: if a param has an invalid value
+    
+    ``Exception``: if something else goes wrong
 
 
 edit_token
@@ -96,18 +96,18 @@ edit_token
 Results
 ^^^^^^^
     
-      ``success``: True or False
-    
-      ``message``: on failure the error message is returned
+    ``success``: True or False
+
+    ``message``: on failure the error message is returned
 
 Errors
 ^^^^^^
     
-      ``TokenAPIError``: if a param is missing 
-    
-      ``TokenValueError``: if a param has an invalid value
+    ``TokenAPIError``: if a param is missing 
 
-      ``Exception``: if something else goes wrong
+    ``TokenValueError``: if a param has an invalid value
+    
+    ``Exception``: if something else goes wrong
 
 
 delete_token
@@ -122,18 +122,18 @@ delete_token
 Results
 ^^^^^^^
     
-      ``success``: True or False
-    
-      ``message``: on failure the error message is returned
+    ``success``: True or False
+
+    ``message``: on failure the error message is returned
 
 Errors
 ^^^^^^
     
-      ``TokenAPIError``: if a param is missing 
-    
-      ``TokenValueError``: if a param has an invalid value
+    ``TokenAPIError``: if a param is missing 
 
-      ``Exception``: if something else goes wrong
+    ``TokenValueError``: if a param has an invalid value
+    
+    ``Exception``: if something else goes wrong
 
 
 QR Code
