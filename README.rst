@@ -29,11 +29,11 @@ json views.
 
 ``token_add`` is the view for token generation.
 It expects a ``POST`` request.
- Params: ``valid_from``, ``valid_to``, ``usage_count``, ``lock_time``
+Params: ``valid_from``, ``valid_to``, ``usage_count``, ``lock_time``
 
 ``token_edit`` is a view for editing existing tokens.
 It expects a ``POST`` request.
- Params: ``valid_from``, ``valid_to``, ``usage_count``, ``lock_time``
+Params: ``valid_from``, ``valid_to``, ``usage_count``, ``lock_time``
 
 ``token_delete`` is a view for deleting existing tokens.
 It expects a ``POST`` request.
