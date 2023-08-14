@@ -27,6 +27,9 @@ API
 ``cone.tokens.browser.token`` provides a form for token generation as well as
 json views.
 
+Schema: URL/uuid/{request}
+ Example: www.example.com/b6af6ca1-c4a4-4e74-82da-de81de8f18ae/consume_token
+
 ``token_add`` is the view for token generation.
 It expects a ``POST`` request.
 Params: ``valid_from``, ``valid_to``, ``usage_count``, ``lock_time``
