@@ -38,6 +38,14 @@ class TokenTile(ProtectedContentTile):
         img_byte_arr = b64encode(img_byte_arr.getvalue()).decode('utf-8')
         qr_src = 'data:image/png;base64,' + img_byte_arr
         return qr_src
+    
+    @property
+    def lock_time_seconds(self):
+        return f"{self.model.attrs.get('lock_time')} sec"
+    
+    def active_toggle(self):
+        print('active_toggle')
+        self.model.attrs['active'] = not self.model.attrs['active']
 
 
 class TokenForm(Form):

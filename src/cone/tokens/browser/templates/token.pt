@@ -1,13 +1,30 @@
 <tal:block
   xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:ajax="http://namespaces.conestack.org/ajax"
   omit-tag="True">
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
   <ul class="list-group col-md-6">
     <li class="list-group-item active">
-      <strong>Tokens</strong>
+      <strong>Token</strong>
     </li>
+
+    <li class="list-group-item">
+      <button tal:condition="model.attrs['active']" type="button"
+              class="btn btn-success"
+              ajax:bind="click"
+              ajax:target="${context.active_toggle}">
+        <span class="glyphicon glyphicon-off"></span>
+        Active
+      </button>
+      <button tal:condition="not: model.attrs['active']" type="button"
+              class="btn btn-danger"
+              ajax:bind="click"
+              ajax:target="${context.active_toggle}">
+        <span class="glyphicon glyphicon-off"></span>
+        Inactive
+      </button>
     <li class="list-group-item">
       <strong>UUID:</strong>
       <span tal:content="model.attrs['uid']"></span>
@@ -30,7 +47,7 @@
     </li>
     <li class="list-group-item">
       <strong>Lock Time:</strong>
-      <span tal:content="model.attrs['lock_time']"></span>
+      <span tal:content="context.lock_time_seconds"></span>
     </li>
     <li class="list-group-item">
       <strong>Creator:</strong>

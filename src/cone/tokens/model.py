@@ -14,6 +14,7 @@ from pyramid.i18n import TranslationStringFactory
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
+from sqlalchemy import Boolean
 from sqlalchemy import String
 from zope.interface import implementer
 import uuid
@@ -31,6 +32,7 @@ class TokenRecord(SQLBase):
     valid_to = Column(DateTime)
     usage_count = Column(Integer)
     lock_time = Column(Integer)  # in seconds
+    active = Column(Boolean) # active or inactive
     creator = Column(String)
     created = Column(DateTime)
     modified = Column(DateTime)
