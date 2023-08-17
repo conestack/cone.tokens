@@ -15,7 +15,7 @@
               class="btn btn-success"
               ajax:bind="click"
               ajax:target="${context.nodeurl}"
-              ajax:action="toggle_Action">
+              ajax:action="active_toggle_action">
         <span class="glyphicon glyphicon-off"></span>
         Active
       </button>
@@ -23,7 +23,7 @@
               class="btn btn-danger"
               ajax:bind="click"
               ajax:target="${context.nodeurl}"
-              ajax:action="toggle_Action">
+              ajax:action="active_toggle_action">
         <span class="glyphicon glyphicon-off"></span>
         Inactive
       </button>

@@ -45,14 +45,11 @@ class TokenTile(ProtectedContentTile):
     @property
     def lock_time_seconds(self):
         return f"{self.model.attrs.get('lock_time')} sec"
-    
-    def active_toggle(self):
-        print('active_toggle')
-        self.model.attrs['active'] = not self.model.attrs['active']
 
 
-@tile(name='toggle_Action', permission='view')
-class ExampleAction(Tile):
+
+@tile(name='active_toggle_action', permission='view')
+class ActiveToggleAction(Tile):
 
     def render(self):
         event = AjaxEvent(
