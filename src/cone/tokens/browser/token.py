@@ -3,19 +3,22 @@ from cone.app.browser.ajax import AjaxEvent
 from cone.app.browser.ajax import ajax_continue
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
+from cone.app.browser.contents import ContentsTile
+from cone.app.browser.copysupport import extract_copysupport_cookie
 from cone.app.browser.form import Form
 from cone.app.browser.layout import ProtectedContentTile
 from cone.app.browser.utils import make_url
 from cone.app.browser.utils import request_property
+from cone.app.interfaces import ICopySupport
+from cone.app.interfaces import IWorkflowState
 from cone.app.utils import add_creation_metadata
 from cone.app.utils import update_creation_metadata
 from cone.tile import Tile
 from cone.tile import tile
 from cone.tile import tile
 from cone.tokens.exceptions import TokenValueError
-from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenContainer
-from cone.app.browser.contents import ContentsTile
+from cone.tokens.model import TokenNode
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
@@ -24,7 +27,6 @@ from yafowil.persistence import node_attribute_writer
 import io
 import qrcode
 import uuid
-
 _ = TranslationStringFactory('cone.tokens')
 
 
@@ -48,9 +50,6 @@ class TokenTile(ProtectedContentTile):
     def lock_time_seconds(self):
         return f"{self.model.attrs.get('lock_time')} sec"
 
-from cone.app.browser.copysupport import extract_copysupport_cookie
-from cone.app.interfaces import ICopySupport
-from cone.app.interfaces import IWorkflowState
 
 @tile(
     name='contents',
