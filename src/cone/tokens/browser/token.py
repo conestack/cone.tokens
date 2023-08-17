@@ -1,4 +1,6 @@
 from base64 import b64encode
+from cone.app.browser.ajax import AjaxEvent
+from cone.app.browser.ajax import ajax_continue
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
 from cone.app.browser.form import Form
@@ -7,6 +9,8 @@ from cone.app.browser.utils import make_url
 from cone.app.browser.utils import request_property
 from cone.app.utils import add_creation_metadata
 from cone.app.utils import update_creation_metadata
+from cone.tile import Tile
+from cone.tile import tile
 from cone.tile import tile
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenNode
@@ -18,7 +22,6 @@ from yafowil.persistence import node_attribute_writer
 import io
 import qrcode
 import uuid
-
 
 _ = TranslationStringFactory('cone.tokens')
 
@@ -46,6 +49,20 @@ class TokenTile(ProtectedContentTile):
     def active_toggle(self):
         print('active_toggle')
         self.model.attrs['active'] = not self.model.attrs['active']
+
+
+@tile(name='toggle_Action', permission='view')
+class ExampleAction(Tile):
+
+    def render(self):
+        event = AjaxEvent(
+            target=make_url(self.request, node=self.model),
+            name='contextchanged',
+            selector='#layout'
+        )
+        self.model.attrs['active'] = not self.model.attrs['active']
+        ajax_continue(self.request, [event])
+        return u''
 
 
 class TokenForm(Form):

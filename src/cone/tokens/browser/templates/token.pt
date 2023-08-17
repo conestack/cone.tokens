@@ -14,14 +14,16 @@
       <button tal:condition="model.attrs['active']" type="button"
               class="btn btn-success"
               ajax:bind="click"
-              ajax:target="${context.active_toggle}">
+              ajax:target="${context.nodeurl}"
+              ajax:action="toggle_Action">
         <span class="glyphicon glyphicon-off"></span>
         Active
       </button>
       <button tal:condition="not: model.attrs['active']" type="button"
               class="btn btn-danger"
               ajax:bind="click"
-              ajax:target="${context.active_toggle}">
+              ajax:target="${context.nodeurl}"
+              ajax:action="toggle_Action">
         <span class="glyphicon glyphicon-off"></span>
         Inactive
       </button>
