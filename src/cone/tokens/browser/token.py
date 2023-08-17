@@ -14,6 +14,8 @@ from cone.tile import tile
 from cone.tile import tile
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenNode
+from cone.tokens.model import TokenContainer
+from cone.app.browser.contents import ContentsTile
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
@@ -45,6 +47,41 @@ class TokenTile(ProtectedContentTile):
     @property
     def lock_time_seconds(self):
         return f"{self.model.attrs.get('lock_time')} sec"
+
+from cone.app.browser.copysupport import extract_copysupport_cookie
+from cone.app.interfaces import ICopySupport
+from cone.app.interfaces import IWorkflowState
+
+@tile(
+    name='contents',
+    path='templates/tokens.pt',
+    interface=TokenContainer,
+    permission='view')
+class TokensTile(ContentsTile):
+    
+    def sorted_rows(self, start, end, sort, order):
+        children = self.sorted_children(sort, order)
+        rows = list()
+        cut_urls = extract_copysupport_cookie(self.request, 'cut')
+        for child in children[start:end]:
+            row_data = self.row_data(child)
+            target = make_url(self.request, node=child)
+            if ICopySupport.providedBy(child):
+                row_data.selectable = True
+                row_data.target = target
+                row_data.css = 'copysupportitem'
+                if target in cut_urls:
+                    row_data.css += ' copysupport_cut'
+            if IWorkflowState.providedBy(child):
+                row_data.css += ' state-%s' % child.state
+            if hasattr(child, 'node_info_name') and child.node_info_name:
+                row_data.css += ' node-type-%s' % child.node_info_name
+            if child.attrs.get('active'):
+                row_data.css += ' active-token'
+            else:
+                row_data.css += ' inactive-token'
+            rows.append(row_data)
+        return rows
 
 
 
