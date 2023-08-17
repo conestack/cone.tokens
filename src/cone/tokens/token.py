@@ -5,6 +5,7 @@ from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
+from cone.tokens.exceptions import InvalidToken
 from cone.tokens.model import TokenRecord
 from datetime import datetime 
 from datetime import timedelta
@@ -37,7 +38,7 @@ class Tokens(object):
         session = self.session
         existing = self._get_token(token_uid)
         if not existing.active:
-            raise TokenNotExists(token_uid)
+            raise InvalidToken(token_uid)
         if existing.usage_count == 0:
             raise TokenUsageCountExceeded(token_uid)
         current_time = datetime.now()
