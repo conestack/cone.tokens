@@ -11,11 +11,11 @@
         <strong>Token</strong>
       </li>
       <tr>
-        <td>
+        <td class="token-td">
           <strong>UUID:</strong>
           <span tal:content="model.attrs['uid']"></span>
         </td>
-        <td>
+        <td class="token-td">
           <button tal:condition="context.is_active" type="button"
                   class="btn btn-success" style="pointer-events: none;">
             <span class="glyphicon glyphicon-off"></span>
@@ -29,18 +29,17 @@
         </td>
       </tr>
       <tr>
-        <td >
-          <li class="" style="display: block; padding: 10px 15px;">
+        <td class="token-td">
+          <li class="token-li">
             <strong>Valid From:</strong>
             <span tal:content="model.attrs['valid_from']"></span>
           </li>
-          <li class="" style="display: block; padding: 10px 15px;">
+          <li class="token-li">
             <strong>Valid to:</strong>
             <span tal:content="model.attrs['valid_to']"></span>
           </li>
         </td>
-        <td>
-          <div>
+        <td class="token-td">
             <button class="btn btn-primary"
               ajax:bind="click"
               ajax:target="${context.nodeurl}"
@@ -59,15 +58,14 @@
               ajax:action="add_week">
               Add Week
             </button>
-          </div>
         </td>
       </tr>
       <tr>
-        <td>
+        <td class="token-td">
           <strong>Usage Count:</strong>
           <span tal:content="model.attrs['usage_count']"></span>
         </td>
-        <td>
+        <td class="token-td">
           <div>
             <button class="btn btn-primary"           
               ajax:bind="click"
@@ -133,59 +131,3 @@
       </tr>
     </table>
   </div>
-
-
-<!--
-
-
-  <ul class="list-group col-md-6">
-    <li class="list-group-item active">
-      <strong>Token</strong>
-    </li>
-
-    <li class="list-group-item">
-      <strong>UUID:</strong>
-      <span tal:content="model.attrs['uid']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Valid From:</strong>
-      <span tal:content="model.attrs['valid_from']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Valid to:</strong>
-      <span tal:content="model.attrs['valid_to']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Usage Count:</strong>
-      <span tal:content="model.attrs['usage_count']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Lock Time:</strong>
-      <span tal:content="context.lock_time_seconds"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Creator:</strong>
-      <span tal:content="model.attrs['creator']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Created:</strong>
-      <span tal:content="model.attrs['created']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Modified:</strong>
-      <span tal:content="model.attrs['modified']"></span>
-    </li>
-    <li class="list-group-item" tal:condition="context.stream_qrcode_token">
-      <strong>QR CODE</strong>:
-      <div class="stream_image">
-        <object data="${context.stream_qrcode_token}"
-                type="image/png"
-                height="512px"
-                width="512px" />
-      </div>
-    </li>
-
-  </ul>
-
-</tal:block>
--->

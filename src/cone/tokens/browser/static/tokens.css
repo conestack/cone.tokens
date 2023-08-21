@@ -1,18 +1,7 @@
-td.active-token{
-    background-color: #e6ffeb;
+td.token-td{
+    vertical-align: middle !important;
 }
-td.active-token:hover{
-    background-color: #ccffcc;
-}
-td.active-token:active{
-    background-color: #b3ffb3;
-}
-td.inactive-token{
-    background-color: #ffe6e6;
-}
-td.inactive-token:hover{
-    background-color: #ffcccc;
-}
-td.inactive-token:active{
-    background-color: #ffb3b3;
+li.token-li{
+    display: block; 
+    padding: 10px 15px;
 }
