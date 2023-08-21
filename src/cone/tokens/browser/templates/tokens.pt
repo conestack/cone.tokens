@@ -3,7 +3,6 @@
            xmlns:i18n="http://xml.zope.org/namespaces/i18n"
            i18n:domain="cone.app"
            omit-tag="True">
-  TEST
   <div id="${context.table_id}"
        class="${context.table_id}batchsensitiv
               ${context.table_id}sortingheadsensitiv

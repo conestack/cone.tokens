@@ -1,4 +1,5 @@
 from base64 import b64encode
+from datetime import datetime, timedelta
 from cone.app.browser.ajax import AjaxEvent
 from cone.app.browser.ajax import ajax_continue
 from cone.app.browser.authoring import ContentAddForm
@@ -49,6 +50,16 @@ class TokenTile(ProtectedContentTile):
     @property
     def lock_time_seconds(self):
         return f"{self.model.attrs.get('lock_time')} sec"
+    
+    @property
+    def is_active(self):
+        if self.model.attrs.get('usage_count') == 0:
+            return False
+        if datetime.now() > self.model.attrs.get('valid_to'):
+            return False
+        if datetime.now() < self.model.attrs.get('valid_from'):
+            return False
+        return True
 
 
 @tile(
@@ -75,10 +86,6 @@ class TokensTile(ContentsTile):
                 row_data.css += ' state-%s' % child.state
             if hasattr(child, 'node_info_name') and child.node_info_name:
                 row_data.css += ' node-type-%s' % child.node_info_name
-            if child.attrs.get('active'):
-                row_data.css += ' active-token'
-            else:
-                row_data.css += ' inactive-token'
             rows.append(row_data)
         return rows
 
@@ -93,10 +100,111 @@ class ActiveToggleAction(Tile):
             name='contextchanged',
             selector='#layout'
         )
-        self.model.attrs['active'] = not self.model.attrs['active']
+        #XXX: toggle active state
         ajax_continue(self.request, [event])
         return u''
 
+@tile(name='add_vormittag', permission='view')
+class AddVormittag(Tile):
+
+    def render(self):
+        event = AjaxEvent(
+            target=make_url(self.request, node=self.model),
+            name='contextchanged',
+            selector='#layout'
+        )
+        current_time = datetime.now()
+        if current_time.hour < 12:
+            self.model.attrs['valid_from'] = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)
+            self.model.attrs['valid_to'] = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0)
+        else: #tomorrow
+            self.model.attrs['valid_from'] = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0) + timedelta(days=1)
+            self.model.attrs['valid_to'] = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        ajax_continue(self.request, [event])
+        return u''
+    
+
+@tile(name='add_day', permission='view')
+class AddDay(Tile):
+
+    def render(self):
+        event = AjaxEvent(
+            target=make_url(self.request, node=self.model),
+            name='contextchanged',
+            selector='#layout'
+        )
+        self.model.attrs['valid_from'] = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        self.model.attrs['valid_to'] = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        ajax_continue(self.request, [event])
+        return u''
+
+
+@tile(name='add_week', permission='view')
+class AddWeek(Tile):
+
+    def render(self):
+        event = AjaxEvent(
+            target=make_url(self.request, node=self.model),
+            name='contextchanged',
+            selector='#layout'
+        )
+        current_time = datetime.now()
+        self.model.attrs['valid_from'] = current_time.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=current_time.weekday())
+        self.model.attrs['valid_to'] = current_time.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=7-current_time.weekday())
+        ajax_continue(self.request, [event])
+        return u''
+    
+@tile(name='add_one_use',permission='view')
+class AddOneUse(Tile):
+
+    def render(self):
+        event = AjaxEvent(
+            target=make_url(self.request, node=self.model),
+            name='contextchanged',
+            selector='#layout'
+        )
+        self.model.attrs['usage_count'] += 1
+        ajax_continue(self.request, [event])
+        return u''
+    
+@tile(name='add_ten_use',permission='view')
+class AddTenUse(Tile):
+
+    def render(self):
+        event = AjaxEvent(
+            target=make_url(self.request, node=self.model),
+            name='contextchanged',
+            selector='#layout'
+        )
+        self.model.attrs['usage_count'] += 10
+        ajax_continue(self.request, [event])
+        return u''
+
+@tile(name='add_hundret_use',permission='view')
+class AddHundretUse(Tile):
+        
+    def render(self):
+        event = AjaxEvent(
+            target=make_url(self.request, node=self.model),
+            name='contextchanged',
+            selector='#layout'
+        )
+        self.model.attrs['usage_count'] += 100
+        ajax_continue(self.request, [event])
+        return u''
+    
+@tile(name='add_unlimited_use',permission='view')
+class AddUnlimitedUse(Tile):
+
+    def render(self):
+        event = AjaxEvent(
+            target=make_url(self.request, node=self.model),
+            name='contextchanged',
+            selector='#layout'
+        )
+        self.model.attrs['usage_count'] = -1
+        ajax_continue(self.request, [event])
+        return u''
 
 class TokenForm(Form):
     form_name = 'tokenform'

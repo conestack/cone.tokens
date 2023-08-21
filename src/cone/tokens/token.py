@@ -37,8 +37,6 @@ class Tokens(object):
     def consume(self, token_uid):
         session = self.session
         existing = self._get_token(token_uid)
-        if not existing.active:
-            raise InvalidToken(token_uid)
         if existing.usage_count == 0:
             raise TokenUsageCountExceeded(token_uid)
         current_time = datetime.now()

@@ -5,35 +5,147 @@
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
+  <div class="panel panel-default">
+    <table class="table table-striped table-condensed">
+      <li class="list-group-item active">
+        <strong>Token</strong>
+      </li>
+      <tr>
+        <td>
+          <strong>UUID:</strong>
+          <span tal:content="model.attrs['uid']"></span>
+        </td>
+        <td>
+          <button tal:condition="context.is_active" type="button"
+                  class="btn btn-success" style="pointer-events: none;">
+            <span class="glyphicon glyphicon-off"></span>
+            Active
+          </button>
+          <button tal:condition="not: context.is_active" type="button"
+                  class="btn btn-danger" style="pointer-events: none;">
+            <span class="glyphicon glyphicon-off"></span>
+            Inactive
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td >
+          <li class="" style="display: block; padding: 10px 15px;">
+            <strong>Valid From:</strong>
+            <span tal:content="model.attrs['valid_from']"></span>
+          </li>
+          <li class="" style="display: block; padding: 10px 15px;">
+            <strong>Valid to:</strong>
+            <span tal:content="model.attrs['valid_to']"></span>
+          </li>
+        </td>
+        <td>
+          <div>
+            <button class="btn btn-primary"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}"
+              ajax:action="add_vormittag">
+              Add Vormittag
+            </button>
+            <button class="btn btn-primary"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}"
+              ajax:action="add_day">
+              Add Day
+            </button>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}"
+              ajax:action="add_week">
+              Add Week
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Usage Count:</strong>
+          <span tal:content="model.attrs['usage_count']"></span>
+        </td>
+        <td>
+          <div>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}"
+              ajax:action="add_unlimited_use">              
+              Unlimited
+            </button>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}"
+              ajax:action="add_one_use">              
+              +1
+            </button>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}"
+              ajax:action="add_ten_use">              
+              +10
+            </button>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}"
+              ajax:action="add_hundret_use">             
+              +100
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Lock Time:</strong>
+          <span tal:content="context.lock_time_seconds"></span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Creator:</strong>
+          <span tal:content="model.attrs['creator']"></span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Created:</strong>
+          <span tal:content="model.attrs['created']"></span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Modified:</strong>
+          <span tal:content="model.attrs['modified']"></span>
+        </td>
+      </tr>
+      <tr>
+        <td tal:condition="context.stream_qrcode_token">
+          <strong>QR CODE</strong>:
+          <div class="stream_image">
+            <object data="${context.stream_qrcode_token}"
+                    type="image/png"
+                    height="512px"
+                    width="512px" />
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+
+<!--
+
+
   <ul class="list-group col-md-6">
     <li class="list-group-item active">
       <strong>Token</strong>
     </li>
 
     <li class="list-group-item">
-      <button tal:condition="model.attrs['active']" type="button"
-              class="btn btn-success"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="active_toggle_action">
-        <span class="glyphicon glyphicon-off"></span>
-        Active
-      </button>
-      <button tal:condition="not: model.attrs['active']" type="button"
-              class="btn btn-danger"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="active_toggle_action">
-        <span class="glyphicon glyphicon-off"></span>
-        Inactive
-      </button>
-    <li class="list-group-item">
       <strong>UUID:</strong>
       <span tal:content="model.attrs['uid']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Description:</strong>
-      <span tal:content="model.attrs['last_used']"></span>
     </li>
     <li class="list-group-item">
       <strong>Valid From:</strong>
@@ -76,3 +188,4 @@
   </ul>
 
 </tal:block>
+-->

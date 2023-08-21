@@ -32,7 +32,6 @@ class TokenRecord(SQLBase):
     valid_to = Column(DateTime)
     usage_count = Column(Integer)
     lock_time = Column(Integer)  # in seconds
-    active = Column(Boolean) # active or inactive
     creator = Column(String)
     created = Column(DateTime)
     modified = Column(DateTime)
