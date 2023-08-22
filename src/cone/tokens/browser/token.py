@@ -1,5 +1,6 @@
 from base64 import b64encode
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 from cone.app.browser.ajax import AjaxEvent
 from cone.app.browser.ajax import ajax_continue
 from cone.app.browser.authoring import ContentAddForm
@@ -61,7 +62,6 @@ class TokenTile(ProtectedContentTile):
             return False
         return True
 
-
 @tile(
     name='contents',
     path='templates/tokens.pt',
@@ -88,8 +88,6 @@ class TokensTile(ContentsTile):
                 row_data.css += ' node-type-%s' % child.node_info_name
             rows.append(row_data)
         return rows
-
-
 
 @tile(name='active_toggle_action', permission='view')
 class ActiveToggleAction(Tile):
