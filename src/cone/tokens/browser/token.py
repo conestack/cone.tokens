@@ -54,6 +54,7 @@ class TokenTile(ProtectedContentTile):
     
     @property
     def is_active(self):
+        #check if token is active / valid,  doesnt check locktime
         if self.model.attrs.get('usage_count') == 0:
             return False
         if datetime.now() > self.model.attrs.get('valid_to'):
@@ -69,6 +70,7 @@ class TokenTile(ProtectedContentTile):
     permission='view')
 class TokensTile(ContentsTile):
     
+    # if needed, can add css classes based on conditions here
     def sorted_rows(self, start, end, sort, order):
         children = self.sorted_children(sort, order)
         rows = list()
@@ -89,22 +91,10 @@ class TokensTile(ContentsTile):
             rows.append(row_data)
         return rows
 
-@tile(name='active_toggle_action', permission='view')
-class ActiveToggleAction(Tile):
-
-    def render(self):
-        event = AjaxEvent(
-            target=make_url(self.request, node=self.model),
-            name='contextchanged',
-            selector='#layout'
-        )
-        #XXX: toggle active state
-        ajax_continue(self.request, [event])
-        return u''
-
 @tile(name='add_duration', permission='view')
 class AddDuration(Tile):
 
+    # action event to reload the page and update the tokens valid_to and valid_from
     def render(self):
         event = AjaxEvent(
             target=make_url(self.request, node=self.model),
@@ -171,6 +161,7 @@ class AddDuration(Tile):
 @tile(name='add_use',permission='view')
 class AddUse(Tile):
 
+    # action event to reload the page and update the tokens usage_count
     def render(self):
         event = AjaxEvent(
             target=make_url(self.request, node=self.model),
