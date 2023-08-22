@@ -42,20 +42,20 @@
         <td class="token-td">
             <button class="btn btn-primary"
               ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="add_vormittag">
-              Add Vormittag
+              ajax:target="${context.nodeurl}?duration=morning"
+              ajax:action="add_duration">
+              Add Morning
             </button>
             <button class="btn btn-primary"
               ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="add_day">
+              ajax:target="${context.nodeurl}?duration=day"
+              ajax:action="add_duration">
               Add Day
             </button>
             <button class="btn btn-primary"           
               ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="add_week">
+              ajax:target="${context.nodeurl}?duration=week"
+              ajax:action="add_duration">
               Add Week
             </button>
         </td>
@@ -69,26 +69,26 @@
           <div>
             <button class="btn btn-primary"           
               ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="add_unlimited_use">              
+              ajax:target="${context.nodeurl}?amount=-1"
+              ajax:action="add_use">              
               Unlimited
             </button>
             <button class="btn btn-primary"           
               ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="add_one_use">              
+              ajax:target="${context.nodeurl}?amount=1"
+              ajax:action="add_use">              
               +1
             </button>
             <button class="btn btn-primary"           
               ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="add_ten_use">              
+              ajax:target="${context.nodeurl}?amount=10"
+              ajax:action="add_use">              
               +10
             </button>
             <button class="btn btn-primary"           
               ajax:bind="click"
-              ajax:target="${context.nodeurl}"
-              ajax:action="add_hundret_use">             
+              ajax:target="${context.nodeurl}?amount=100"
+              ajax:action="add_use">             
               +100
             </button>
           </div>

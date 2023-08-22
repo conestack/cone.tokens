@@ -104,8 +104,8 @@ class ActiveToggleAction(Tile):
         ajax_continue(self.request, [event])
         return u''
 
-@tile(name='add_vormittag', permission='view')
-class AddVormittag(Tile):
+@tile(name='add_duration', permission='view')
+class AddDuration(Tile):
 
     def render(self):
         event = AjaxEvent(
@@ -114,33 +114,64 @@ class AddVormittag(Tile):
             selector='#layout'
         )
         current_time = datetime.now()
-        if current_time.hour < 12:
-            self.model.attrs['valid_from'] = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)
-            self.model.attrs['valid_to'] = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0)
-        else: #tomorrow
-            self.model.attrs['valid_from'] = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0) + timedelta(days=1)
-            self.model.attrs['valid_to'] = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        if self.request.params.get('duration') == 'morning':
+            if current_time.hour < 12:
+                self.model.attrs['valid_from'] = datetime.now().replace(
+                    hour=6,
+                    minute=0,
+                    second=0,
+                    microsecond=0
+                )
+                self.model.attrs['valid_to'] = datetime.now().replace(
+                    hour=12,
+                    minute=0,
+                    second=0,
+                    microsecond=0
+                )
+            else: #tomorrow
+                self.model.attrs['valid_from'] = datetime.now().replace(
+                    hour=6,
+                    minute=0,
+                    second=0,
+                    microsecond=0
+                ) + timedelta(days=1)
+                self.model.attrs['valid_to'] = datetime.now().replace(
+                    hour=12,
+                    minute=0,
+                    second=0,
+                    microsecond=0
+                ) + timedelta(days=1)
+        if self.request.params.get('duration') == 'day':
+            self.model.attrs['valid_from'] = datetime.now().replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0
+            )
+            self.model.attrs['valid_to'] = datetime.now().replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0
+            ) + timedelta(days=1)
+        if self.request.params.get('duration') == 'week':
+            self.model.attrs['valid_from'] = current_time.replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0
+            ) - timedelta(days=current_time.weekday())
+            self.model.attrs['valid_to'] = current_time.replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0
+            ) + timedelta(days=7-current_time.weekday())
         ajax_continue(self.request, [event])
         return u''
     
-
-@tile(name='add_day', permission='view')
-class AddDay(Tile):
-
-    def render(self):
-        event = AjaxEvent(
-            target=make_url(self.request, node=self.model),
-            name='contextchanged',
-            selector='#layout'
-        )
-        self.model.attrs['valid_from'] = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        self.model.attrs['valid_to'] = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-        ajax_continue(self.request, [event])
-        return u''
-
-
-@tile(name='add_week', permission='view')
-class AddWeek(Tile):
+@tile(name='add_use',permission='view')
+class AddUse(Tile):
 
     def render(self):
         event = AjaxEvent(
@@ -148,61 +179,10 @@ class AddWeek(Tile):
             name='contextchanged',
             selector='#layout'
         )
-        current_time = datetime.now()
-        self.model.attrs['valid_from'] = current_time.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=current_time.weekday())
-        self.model.attrs['valid_to'] = current_time.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=7-current_time.weekday())
-        ajax_continue(self.request, [event])
-        return u''
-    
-@tile(name='add_one_use',permission='view')
-class AddOneUse(Tile):
-
-    def render(self):
-        event = AjaxEvent(
-            target=make_url(self.request, node=self.model),
-            name='contextchanged',
-            selector='#layout'
-        )
-        self.model.attrs['usage_count'] += 1
-        ajax_continue(self.request, [event])
-        return u''
-    
-@tile(name='add_ten_use',permission='view')
-class AddTenUse(Tile):
-
-    def render(self):
-        event = AjaxEvent(
-            target=make_url(self.request, node=self.model),
-            name='contextchanged',
-            selector='#layout'
-        )
-        self.model.attrs['usage_count'] += 10
-        ajax_continue(self.request, [event])
-        return u''
-
-@tile(name='add_hundret_use',permission='view')
-class AddHundretUse(Tile):
-        
-    def render(self):
-        event = AjaxEvent(
-            target=make_url(self.request, node=self.model),
-            name='contextchanged',
-            selector='#layout'
-        )
-        self.model.attrs['usage_count'] += 100
-        ajax_continue(self.request, [event])
-        return u''
-    
-@tile(name='add_unlimited_use',permission='view')
-class AddUnlimitedUse(Tile):
-
-    def render(self):
-        event = AjaxEvent(
-            target=make_url(self.request, node=self.model),
-            name='contextchanged',
-            selector='#layout'
-        )
-        self.model.attrs['usage_count'] = -1
+        if self.request.params.get('amount') == '-1':
+            self.model.attrs['usage_count'] = -1
+        else:
+            self.model.attrs['usage_count'] += int(self.request.params.get('amount'))
         ajax_continue(self.request, [event])
         return u''
 
