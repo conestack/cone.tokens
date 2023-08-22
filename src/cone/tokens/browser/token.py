@@ -116,39 +116,39 @@ class AddDuration(Tile):
         current_time = datetime.now()
         if self.request.params.get('duration') == 'morning':
             if current_time.hour < 12:
-                self.model.attrs['valid_from'] = datetime.now().replace(
+                self.model.attrs['valid_from'] = current_time.replace(
                     hour=6,
                     minute=0,
                     second=0,
                     microsecond=0
                 )
-                self.model.attrs['valid_to'] = datetime.now().replace(
+                self.model.attrs['valid_to'] = current_time.replace(
                     hour=12,
                     minute=0,
                     second=0,
                     microsecond=0
                 )
             else: #tomorrow
-                self.model.attrs['valid_from'] = datetime.now().replace(
+                self.model.attrs['valid_from'] = current_time.replace(
                     hour=6,
                     minute=0,
                     second=0,
                     microsecond=0
                 ) + timedelta(days=1)
-                self.model.attrs['valid_to'] = datetime.now().replace(
+                self.model.attrs['valid_to'] = current_time.replace(
                     hour=12,
                     minute=0,
                     second=0,
                     microsecond=0
                 ) + timedelta(days=1)
         if self.request.params.get('duration') == 'day':
-            self.model.attrs['valid_from'] = datetime.now().replace(
+            self.model.attrs['valid_from'] = current_time.replace(
                 hour=0,
                 minute=0,
                 second=0,
                 microsecond=0
             )
-            self.model.attrs['valid_to'] = datetime.now().replace(
+            self.model.attrs['valid_to'] = current_time.replace(
                 hour=0,
                 minute=0,
                 second=0,
