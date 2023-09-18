@@ -90,6 +90,12 @@ class TestTokens(NodeTestCase):
             tokens.metadata.description,
             'token_container_description'
         )
+        # check container properties
+        self.assertEqual(tokens.properties.default_content_tile,'listing')
+        self.assertEqual(tokens.properties.in_navtree, True)
+        self.assertEqual(tokens.properties.action_up, True)
+        self.assertEqual(tokens.properties.action_sharing, True)
+        
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_token_consume(self):

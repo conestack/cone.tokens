@@ -27,17 +27,113 @@ API
 ``cone.tokens.browser.token`` provides a form for token generation as well as
 json views.
 
-``token_add`` is the view for token generation.
-It expects a ``POST`` request.
+Schema: URL/uuid/{request}
+ Example: www.example.com/b6af6ca1-c4a4-4e74-82da-de81de8f18ae/consume_token
 
-``token_edit`` is a view for editing existing tokens.
-It expects a ``POST`` request.
+add_token
+---------
 
-``token_delete`` is a view for deleting existing tokens.
-It expects a ``POST`` request.
+  ``add_token`` is for generating a new token.
 
-``token_consume`` is a view for consuming exisitng tokens and validating them.
-It expects a ``GET`` request.
+  It expects a ``POST`` request.
+
+  Params: ``valid_from``, ``valid_to``, ``usage_count``, ``lock_time``
+
+Results
+^^^^^^^
+    
+    ``success``: True or False
+
+    ``token_uid``: on success the token uid is returned
+
+    ``message``: on failure the error message is returned
+
+Errors
+^^^^^^
+    
+    ``TokenAPIError``: if a param is missing 
+
+    ``TokenValueError``: if a param has an invalid value
+    
+    ``Exception``: if something else goes wrong
+
+
+consume_token
+-------------
+
+  ``consume_token`` is for consuming a token.
+
+  It expects a ``GET`` request.
+
+  Params: ``token_uid``
+
+Results
+^^^^^^^
+    
+    ``success``: True or False
+
+    ``message``: on failure the error message is returned
+
+Errors
+^^^^^^
+    
+    ``TokenAPIError``: if a param is missing 
+
+    ``TokenValueError``: if a param has an invalid value
+    
+    ``Exception``: if something else goes wrong
+
+
+edit_token
+----------
+
+  ``edit_token`` is for editing a token.
+
+  It expects a ``POST`` request.
+
+  Params: ``token_uid``, ``valid_from``, ``valid_to``, ``usage_count``, ``lock_time``
+
+Results
+^^^^^^^
+    
+    ``success``: True or False
+
+    ``message``: on failure the error message is returned
+
+Errors
+^^^^^^
+    
+    ``TokenAPIError``: if a param is missing 
+
+    ``TokenValueError``: if a param has an invalid value
+    
+    ``Exception``: if something else goes wrong
+
+
+delete_token
+------------
+
+  ``delete_token`` is for deleting a token.
+
+  It expects a ``POST`` request.
+
+  Params: ``token_uid``
+
+Results
+^^^^^^^
+    
+    ``success``: True or False
+
+    ``message``: on failure the error message is returned
+
+Errors
+^^^^^^
+    
+    ``TokenAPIError``: if a param is missing 
+
+    ``TokenValueError``: if a param has an invalid value
+    
+    ``Exception``: if something else goes wrong
 
 
 QR Code

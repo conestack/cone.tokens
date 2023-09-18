@@ -1,59 +1,133 @@
 <tal:block
   xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:ajax="http://namespaces.conestack.org/ajax"
   omit-tag="True">
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
-  <ul class="list-group col-md-6">
-    <li class="list-group-item active">
-      <strong>Tokens</strong>
-    </li>
-    <li class="list-group-item">
-      <strong>UUID:</strong>
-      <span tal:content="model.attrs['uid']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Description:</strong>
-      <span tal:content="model.attrs['last_used']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Valid From:</strong>
-      <span tal:content="model.attrs['valid_from']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Valid to:</strong>
-      <span tal:content="model.attrs['valid_to']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Usage Count:</strong>
-      <span tal:content="model.attrs['usage_count']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Lock Time:</strong>
-      <span tal:content="model.attrs['lock_time']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Creator:</strong>
-      <span tal:content="model.attrs['creator']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Created:</strong>
-      <span tal:content="model.attrs['created']"></span>
-    </li>
-    <li class="list-group-item">
-      <strong>Modified:</strong>
-      <span tal:content="model.attrs['modified']"></span>
-    </li>
-    <li class="list-group-item" tal:condition="context.stream_qrcode_token">
-      <strong>QR CODE</strong>:
-      <div class="stream_image">
-        <object data="${context.stream_qrcode_token}"
-                type="image/png"
-                height="512px"
-                width="512px" />
-      </div>
-    </li>
-
-  </ul>
-
-</tal:block>
+  <div class="panel panel-default">
+    <table class="table table-striped table-condensed">
+      <li class="list-group-item active">
+        <strong>Token</strong>
+      </li>
+      <tr>
+        <td class="token-td">
+          <strong>UUID:</strong>
+          <span tal:content="model.attrs['uid']"></span>
+        </td>
+        <td class="token-td">
+          <button tal:condition="context.is_active" type="button"
+                  class="btn btn-success" style="pointer-events: none;">
+            <span class="glyphicon glyphicon-off"></span>
+            Active
+          </button>
+          <button tal:condition="not: context.is_active" type="button"
+                  class="btn btn-danger" style="pointer-events: none;">
+            <span class="glyphicon glyphicon-off"></span>
+            Inactive
+          </button>
+        </td>
+      </tr>
+      <tr>
+        <td class="token-td">
+          <li class="token-li">
+            <strong>Valid From:</strong>
+            <span tal:content="model.attrs['valid_from']"></span>
+          </li>
+          <li class="token-li">
+            <strong>Valid to:</strong>
+            <span tal:content="model.attrs['valid_to']"></span>
+          </li>
+        </td>
+        <td class="token-td">
+            <button class="btn btn-primary"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=morning"
+              ajax:action="add_duration">
+              Add Morning
+            </button>
+            <button class="btn btn-primary"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=day"
+              ajax:action="add_duration">
+              Add Day
+            </button>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=week"
+              ajax:action="add_duration">
+              Add Week
+            </button>
+        </td>
+      </tr>
+      <tr>
+        <td class="token-td">
+          <strong>Usage Count:</strong>
+          <span tal:content="model.attrs['usage_count']"></span>
+        </td>
+        <td class="token-td">
+          <div>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=-1"
+              ajax:action="add_use">              
+              Unlimited
+            </button>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=1"
+              ajax:action="add_use">              
+              +1
+            </button>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=10"
+              ajax:action="add_use">              
+              +10
+            </button>
+            <button class="btn btn-primary"           
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=100"
+              ajax:action="add_use">             
+              +100
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Lock Time:</strong>
+          <span tal:content="context.lock_time_seconds"></span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Creator:</strong>
+          <span tal:content="model.attrs['creator']"></span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Created:</strong>
+          <span tal:content="model.attrs['created']"></span>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Modified:</strong>
+          <span tal:content="model.attrs['modified']"></span>
+        </td>
+      </tr>
+      <tr>
+        <td tal:condition="context.stream_qrcode_token">
+          <strong>QR CODE</strong>:
+          <div class="stream_image">
+            <object data="${context.stream_qrcode_token}"
+                    type="image/png"
+                    height="512px"
+                    width="512px" />
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>

@@ -5,6 +5,7 @@ from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
+from cone.tokens.exceptions import InvalidToken
 from cone.tokens.model import TokenRecord
 from datetime import datetime 
 from datetime import timedelta

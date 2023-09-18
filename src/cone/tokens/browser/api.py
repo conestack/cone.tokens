@@ -19,7 +19,7 @@ def get_datetime(request, name, now_when_missing=False):
     except KeyError:
         if now_when_missing:
             return datetime.datetime.now()
-        raise TokenAPIError(f'`{name}` missing on request')
+        raise KeyError(f'`{name}` missing on request')
     except ValueError:
         raise TokenAPIError('Invalid datetime format')
 
@@ -28,7 +28,7 @@ def get_int(request, name):
     try:
         return int(request.params[name])
     except KeyError:
-        raise TokenAPIError(f'`{name}` missing on request')
+        raise KeyError(f'`{name}` missing on request')
     except ValueError:
         raise TokenAPIError('Value is no integer')
 
@@ -48,14 +48,20 @@ def add_token(model, request):
         valid_to = get_datetime(request, 'valid_to')
     except TokenAPIError as e:
         return e.as_json()
+    except KeyError as e:
+        return dict(success=False, message=str(e))
     try:
         usage_count = get_int(request, 'usage_count')
     except TokenAPIError as e:
         return e.as_json()
+    except KeyError as e:
+        return dict(success=False, message=str(e))
     try:
         lock_time = get_int(request, 'lock_time')
     except TokenAPIError as e:
         return e.as_json()
+    except KeyError as e:
+        return dict(success=False, message=str(e))
     try:
         token_api.add(
             token_uid,
@@ -104,18 +110,32 @@ def edit_token(model, request):
         valid_from = get_datetime(request, 'valid_from')
     except TokenAPIError as e:
         return e.as_json()
+    except KeyError:
+        valid_from = None
+        pass
     try:
         valid_to = get_datetime(request, 'valid_to')
     except TokenAPIError as e:
         return e.as_json()
+    except KeyError:
+        valid_to = None
+        pass
     try:
         usage_count = get_int(request, 'usage_count')
     except TokenAPIError as e:
         return e.as_json()
+    except KeyError:
+        usage_count = None
+        pass
     try:
         lock_time = get_int(request, 'lock_time')
     except TokenAPIError as e:
-        return e.as_json()
+       return e.as_json()
+    except KeyError:
+        lock_time = None
+        pass
+    if valid_from == None and valid_to == None and usage_count == None and lock_time == None:
+        return dict(success=False, message='Missing parameter')
     try:
         token_api.update(
             token_uid,

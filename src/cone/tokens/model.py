@@ -14,6 +14,7 @@ from pyramid.i18n import TranslationStringFactory
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
+from sqlalchemy import Boolean
 from sqlalchemy import String
 from zope.interface import implementer
 import uuid
