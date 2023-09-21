@@ -47,11 +47,11 @@ class TokenTile(ProtectedContentTile):
         img_byte_arr = b64encode(img_byte_arr.getvalue()).decode('utf-8')
         qr_src = 'data:image/png;base64,' + img_byte_arr
         return qr_src
-    
+
     @property
     def lock_time_seconds(self):
         return f"{self.model.attrs.get('lock_time')} sec"
-    
+
     @property
     def is_active(self):
         #check if token is active / valid,  doesnt check locktime
@@ -62,6 +62,15 @@ class TokenTile(ProtectedContentTile):
         if datetime.now() < self.model.attrs.get('valid_from'):
             return False
         return True
+
+    @property
+    def active_label(self):
+        return 'Active' if self.is_active else 'Inactive'
+
+    @property
+    def cssclass(self):
+        return 'btn-success' if self.is_active else 'btn-danger'
+
 
 @tile(
     name='contents',
