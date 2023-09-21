@@ -6,7 +6,7 @@ from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
-from cone.tokens.token import Tokens
+from cone.tokens.api import TokenAPI
 from pyramid.view import view_config
 import datetime
 import dateutil.parser
@@ -41,7 +41,7 @@ def get_int(request, name):
     context=TokenContainer,
     permission='add')
 def add_token(model, request):
-    token_api = Tokens(request)
+    token_api = TokenAPI(request)
     token_uid = uuid.uuid4()
     valid_from = get_datetime(request, 'valid_from', now_when_missing=True)
     try:
@@ -85,7 +85,7 @@ def add_token(model, request):
     context=TokenNode,
     permission='delete')
 def delete_token(model, request):
-    token_api = Tokens(request)
+    token_api = TokenAPI(request)
     token_uid = uuid.UUID(model.name)
     try:
         token_api.delete(token_uid)
@@ -104,7 +104,7 @@ def delete_token(model, request):
     context=TokenNode,
     permission='edit')
 def edit_token(model, request):
-    token_api = Tokens(request)
+    token_api = TokenAPI(request)
     token_uid = uuid.UUID(model.name)
     try:
         valid_from = get_datetime(request, 'valid_from')
@@ -161,7 +161,7 @@ def edit_token(model, request):
     context=TokenNode,
     permission='view')
 def consume_token(model, request):
-    token_api = Tokens(request)
+    token_api = TokenAPI(request)
     token_uid = uuid.UUID(model.name)
     try:
         consumed = token_api.consume(token_uid)

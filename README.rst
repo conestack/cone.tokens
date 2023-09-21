@@ -147,3 +147,4 @@ Contributors
 
 - Robert Niederreiter
 - Torben Baumgartner
+- Lena Daxenbichler

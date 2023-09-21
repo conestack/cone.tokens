@@ -5,4 +5,4 @@ Changes
 ----------------
 
 - Initial work.
-  [toalba]
+  [rnix, toalba, lenadax]

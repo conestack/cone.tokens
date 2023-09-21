@@ -19,7 +19,7 @@ from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenRecord
-from cone.tokens.token import Tokens
+from cone.tokens.api import TokenAPI
 from cone.ugm.testing import principals
 from datetime import datetime 
 from datetime import timedelta
@@ -49,54 +49,26 @@ class TokensLayer(SQLLayer):
 tokens_layer = TokensLayer()
 
 
-class TestTokens(NodeTestCase):
+class TestModel(NodeTestCase):
     layer = tokens_layer
 
     @sql_testing.delete_table_records(TokenRecord)
-    def test_model(self):
+    def test_TokenContainer(self):
         tokens = get_root()['tokens']
-        self.assertEqual(isinstance(tokens, TokenContainer), True)
 
-        # add token to tokens container
-        token = TokenNode()
-        value = token.attrs['value'] = 'Token value'
-        valid_from = token.attrs['valid_from'] = datetime.now()
-        valid_to = token.attrs['valid_to'] = datetime.now() + timedelta(1)
-        token.attrs['lock_time'] = 0
-        token.attrs['usage_count'] = -1
-        token_uuid = str(uuid.uuid4())
-        tokens[token_uuid] = token
-        token()
+        self.assertEqual(tokens.record_class, TokenRecord)
+        self.assertEqual(tokens.child_factory, TokenNode)
+        self.assertEqual(
+            tokens.uuid,
+            uuid.UUID('c40ef458-832f-42e6-9add-2dda2afb8920')
+        )
 
-        # check if token has been added
-        self.assertEqual(len(tokens), 1)
-        token = tokens.values()[0]
-        self.assertEqual(isinstance(token, TokenNode), True)
-        self.assertEqual(token.attrs['value'], value)
-        self.assertEqual(token.attrs['valid_from'], valid_from)
-        self.assertEqual(token.attrs['valid_to'],valid_to)
-        self.assertEqual(token.attrs['lock_time'], 0)
-        self.assertEqual(token.attrs['usage_count'], -1)
-
-        # check metadata
-        self.assertEqual(token.metadata.title, value)
-        self.assertEqual(token.metadata.creator, None)
-        self.assertEqual(token.metadata.created, None)
-        self.assertEqual(token.metadata.modified, None)
-
-        # check properties
-        self.assertEqual(token.properties.action_up, True)
-        self.assertEqual(token.properties.action_up_tile, 'content')
-        self.assertEqual(token.properties.action_edit, True)
-        self.assertEqual(token.properties.action_view, True)
-
-        # check container metadata
         self.assertEqual(tokens.metadata.title, 'token_container_title')
         self.assertEqual(
             tokens.metadata.description,
             'token_container_description'
         )
-        # check container properties
+
         self.assertTrue(tokens.properties.in_navtree)
         self.assertTrue(tokens.properties.action_up)
         self.assertTrue(tokens.properties.action_sharing)
@@ -104,105 +76,297 @@ class TestTokens(NodeTestCase):
         self.assertTrue(tokens.properties.action_list)
 
     @sql_testing.delete_table_records(TokenRecord)
-    def _test_token_consume(self):
+    def test_TokenNode(self):
+        tokens = get_root()['tokens']
+        self.assertEqual(isinstance(tokens, TokenContainer), True)
+
+        # add token to tokens container
+        token = TokenNode()
+        token.attrs['value'] = 'value'
+        token.attrs['valid_from'] = datetime(2023, 9, 21)
+        token.attrs['valid_to'] = datetime(2023, 9, 22)
+        token.attrs['lock_time'] = 0
+        token.attrs['usage_count'] = -1
+        token.attrs['creator'] = 'admin'
+        token.attrs['created'] = datetime(2023, 9, 21)
+        token.attrs['modified'] = datetime(2023, 9, 21)
+
+        token_uuid = str(uuid.uuid4())
+        tokens[token_uuid] = token
+        token()
+
+        # check if token has been added
+        self.assertEqual(len(tokens), 1)
+        token = tokens.values()[0]
+        self.assertTrue(isinstance(token, TokenNode))
+        self.assertEqual(token.attrs['value'], 'value')
+        self.assertEqual(token.attrs['valid_from'], datetime(2023, 9, 21))
+        self.assertEqual(token.attrs['valid_to'], datetime(2023, 9, 22))
+        self.assertEqual(token.attrs['lock_time'], 0)
+        self.assertEqual(token.attrs['usage_count'], -1)
+        self.assertEqual(token.attrs['creator'], 'admin')
+        self.assertEqual(token.attrs['created'], datetime(2023, 9, 21))
+        self.assertEqual(token.attrs['modified'], datetime(2023, 9, 21))
+
+        # check metadata
+        self.assertEqual(token.metadata.title, 'value')
+        self.assertEqual(token.metadata.creator, 'admin')
+        self.assertEqual(token.metadata.created, datetime(2023, 9, 21))
+        self.assertEqual(token.metadata.modified, datetime(2023, 9, 21))
+
+        # check properties
+        self.assertTrue(token.properties.action_up)
+        self.assertEqual(token.properties.action_up_tile, 'content')
+        self.assertTrue(token.properties.action_edit)
+        self.assertTrue(token.properties.action_view)
+
+
+class TestTokenAPI(NodeTestCase):
+    layer = tokens_layer
+
+    @sql_testing.delete_table_records(TokenRecord)
+    def test__get_token(self):
         request = self.layer.new_request()
         session = get_session(request)
 
         token = TokenRecord()
-        uid = token.uid = uuid.uuid4()
-        token.value = 'Token value'
+        token_uid = token.uid = uuid.uuid4()
+
+        session.add(token)
+        session.commit()
+
+        api = TokenAPI(request)
+        self.assertEqual(api._get_token(token_uid).uid, token_uid)
+
+        invalid_uid = uuid.UUID('f9c98a6b-b773-4714-b965-98c7911e6236')
+        with self.assertRaises(TokenNotExists) as arc:
+            api._get_token(invalid_uid)
+        self.assertEqual(
+            str(arc.exception),
+            'Token f9c98a6b-b773-4714-b965-98c7911e6236 not exists'
+        )
+
+    @sql_testing.delete_table_records(TokenRecord)
+    def test__query_token(self):
+        request = self.layer.new_request()
+        session = get_session(request)
+
+        token = TokenRecord()
+        token_uid = token.uid = uuid.uuid4()
+        token_value = token.value = 'token value'
+
+        session.add(token)
+        session.commit()
+
+        api = TokenAPI(request)
+        self.assertEqual(api._query_token(''), None)
+        self.assertEqual(api._query_token(token_value).uid, token_uid)
+
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_consume(self):
+        request = self.layer.new_request()
+        session = get_session(request)
+
+        token = TokenRecord()
+        token_uid = uuid.UUID('577989d4-1673-4639-a579-dd468b294713')
+        token.uid = token_uid
+        token.value = 'token value'
         last_used = token.last_used = datetime(2023, 1, 1)
-        token.valid_from = datetime.now()
-        token.valid_to = datetime.now() + timedelta(1)
+        token.valid_from = None
+        token.valid_to = None
         token.lock_time = 0
-        token.usage_count = 2
+        token.usage_count = -1
         session.add(token)
 
-        token_api = Tokens(request)
-        self.assertEqual(token_api.consume(uid), True)
+        api = TokenAPI(request)
+        self.assertTrue(api.consume(token_uid))
         self.assertNotEqual(last_used, token.last_used)
-        self.assertEqual(token.usage_count, 1)
+        self.assertEqual(token.usage_count, -1)
 
-        token.usage_count = 0
+        token.usage_count = 1
         session.commit()
-        self.assertRaises(TokenUsageCountExceeded, token_api.consume, uid)
+        self.assertTrue(api.consume(token_uid))
+        self.assertEqual(token.usage_count, 0)
+
+        with self.assertRaises(TokenUsageCountExceeded) as arc:
+            api.consume(token_uid)
+        self.assertEqual(
+            str(arc.exception),
+            'Token 577989d4-1673-4639-a579-dd468b294713 usage count exceeded'
+        )
 
         token.usage_count = -1
         token.lock_time = 120
         session.commit()
-        self.assertRaises(TokenLockTimeViolation, token_api.consume, uid)
+        with self.assertRaises(TokenLockTimeViolation) as arc:
+            api.consume(token_uid)
+        self.assertEqual(
+            str(arc.exception),
+            'Token 577989d4-1673-4639-a579-dd468b294713 is locked'
+        )
 
         token.lock_time = 0
-        token.valid_to = datetime(1999, 1, 1)
         session.commit()
-        self.assertRaises(TokenTimeRangeViolation, token_api.consume, uid)
+        self.assertTrue(api.consume(token_uid))
 
-        token.valid_to = datetime.now() + timedelta(2)
-        token.valid_from = datetime.now() + timedelta(1)
+        token.valid_from = datetime.now() + timedelta(days=1)
         session.commit()
-        self.assertRaises(TokenTimeRangeViolation, token_api.consume, uid)
+        with self.assertRaises(TokenTimeRangeViolation) as arc:
+            api.consume(token_uid)
+        self.assertEqual(
+            str(arc.exception),
+            'Token 577989d4-1673-4639-a579-dd468b294713 out of time range'
+        )
+
+        token.valid_from = None
+        token.valid_to = datetime.now() - timedelta(days=1)
+        session.commit()
+        with self.assertRaises(TokenTimeRangeViolation) as arc:
+            api.consume(token_uid)
+        self.assertEqual(
+            str(arc.exception),
+            'Token 577989d4-1673-4639-a579-dd468b294713 out of time range'
+        )
+
+        token.valid_from = datetime.now() - timedelta(days=1)
+        token.valid_to = datetime.now() + timedelta(days=1)
+        session.commit()
+
+        self.assertTrue(api.consume(token_uid))
 
         session.delete(token)
-        self.assertRaises(TokenNotExists, token_api.consume, uid)
-
-    @sql_testing.delete_table_records(TokenRecord)
-    def _test_token_add(self):
-        request = self.layer.new_request()
-        session = get_session(request)
-
-        token_api = Tokens(request)
-        token_api.add(uuid.uuid4(),datetime.now(), datetime.now() + timedelta(1), -1, 0)
-
-        result = session.query(TokenRecord).one()
-        self.assertEqual(isinstance(result, TokenRecord), True)
-
-    @sql_testing.delete_table_records(TokenRecord)
-    def _test_token_delete(self):
-        request = self.layer.new_request()
-        session = get_session(request)
-
-        token = TokenRecord()
-        token.uid = uuid.uuid4()
-        token.valid_from = datetime.now()
-        token.valid_to = datetime.now() + timedelta(1)
-        token.lock_time = 0
-        token.usage_count = -1
-        session.add(token)
-        session.commit()
-
-        token_api = Tokens(request)
-        token_api.delete(token.uid)
-        result = session.query(TokenRecord).all()
-        self.assertEqual(result, [])
-
-    @sql_testing.delete_table_records(TokenRecord)
-    def _test_token_update(self):
-        request = self.layer.new_request()
-        session = get_session(request)
-
-        token = TokenRecord()
-        token.uid = uuid.uuid4()
-        token.valid_from = datetime.now()
-        token.valid_to = datetime.now() + timedelta(1)
-        token.lock_time = 0
-        token.usage_count = -1
-        session.add(token)
-        session.commit()
-
-        token_api = Tokens(request)
-        token_api.update(
-            token.uid,
-            datetime(2022, 1, 1),
-            datetime(2022, 1, 2),
-            1,
-            120
+        with self.assertRaises(TokenNotExists) as arc:
+            api.consume(token_uid)
+        self.assertEqual(
+            str(arc.exception),
+            'Token 577989d4-1673-4639-a579-dd468b294713 not exists'
         )
-        result = session.query(TokenRecord).one()
-        self.assertEqual(isinstance(result, TokenRecord), True)
-        self.assertEqual(result.valid_from,datetime(2022, 1, 1))
-        self.assertEqual(result.valid_to,datetime(2022, 1, 2))
-        self.assertEqual(result.lock_time, 120)
-        self.assertEqual(result.usage_count, 1)
+
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_add(self):
+        request = self.layer.new_request()
+        api = TokenAPI(request)
+        token_uid = uuid.UUID('c27b6d86-8ac0-4261-9e62-151ff7e31ecb')
+        api.add(token_uid)
+
+        token = api._get_token(token_uid)
+        self.assertEqual(token.value, str(token_uid))
+        self.assertEqual(token.valid_from, None)
+        self.assertEqual(token.valid_to, None)
+        self.assertEqual(token.usage_count, -1)
+        self.assertEqual(token.lock_time, 0)
+
+        token_uid = uuid.UUID('6556f43e-b0ce-4c14-a0c5-40b8f2cdab3a')
+        api.add(
+            token_uid,
+            value='token value',
+            valid_from=datetime(2023, 9, 21),
+            valid_to=datetime(2023, 9, 22),
+            usage_count=0,
+            lock_time=10
+        )
+        token = api._get_token(token_uid)
+        self.assertEqual(token.value, 'token value')
+        self.assertEqual(token.valid_from, datetime(2023, 9, 21))
+        self.assertEqual(token.valid_to, datetime(2023, 9, 22))
+        self.assertEqual(token.usage_count, 0)
+        self.assertEqual(token.lock_time, 10)
+
+        with self.assertRaises(TokenValueError) as arc:
+            api.add(
+                token_uid,
+                valid_from=datetime(2023, 9, 21),
+                valid_to=datetime(2023, 9, 21),
+            )
+        self.assertEqual(
+            str(arc.exception),
+            'Token with uid 6556f43e-b0ce-4c14-a0c5-40b8f2cdab3a already exists'
+        )
+
+        token_uid = uuid.UUID('9c9196f0-8b5b-42e7-b389-b13b267c9378')
+        with self.assertRaises(TokenValueError) as arc:
+            api.add(
+                token_uid,
+                valid_from=datetime(2023, 9, 21),
+                valid_to=datetime(2023, 9, 21),
+            )
+        self.assertEqual(
+            str(arc.exception),
+            'valid_from must be before valid_to'
+        )
+
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_delete(self):
+        request = self.layer.new_request()
+        session = get_session(request)
+
+        token = TokenRecord()
+        token_uid = token.uid = uuid.UUID('cc3ebacb-1fc1-42ea-bc24-051b60d60545')
+        session.add(token)
+        session.commit()
+
+        api = TokenAPI(request)
+        api.delete(token_uid)
+        with self.assertRaises(TokenNotExists) as arc:
+            api.delete(token_uid)
+        self.assertEqual(
+            str(arc.exception),
+            'Token cc3ebacb-1fc1-42ea-bc24-051b60d60545 not exists'
+        )
+
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_update(self):
+        request = self.layer.new_request()
+        session = get_session(request)
+
+        token = TokenRecord()
+        token_uid = token.uid = uuid.UUID('17b04001-4f42-4061-ad85-72de9ed8e287')
+        token.value = 'value'
+        session.add(token)
+
+        token = TokenRecord()
+        token.uid = uuid.UUID('c32e818c-af0c-4ee4-a855-0e50cad09e13')
+        token.value = 'other value'
+        session.add(token)
+        session.commit()
+
+        api = TokenAPI(request)
+        with self.assertRaises(TokenValueError) as arc:
+            api.update(token_uid, value='other value')
+        self.assertEqual(
+            str(arc.exception),
+            'Given value already used by another token'
+        )
+
+        with self.assertRaises(TokenValueError) as arc:
+            api.update(
+                token_uid,
+                valid_from=datetime(2023, 9, 21),
+                valid_to=datetime(2023, 9, 21)
+            )
+        self.assertEqual(
+            str(arc.exception),
+            'valid_from must be before valid_to'
+        )
+
+        api.update(
+            token_uid,
+            value='new value',
+            valid_from=datetime(2023, 9, 21),
+            valid_to=datetime(2023, 9, 22),
+            usage_count=10,
+            lock_time=100
+        )
+        token = session\
+            .query(TokenRecord)\
+            .filter(TokenRecord.uid == token_uid)\
+            .one()
+
+        self.assertEqual(token.value, 'new value')
+        self.assertEqual(token.valid_from, datetime(2023, 9, 21))
+        self.assertEqual(token.valid_to, datetime(2023, 9, 22))
+        self.assertEqual(token.usage_count, 10)
+        self.assertEqual(token.lock_time, 100)
 
     def _test_token_form(self):
         request = self.layer.new_request()
@@ -416,7 +580,7 @@ class TestTokens(NodeTestCase):
             res = render_view_to_response(tokens, request, 'add_token')
         self.assertTrue(res.json['success'])
 
-        with patch.object(Tokens, 'add', side_effect=KeyError('Error')):
+        with patch.object(TokenAPI, 'add', side_effect=KeyError('Error')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(tokens, request, 'add_token')
             self.assertFalse(res.json['success'])
@@ -469,7 +633,7 @@ class TestTokens(NodeTestCase):
     def _test_json_api_edit(self):
         request = self.layer.new_request(type='json')
         request.method = 'POST'
-        token_api = Tokens(request)
+        token_api = TokenAPI(request)
         token_uid = uuid.uuid4()
         token_api.add(
             token_uid,
@@ -497,7 +661,7 @@ class TestTokens(NodeTestCase):
         self.assertTrue(res.json['success'])
         self.assertEqual(token.attrs['usage_count'], 1)
 
-        with patch.object(Tokens, 'update', side_effect=KeyError('Error')):
+        with patch.object(TokenAPI, 'update', side_effect=KeyError('Error')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(token, request, 'edit_token')
             self.assertFalse(res.json['success'])
@@ -570,7 +734,7 @@ class TestTokens(NodeTestCase):
     def _test_json_api_delete(self):
         request = self.layer.new_request(type='json')
         request.method = 'POST'
-        token_api = Tokens(request)
+        token_api = TokenAPI(request)
         token_uid = uuid.uuid4()
         token_api.add(
             token_uid,
@@ -594,7 +758,7 @@ class TestTokens(NodeTestCase):
         self.assertTrue(res.json['success'])
         self.assertFalse(token_uid in tokens)
 
-        with patch.object(Tokens, 'delete', side_effect=KeyError('Error')):
+        with patch.object(TokenAPI, 'delete', side_effect=KeyError('Error')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(token, request, 'delete_token')
             self.assertFalse(res.json['success'])
@@ -616,7 +780,7 @@ class TestTokens(NodeTestCase):
     def _test_json_api_consume(self):
         request = self.layer.new_request(type='json')
         request.method = 'GET'
-        token_api = Tokens(request)
+        token_api = TokenAPI(request)
         token_uid = uuid.uuid4()
         token_api.add(
             token_uid,
@@ -640,7 +804,7 @@ class TestTokens(NodeTestCase):
         self.assertTrue(res.json['success'])
         self.assertTrue(res.json['consumed'])
 
-        with patch.object(Tokens, 'consume', side_effect=KeyError('Error')):
+        with patch.object(TokenAPI, 'consume', side_effect=KeyError('Error')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(token, request, 'consume_token')
             self.assertFalse(res.json['success'])

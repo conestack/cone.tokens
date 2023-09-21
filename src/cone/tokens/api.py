@@ -8,13 +8,14 @@ from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenRecord
 from datetime import datetime 
 from datetime import timedelta
+from node.utils import UNSET
 from pyramid.i18n import TranslationStringFactory
 
 
 _ = TranslationStringFactory('cone.tokens')
 
 
-class Tokens(object):
+class TokenAPI(object):
 
     def __init__(self, request):
        self.request = request
@@ -42,18 +43,22 @@ class Tokens(object):
 
     def consume(self, token_uid):
         session = self.session
-        existing = self._get_token(token_uid)
-        if existing.usage_count == 0:
+        token = self._get_token(token_uid)
+        if token.usage_count == 0:
             raise TokenUsageCountExceeded(token_uid)
-        current_time = datetime.now()
-        if existing.last_used:
-            if existing.last_used + timedelta(0, existing.lock_time) > current_time:
+        now = datetime.now()
+        if token.last_used:
+            if token.last_used + timedelta(0, token.lock_time) > now:
                 raise TokenLockTimeViolation(token_uid)
-        if current_time > existing.valid_to or current_time < existing.valid_from:
+        valid_from = token.valid_from
+        valid_to = token.valid_to
+        if valid_from and now < valid_from:
             raise TokenTimeRangeViolation(token_uid)
-        if existing.usage_count != -1:
-            existing.usage_count -= 1
-        existing.last_used = current_time
+        if valid_to and now > valid_to:
+            raise TokenTimeRangeViolation(token_uid)
+        if token.usage_count != -1:
+            token.usage_count -= 1
+        token.last_used = now
         if use_tm():
             session.flush() # pragma: no cover
         else:
@@ -63,55 +68,59 @@ class Tokens(object):
     def add(
         self,
         token_uid,
-        value,
-        valid_from,
-        valid_to,
-        usage_count,
-        lock_time
+        value=None,
+        valid_from=None,
+        valid_to=None,
+        usage_count=-1,
+        lock_time=0
     ):
-        if valid_from >= valid_to:
-            raise TokenValueError('valid_from must be before valid_to')
-        if not value:
-            value = token_uid
-        session = self.session
-        token = TokenRecord()
-        token.uid = token_uid
-        token.value = value
-        token.valid_from = valid_from
-        token.valid_to = valid_to
-        token.lock_time = lock_time
-        token.usage_count = usage_count
-        session.add(token)
-        if use_tm():
-            session.flush() # pragma: no cover
-        else:
-            session.commit()
+        try:
+            self._get_token(token_uid)
+            raise TokenValueError(f'Token with uid {token_uid} already exists')
+        except TokenNotExists:
+            if valid_from and valid_to and valid_from >= valid_to:
+                raise TokenValueError('valid_from must be before valid_to')
+            if not value:
+                value = str(token_uid)
+            session = self.session
+            token = TokenRecord()
+            token.uid = token_uid
+            token.value = value
+            token.valid_from = valid_from
+            token.valid_to = valid_to
+            token.lock_time = lock_time
+            token.usage_count = usage_count
+            session.add(token)
+            if use_tm():
+                session.flush() # pragma: no cover
+            else:
+                session.commit()
 
     def update(
         self,
         token_uid,
-        value=None,
-        valid_from=None,
-        valid_to=None,
-        usage_count=None,
-        lock_time=None
+        value=UNSET,
+        valid_from=UNSET,
+        valid_to=UNSET,
+        usage_count=UNSET,
+        lock_time=UNSET
     ):
         token = self._get_token(token_uid)
         session = self.session
-        if value and value != token.value:
-            token = self._query_token(value)
-            if token and token.uid != token_uid:
+        if value is not UNSET and value != token.value:
+            existing = self._query_token(value)
+            if existing and existing.uid != token_uid:
                 raise TokenValueError('Given value already used by another token')
             token.value = value
-        if valid_from:
+        if valid_from is not UNSET:
             token.valid_from = valid_from
-        if valid_to:
+        if valid_to is not UNSET:
             token.valid_to = valid_to
-        if lock_time:
+        if lock_time is not UNSET:
             token.lock_time = lock_time
-        if usage_count:
+        if usage_count is not UNSET:
             token.usage_count = usage_count
-        if token.valid_from >= token.valid_to:
+        if token.valid_from and token.valid_to and token.valid_from >= token.valid_to:
             raise TokenValueError('valid_from must be before valid_to')
         if use_tm():
             session.flush() # pragma: no cover
