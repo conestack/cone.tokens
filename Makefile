@@ -9,6 +9,9 @@
 #: core.sources
 #: i18n.gettext
 #: i18n.lingua
+#: js.npm
+#: js.rollup
+#: js.scss
 #: qa.coverage
 #: qa.test
 #
@@ -33,6 +36,57 @@ CLEAN_FS?=
 # be used to provide custom targets or hook up to existing targets.
 # Default: include.mk
 INCLUDE_MAKEFILE?=include.mk
+
+## js.npm
+
+# Value for `--prefix` option.
+# Default: .
+NPM_PREFIX?=.
+
+# Packages which get installed with `--no-save` option.
+# No default value.
+NPM_PACKAGES?=
+
+# Packages which get installed with `--save-dev` option.
+# No default value.
+NPM_DEV_PACKAGES?=
+
+# Packages which get installed with `--save-prod` option.
+# No default value.
+NPM_PROD_PACKAGES?=
+
+# Packages which get installed with `--save-optional` option.
+# No default value.
+NPM_OPT_PACKAGES?=
+
+# Additional install options. Possible values are `--save-exact`
+# and `--save-bundle`.
+# No default value.
+NPM_INSTALL_OPTS?=
+
+## js.scss
+
+# The SCSS root source file.
+# Default: scss/styles.scss
+SCSS_SOURCE?=scss/styles.scss
+
+# The target file for the compiles Stylesheet.
+# Default: scss/styles.css
+SCSS_TARGET?=src/cone/tokens/browser/static/styles.css
+
+# The target file for the compressed Stylesheet.
+# Default: scss/styles.min.css
+SCSS_MIN_TARGET?=src/cone/tokens/browser/static/styles.min.css
+
+# Additional options to be passed to SCSS compiler.
+# Default: --no-source-map=none
+SCSS_OPTIONS?=--no-source-map=none
+
+## js.rollup
+
+# Rollup config file.
+# Default: rollup.conf.js
+ROLLUP_CONFIG?=js/rollup.conf.js
 
 ## core.mxenv
 
@@ -154,6 +208,84 @@ SENTINEL?=$(SENTINEL_FOLDER)/about.txt
 $(SENTINEL):
 	@mkdir -p $(SENTINEL_FOLDER)
 	@echo "Sentinels for the Makefile process." > $(SENTINEL)
+
+##############################################################################
+# npm
+##############################################################################
+
+# case `system.dependencies` domain is included
+SYSTEM_DEPENDENCIES+=npm
+
+NPM_TARGET:=$(SENTINEL_FOLDER)/npm.sentinel
+$(NPM_TARGET): $(SENTINEL)
+	@echo "Install npm packages"
+	@test -z "$(NPM_DEV_PACKAGES)" \
+		&& echo "No dev packages to be installed" \
+		|| npm --prefix $(NPM_PREFIX) install \
+			--save-dev \
+			$(NPM_INSTALL_OPTS) \
+			$(NPM_DEV_PACKAGES)
+	@test -z "$(NPM_PROD_PACKAGES)" \
+		&& echo "No prod packages to be installed" \
+		|| npm --prefix $(NPM_PREFIX) install \
+			--save-prod \
+			$(NPM_INSTALL_OPTS) \
+			$(NPM_PROD_PACKAGES)
+	@test -z "$(NPM_OPT_PACKAGES)" \
+		&& echo "No opt packages to be installed" \
+		|| npm --prefix $(NPM_PREFIX) install \
+			--save-optional \
+			$(NPM_INSTALL_OPTS) \
+			$(NPM_OPT_PACKAGES)
+	@test -z "$(NPM_PACKAGES)" \
+		&& echo "No packages to be installed" \
+		|| npm --prefix $(NPM_PREFIX) install \
+			--no-save \
+			$(NPM_PACKAGES)
+	@touch $(NPM_TARGET)
+
+.PHONY: npm
+npm: $(NPM_TARGET)
+
+.PHONY: npm-dirty
+npm-dirty:
+	@rm -f $(NPM_TARGET)
+
+.PHONY: npm-clean
+npm-clean: npm-dirty
+	@rm -rf $(NPM_PREFIX)/node_modules
+
+INSTALL_TARGETS+=npm
+DIRTY_TARGETS+=npm-dirty
+CLEAN_TARGETS+=npm-clean
+
+##############################################################################
+# scss
+##############################################################################
+
+# extend npm dev packages
+NPM_DEV_PACKAGES+=sass
+
+.PHONY: scss
+scss: $(NPM_TARGET)
+	@$(NPM_PREFIX)/node_modules/.bin/sass \
+		$(SCSS_OPTIONS) $(SCSS_SOURCE) $(SCSS_TARGET)
+	@$(NPM_PREFIX)/node_modules/.bin/sass \
+		$(SCSS_OPTIONS) --style compressed $(SCSS_SOURCE) $(SCSS_MIN_TARGET)
+
+##############################################################################
+# rollup
+##############################################################################
+
+# extend npm dev packages
+NPM_DEV_PACKAGES+=\
+	rollup \
+	rollup-plugin-cleanup \
+	@rollup/plugin-terser
+
+.PHONY: rollup
+rollup: $(NPM_TARGET)
+	@$(NPM_PREFIX)/node_modules/.bin/rollup --config $(ROLLUP_CONFIG)
 
 ##############################################################################
 # mxenv
