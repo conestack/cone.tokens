@@ -1,6 +1,8 @@
 <tal:block
   xmlns:tal="http://xml.zope.org/namespaces/tal"
   xmlns:ajax="http://namespaces.conestack.org/ajax"
+  xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+  i18n:domain="cone.tokens"
   omit-tag="True">
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
@@ -19,7 +21,7 @@
       </li>
       <li class="list-group-item flex-group">
         <div>
-          <strong>Valid:</strong>
+          <strong i18n:translate="valid">Valid</strong>:
           <span tal:content="model.attrs['valid_from'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
           <strong> - </strong>
           <span tal:content="model.attrs['valid_to'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
@@ -29,48 +31,61 @@
             ajax:bind="click"
             ajax:target="${context.nodeurl}?duration=unlimited"
             ajax:action="add_duration">
-            Unlimited
+            <span i18n:translate="unlimited">
+              Unlimited
+            </span>
           </button>
           <button class="btn btn-default"
             ajax:bind="click"
             ajax:target="${context.nodeurl}?duration=morning"
             ajax:action="add_duration">
-            Morning
+            <span i18n:translate="morning">
+              Morning
+            </span>
           </button>
           <button class="btn btn-default"
             ajax:bind="click"
             ajax:target="${context.nodeurl}?duration=afternoon"
             ajax:action="add_duration">
-            Afternoon
+            <span i18n:translate="afternoon">
+              Afternoon
+            </span>
           </button>
           <button class="btn btn-default"
             ajax:bind="click"
             ajax:target="${context.nodeurl}?duration=day"
             ajax:action="add_duration">
-            Today
+            <span i18n:translate="today">
+              Today
+            </span>
           </button>
           <button class="btn btn-default"
             ajax:bind="click"
             ajax:target="${context.nodeurl}?duration=week"
             ajax:action="add_duration">
-            This Week
+            <span i18n:translate="this_week">
+              This Week
+            </span>
           </button>
           <button class="btn btn-default"
             ajax:bind="click"
             ajax:target="${context.nodeurl}?duration=week"
             ajax:action="add_duration">
-            This Month
+            <span i18n:translate="this_month">
+              This Month
+            </span>
           </button>
         </div>
       </li>
       <li class="list-group-item flex-group">
         <div>
-          <strong>Usage Count:</strong>
+          <strong>Usage Count</strong>:
           <span tal:condition="model.attrs['usage_count'] > -1"
                 tal:content="model.attrs['usage_count']">
             Usage Count
           </span>
-          <span tal:condition="model.attrs['usage_count'] == -1">
+          <span tal:condition="model.attrs['usage_count'] == -1"
+                i18n:translate="unlimited">
             Unlimited
           </span>
         </div>
@@ -79,7 +94,9 @@
             ajax:bind="click"
             ajax:target="${context.nodeurl}?amount=-1"
             ajax:action="add_use">
-            Unlimited
+            <span i18n:translate="unlimited">
+              Unlimited
+            </span>
           </button>
           <button class="btn btn-default"
             ajax:bind="click"
@@ -114,19 +131,19 @@
         </div>
       </li>
       <li class="list-group-item">
-        <strong>Lock Time:</strong>
+        <strong i18n:translate="lock_time">Lock Time</strong>:
         <span tal:content="context.lock_time_seconds"></span>
       </li>
       <li class="list-group-item">
-          <strong>Creator:</strong>
+          <strong i18n:translate="creator">Creator</strong>:
           <span tal:content="model.attrs['creator']"></span>
       </li>
       <li class="list-group-item">
-          <strong>Created:</strong>
+          <strong i18n:translate="created">Created</strong>:
           <span tal:content="model.attrs['created'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
       </li>
       <li class="list-group-item">
-          <strong>Modified:</strong>
+          <strong i18n:translate="modified">Modified</strong>:
           <span tal:content="model.attrs['modified'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
       </li>
     </ul>

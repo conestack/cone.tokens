@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cone.tokens 1.0\n"
-"POT-Creation-Date: 2023-08-08 08:51+0200\n"
+"POT-Creation-Date: 2023-09-21 13:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,51 +12,135 @@ msgstr ""
 "Generated-By: Lingua 4.15.0\n"
 
 #. Default: Token
-#: src/cone/tokens/model.py:41
+#: src/cone/tokens/model.py:42
 msgid "token_node_title"
 msgstr "Token"
 
 #. Default: Token
-#: src/cone/tokens/model.py:42
+#: src/cone/tokens/model.py:43
 msgid "token_node_description"
 msgstr "Token"
 
 #. Default: Tokens
-#: src/cone/tokens/model.py:70
+#: src/cone/tokens/model.py:71
 msgid "token_container_title"
 msgstr "Tokens"
 
 #. Default: Tokens
-#: src/cone/tokens/model.py:71
+#: src/cone/tokens/model.py:72
 msgid "token_container_description"
 msgstr "Tokens"
 
 #. Default: Valid from
-#: src/cone/tokens/browser/token.py:76
+#: src/cone/tokens/browser/token.py:220
 msgid "valid_from"
 msgstr "Valid from"
 
 #. Default: Valid to
-#: src/cone/tokens/browser/token.py:86
+#: src/cone/tokens/browser/token.py:230
 msgid "valid_to"
 msgstr "Valid to"
 
 #. Default: Usage Count
-#: src/cone/tokens/browser/token.py:96
+#: src/cone/tokens/browser/token.py:240
 msgid "usage_count"
 msgstr "Usage Count"
 
 #. Default: Lock Time
-#: src/cone/tokens/browser/token.py:105
+#: src/cone/tokens/browser/token.py:249
+#: src/cone/tokens/browser/templates/token.pt:134
 msgid "lock_time"
 msgstr "Lock Time"
 
 #. Default: Save
-#: src/cone/tokens/browser/token.py:117
+#: src/cone/tokens/browser/token.py:261
 msgid "save"
 msgstr "Save"
 
 #. Default: Cancel
-#: src/cone/tokens/browser/token.py:132
+#: src/cone/tokens/browser/token.py:276
 msgid "cancel"
 msgstr "Cancel"
+
+#. Default: Valid
+#: src/cone/tokens/browser/templates/token.pt:24
+msgid "valid"
+msgstr "Valid"
+
+#. Default: Unlimited
+#: src/cone/tokens/browser/templates/token.pt:34
+#: src/cone/tokens/browser/templates/token.pt:88
+#: src/cone/tokens/browser/templates/token.pt:97
+msgid "unlimited"
+msgstr "Unlimited"
+
+#. Default: Morning
+#: src/cone/tokens/browser/templates/token.pt:42
+msgid "morning"
+msgstr "Morning"
+
+#. Default: Afternoon
+#: src/cone/tokens/browser/templates/token.pt:50
+msgid "afternoon"
+msgstr "Afternoon"
+
+#. Default: Today
+#: src/cone/tokens/browser/templates/token.pt:58
+msgid "today"
+msgstr "Today"
+
+#. Default: This Week
+#: src/cone/tokens/browser/templates/token.pt:66
+msgid "this_week"
+msgstr "This Week"
+
+#. Default: This Month
+#: src/cone/tokens/browser/templates/token.pt:74
+msgid "this_month"
+msgstr "This Month"
+
+#. Default: Creator
+#: src/cone/tokens/browser/templates/token.pt:138
+msgid "creator"
+msgstr "Creator"
+
+#. Default: Created
+#: src/cone/tokens/browser/templates/token.pt:142
+msgid "created"
+msgstr "Created"
+
+#. Default: Modified
+#: src/cone/tokens/browser/templates/token.pt:146
+msgid "modified"
+msgstr "Modified"
+
+#. Default: Show
+#: src/cone/tokens/browser/templates/tokens.pt:31
+msgid "show"
+msgstr "Show"
+
+#. Default: entries
+#: src/cone/tokens/browser/templates/tokens.pt:52
+#: src/cone/tokens/browser/templates/tokens.pt:198
+msgid "entries"
+msgstr "entries"
+
+#. Default: Search
+#: src/cone/tokens/browser/templates/tokens.pt:64
+msgid "search"
+msgstr "Search"
+
+#. Default: Showing
+#: src/cone/tokens/browser/templates/tokens.pt:189
+msgid "showing"
+msgstr "Showing"
+
+#. Default: to
+#: src/cone/tokens/browser/templates/tokens.pt:192
+msgid "to"
+msgstr "to"
+
+#. Default: of
+#: src/cone/tokens/browser/templates/tokens.pt:195
+msgid "of"
+msgstr "of"
