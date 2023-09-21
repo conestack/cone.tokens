@@ -191,7 +191,10 @@ class TokenForm(Form):
         valid_from = data.fetch('tokenform.valid_from').extracted
         if valid_from and extracted:
             if valid_from >= extracted:
-                raise ExtractionError('Token Start Date must be before End Date.')
+                raise ExtractionError(_(
+                    'timerange_error',
+                    default='Valid from date must be before valid to date'
+                ))
         return extracted
 
     def value_extractor(self, widget, data):
@@ -204,7 +207,10 @@ class TokenForm(Form):
             .filter(TokenRecord.uid != self.model.record.uid) \
             .one_or_none()
         if existing_value:
-            raise ExtractionError('Value already used.')
+            raise ExtractionError(_(
+                'value_already_used',
+                default='Value already used by another token'
+            ))
         return extracted
 
     def prepare(self):
@@ -217,6 +223,19 @@ class TokenForm(Form):
             }
         )
         attrs = self.model.attrs
+        form['value'] = factory(
+            '#field:*value:text',
+            value=attrs.get('value', UNSET),
+            props={
+                'label': _('value', default='Value'),
+                'persist': False
+            },
+            custom={
+                'value': {
+                    'extractors': [self.value_extractor]
+                }
+            }
+        )
         form['valid_from'] = factory(
             '#field:datetime',
             value=attrs.get('valid_from', UNSET),
@@ -243,18 +262,6 @@ class TokenForm(Form):
             custom={
                 'valid_to': {
                     'extractors': [self.timerange_extractor]
-                }
-            }
-        )
-        form['value'] = factory(
-            '#field:*value:text',
-            value=attrs.get('value', UNSET),
-            props={
-                'label': _('value', default='Value')
-            },
-            custom={
-                'value': {
-                    'extractors': [self.value_extractor]
                 }
             }
         )
@@ -299,19 +306,24 @@ class TokenForm(Form):
 
     def save(self, widget, data):
         data.write(self.model)
+        value = data.fetch('tokenform.value').extracted
+        # token uid gets used as value if no value given
+        if not value:
+            value = self.token_uid
+        self.model.attrs['value'] = value
 
 
 @tile(name='addform', interface=TokenNode, permission='add')
 @plumbing(ContentAddForm)
 class TokenAddForm(TokenForm):
 
+    @request_property
+    def token_uid(self):
+        return str(uuid.uuid4())
+
     def save(self, widget, data):
         super(TokenAddForm, self).save(widget, data)
-        uid_ = str(uuid.uuid4())
-        self.model.parent[uid_] = self.model
-        value = data.fetch('tokenform.value').extracted
-        if not value:
-            self.model.record.value = uid_
+        self.model.parent[self.token_uid] = self.model
         add_creation_metadata(self.request, self.model.attrs)
         self.model()
 
@@ -320,10 +332,11 @@ class TokenAddForm(TokenForm):
 @plumbing(ContentEditForm)
 class TokenEditForm(TokenForm):
 
+    @property
+    def token_uid(self):
+        return self.model.name
+
     def save(self, widget, data):
         super(TokenEditForm, self).save(widget, data)
-        value = data.fetch('tokenform.value').extracted
-        if not value:
-            self.model.record.value = str(self.model.record.uid)
         update_creation_metadata(self.request, self.model.attrs)
         self.model()

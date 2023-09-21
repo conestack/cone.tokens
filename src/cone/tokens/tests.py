@@ -28,6 +28,7 @@ from node.utils import UNSET
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.view import render_view_to_response
 from unittest.mock import patch
+from yafowil.base import ExtractionError
 import sys
 import unittest
 import uuid
@@ -368,7 +369,11 @@ class TestTokenAPI(NodeTestCase):
         self.assertEqual(token.usage_count, 10)
         self.assertEqual(token.lock_time, 100)
 
-    def _test_token_form(self):
+
+class TestTokenForms(NodeTestCase):
+    layer = tokens_layer
+
+    def test_TokenForm(self):
         request = self.layer.new_request()
 
         # create token
@@ -389,6 +394,7 @@ class TestTokenAPI(NodeTestCase):
         self.assertEqual(form_tile.form.name, 'tokenform')
         self.checkOutput("""
         <class 'yafowil.base.Widget'>: tokenform
+        __<class 'yafowil.base.Widget'>: value
         __<class 'yafowil.base.Widget'>: valid_from
         __<class 'yafowil.base.Widget'>: valid_to
         __<class 'yafowil.base.Widget'>: usage_count
@@ -399,40 +405,108 @@ class TestTokenAPI(NodeTestCase):
 
         # empty extraction
         data = form_tile.form.extract(request=request)
+        self.assertEqual(data.fetch('tokenform.value').extracted, UNSET)
         self.assertEqual(data.fetch('tokenform.valid_from').extracted, None)
         self.assertEqual(data.fetch('tokenform.valid_to').extracted, None)
         self.assertEqual(data.fetch('tokenform.usage_count').extracted, UNSET)
         self.assertEqual(data.fetch('tokenform.lock_time').extracted, UNSET)
 
-        # extraction with values
-        request.params['tokenform.valid_from'] = '1.1.2022'
-        request.params['tokenform.valid_to'] = '2.1.2022'
-        request.params['tokenform.usage_count'] = '-1'
-        request.params['tokenform.lock_time'] = '0'
-        request.params['action.tokenform.save'] = '1'
+        # extraction with empty values
+        request.params['tokenform.value'] = ''
+        request.params['tokenform.valid_from'] = ''
+        request.params['tokenform.valid_from.time'] = ''
+        request.params['tokenform.valid_to'] = ''
+        request.params['tokenform.valid_to.time'] = ''
+        request.params['tokenform.usage_count'] = ''
+        request.params['tokenform.lock_time'] = ''
+        request.params['action.tokenform.save'] = ''
+
         data = form_tile.form.extract(request=request)
-        self.assertEqual(
-            data.fetch('tokenform.valid_from').extracted,
-            datetime(2022, 1, 1, 0, 0)
-        )
-        self.assertEqual(
-            data.fetch('tokenform.valid_to').extracted,
-            datetime(2022, 1, 2, 0, 0)
-        )
+        self.assertEqual(data.fetch('tokenform.value').extracted, '')
+        self.assertEqual(data.fetch('tokenform.valid_from').extracted, None)
+        self.assertEqual(data.fetch('tokenform.valid_to').extracted, None)
         self.assertEqual(data.fetch('tokenform.usage_count').extracted, -1.)
         self.assertEqual(data.fetch('tokenform.lock_time').extracted, 0)
 
-        request.params['tokenform.valid_from'] = '2.1.2022'
-        request.params['tokenform.valid_to'] = '1.1.2022'
-        self.assertRaises(
-            TokenValueError,
-            form_tile.form.extract,
-            request=request
+        # extraction with values
+        request.params['tokenform.value'] = 'token value'
+        request.params['tokenform.valid_from'] = '21.9.2023'
+        request.params['tokenform.valid_from.time'] = '10:00'
+        request.params['tokenform.valid_to'] = '21.9.2023'
+        request.params['tokenform.valid_to.time'] = '16:00'
+        request.params['tokenform.usage_count'] = '1'
+        request.params['tokenform.lock_time'] = '100'
+
+        data = form_tile.form.extract(request=request)
+        self.assertEqual(data.fetch('tokenform.value').extracted, 'token value')
+        self.assertEqual(
+            data.fetch('tokenform.valid_from').extracted,
+            datetime(2023, 9, 21, 10, 0)
+        )
+        self.assertEqual(
+            data.fetch('tokenform.valid_to').extracted,
+            datetime(2023, 9, 21, 16, 0)
+        )
+        self.assertEqual(data.fetch('tokenform.usage_count').extracted, 1)
+        self.assertEqual(data.fetch('tokenform.lock_time').extracted, 100)
+
+        # value validation
+        session = get_session(request)
+
+        token = TokenRecord()
+        token.uid = uuid.uuid4()
+        token.value = 'value'
+        session.add(token)
+        session.commit()
+
+        request.params['tokenform.value'] = 'value'
+        data = form_tile.form.extract(request=request)
+        self.assertEqual(
+            data.fetch('tokenform.value').errors,
+            [ExtractionError('value_already_used')]
+        )
+        request.params['tokenform.value'] = 'token value'
+
+        # time range validation
+        request.params['tokenform.valid_from'] = '21.9.2023'
+        request.params['tokenform.valid_from.time'] = '10:00'
+        request.params['tokenform.valid_to'] = ''
+        request.params['tokenform.valid_to.time'] = ''
+
+        data = form_tile.form.extract(request=request)
+        self.assertEqual(
+            data.fetch('tokenform.valid_from').extracted,
+            datetime(2023, 9, 21, 10, 0)
+        )
+        self.assertEqual(data.fetch('tokenform.valid_to').extracted, None)
+
+        request.params['tokenform.valid_from'] = ''
+        request.params['tokenform.valid_from.time'] = ''
+        request.params['tokenform.valid_to'] = '21.9.2023'
+        request.params['tokenform.valid_to.time'] = '16:00'
+
+        data = form_tile.form.extract(request=request)
+        self.assertEqual(data.fetch('tokenform.valid_from').extracted, None)
+        self.assertEqual(
+            data.fetch('tokenform.valid_to').extracted,
+            datetime(2023, 9, 21, 16, 0)
+        )
+
+        request.params['tokenform.valid_from'] = '22.9.2023'
+        request.params['tokenform.valid_from.time'] = '00:00'
+        request.params['tokenform.valid_to'] = '21.9.2023'
+        request.params['tokenform.valid_to.time'] = '00:00'
+
+        data = form_tile.form.extract(request=request)
+        self.assertEqual(data.fetch('tokenform.valid_from').errors, [])
+        self.assertEqual(
+            data.fetch('tokenform.valid_to').errors,
+            [ExtractionError('timerange_error')]
         )
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def _test_token_addform(self):
+    def test_TokenAddForm(self):
         request = self.layer.new_request()
 
         # create token
@@ -446,11 +520,14 @@ class TestTokenAPI(NodeTestCase):
         form_tile.action_resource = 'tokenform'
         form_tile.prepare()
 
-        # prepare request
-        request.params['tokenform.valid_from'] = '1.1.2022'
-        request.params['tokenform.valid_to'] = '2.1.2022'
-        request.params['tokenform.usage_count'] = '-1'
-        request.params['tokenform.lock_time'] = '0'
+        # prepare request, token gets created with default values
+        request.params['tokenform.value'] = ''
+        request.params['tokenform.valid_from'] = ''
+        request.params['tokenform.valid_from.time'] = ''
+        request.params['tokenform.valid_to'] = ''
+        request.params['tokenform.valid_to.time'] = ''
+        request.params['tokenform.usage_count'] = ''
+        request.params['tokenform.lock_time'] = ''
         request.params['action.tokenform.save'] = '1'
 
         # save token
@@ -459,25 +536,53 @@ class TestTokenAPI(NodeTestCase):
 
         # check if token has been added
         self.assertEqual(len(tokens), 1)
-        token = tokens.values()[0]
-        self.assertEqual(token.attrs['valid_from'], datetime(2022, 1, 1))
-        self.assertEqual(token.attrs['valid_to'], datetime(2022, 1, 2))
+        token = tokens[token.name]
+        self.assertEqual(token.attrs['value'], token.name)
+        self.assertEqual(token.attrs['valid_from'], None)
+        self.assertEqual(token.attrs['valid_to'], None)
         self.assertEqual(token.attrs['usage_count'], -1)
         self.assertEqual(token.attrs['lock_time'], 0)
 
+        # create another token with custom values
+        tokens.clear()
+        tokens()
+        token = TokenNode(parent=tokens)
+
+        request.params['tokenform.value'] = 'token value'
+        request.params['tokenform.valid_from'] = '21.9.2023'
+        request.params['tokenform.valid_from.time'] = '10:00'
+        request.params['tokenform.valid_to'] = '22.9.2023'
+        request.params['tokenform.valid_to.time'] = '12:00'
+        request.params['tokenform.usage_count'] = '10'
+        request.params['tokenform.lock_time'] = '100'
+        request.params['action.tokenform.save'] = '1'
+
+        # save token
+        with self.layer.authenticated('admin'):
+            form_tile(token, request)
+
+        self.assertEqual(len(tokens), 1)
+        token = tokens[token.name]
+        self.assertEqual(token.attrs['value'], 'token value')
+        self.assertEqual(token.attrs['valid_from'], datetime(2023, 9, 21, 10, 0))
+        self.assertEqual(token.attrs['valid_to'], datetime(2023, 9, 22, 12, 0))
+        self.assertEqual(token.attrs['usage_count'], 10)
+        self.assertEqual(token.attrs['lock_time'], 100)
+
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def _test_token_editform(self):
+    def test_TokenEditForm(self):
         request = self.layer.new_request()
 
         # create token
         tokens = get_root()['tokens']
         token_uid = str(uuid.uuid4())
         token = tokens[token_uid] = TokenNode()
-        token.attrs['valid_from'] = datetime.now()
-        token.attrs['valid_to'] = datetime.now() + timedelta(1)
-        token.attrs['lock_time'] = 0
-        token.attrs['usage_count'] = -1
+        token.attrs['value'] = 'token value'
+        token.attrs['valid_from'] = datetime(2023, 9, 21, 10, 0)
+        token.attrs['valid_to'] = datetime(2023, 9, 22, 12, 0)
+        token.attrs['usage_count'] = 10
+        token.attrs['lock_time'] = 100
 
         # prepare token form
         form_tile = TokenEditForm(attribute='render')
@@ -487,8 +592,11 @@ class TestTokenAPI(NodeTestCase):
         form_tile.prepare()
 
         # prepare request
-        request.params['tokenform.valid_from'] = '1.1.2022'
-        request.params['tokenform.valid_to'] = '2.1.2022'
+        request.params['tokenform.value'] = ''
+        request.params['tokenform.valid_from'] = '21.9.2023'
+        request.params['tokenform.valid_from.time'] = '08:00'
+        request.params['tokenform.valid_to'] = '21.9.2023'
+        request.params['tokenform.valid_to.time'] = '18:00'
         request.params['tokenform.usage_count'] = '-1'
         request.params['tokenform.lock_time'] = '0'
         request.params['action.tokenform.save'] = '1'
@@ -498,10 +606,15 @@ class TestTokenAPI(NodeTestCase):
             form_tile(token, request)
 
         # check token has been edited
-        self.assertEqual(token.attrs['valid_from'], datetime(2022, 1, 1))
-        self.assertEqual(token.attrs['valid_to'], datetime(2022, 1, 2))
+        self.assertEqual(token.attrs['value'], token.name)
+        self.assertEqual(token.attrs['valid_from'], datetime(2023, 9, 21, 8, 0))
+        self.assertEqual(token.attrs['valid_to'], datetime(2023, 9, 21, 18, 0))
         self.assertEqual(token.attrs['usage_count'], -1)
         self.assertEqual(token.attrs['lock_time'], 0)
+
+
+class TestTokenViews(NodeTestCase):
+    layer = tokens_layer
 
     def _test_qr_code_generator(self):
         request = self.layer.new_request()
