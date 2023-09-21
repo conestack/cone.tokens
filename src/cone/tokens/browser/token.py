@@ -1,18 +1,12 @@
 from base64 import b64encode
-from datetime import datetime
-from datetime import timedelta
 from cone.app.browser.ajax import AjaxEvent
 from cone.app.browser.ajax import ajax_continue
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
-from cone.app.browser.contents import ContentsTile
-from cone.app.browser.copysupport import extract_copysupport_cookie
 from cone.app.browser.form import Form
 from cone.app.browser.layout import ProtectedContentTile
 from cone.app.browser.utils import make_url
 from cone.app.browser.utils import request_property
-from cone.app.interfaces import ICopySupport
-from cone.app.interfaces import IWorkflowState
 from cone.app.utils import add_creation_metadata
 from cone.app.utils import update_creation_metadata
 from cone.tile import Tile
@@ -21,6 +15,8 @@ from cone.tile import tile
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
+from datetime import datetime
+from datetime import timedelta
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
@@ -29,6 +25,8 @@ from yafowil.persistence import node_attribute_writer
 import io
 import qrcode
 import uuid
+
+
 _ = TranslationStringFactory('cone.tokens')
 
 
@@ -37,7 +35,7 @@ _ = TranslationStringFactory('cone.tokens')
     path='templates/token.pt',
     interface=TokenNode,
     permission='view')
-class TokenTile(ProtectedContentTile):
+class TokenContent(ProtectedContentTile):
 
     @request_property
     def stream_qrcode_token(self):
@@ -47,11 +45,11 @@ class TokenTile(ProtectedContentTile):
         img_byte_arr = b64encode(img_byte_arr.getvalue()).decode('utf-8')
         qr_src = 'data:image/png;base64,' + img_byte_arr
         return qr_src
-    
+
     @property
     def lock_time_seconds(self):
         return f"{self.model.attrs.get('lock_time')} sec"
-    
+
     @property
     def is_active(self):
         #check if token is active / valid,  doesnt check locktime
@@ -63,35 +61,17 @@ class TokenTile(ProtectedContentTile):
             return False
         return True
 
+
 @tile(
-    name='contents',
+    name='content',
     path='templates/tokens.pt',
     interface=TokenContainer,
     permission='view')
-class TokensTile(ContentsTile):
-    
-    # if needed, can add css classes based on conditions here
-    def sorted_rows(self, start, end, sort, order):
-        children = self.sorted_children(sort, order)
-        rows = list()
-        cut_urls = extract_copysupport_cookie(self.request, 'cut')
-        for child in children[start:end]:
-            row_data = self.row_data(child)
-            target = make_url(self.request, node=child)
-            if ICopySupport.providedBy(child):
-                row_data.selectable = True
-                row_data.target = target
-                row_data.css = 'copysupportitem'
-                if target in cut_urls:
-                    row_data.css += ' copysupport_cut'
-            if IWorkflowState.providedBy(child):
-                row_data.css += ' state-%s' % child.state
-            if hasattr(child, 'node_info_name') and child.node_info_name:
-                row_data.css += ' node-type-%s' % child.node_info_name
-            rows.append(row_data)
-        return rows
+class TokensContent(ProtectedContentTile):
+    ...
 
-@tile(name='add_duration', permission='view')
+
+@tile(name='add_duration', interface=TokenNode, permission='edit')
 class AddDuration(Tile):
 
     # action event to reload the page and update the tokens valid_to and valid_from
@@ -116,7 +96,7 @@ class AddDuration(Tile):
                     second=0,
                     microsecond=0
                 )
-            else: #tomorrow
+            else: # tomorrow
                 self.model.attrs['valid_from'] = current_time.replace(
                     hour=6,
                     minute=0,
@@ -157,8 +137,9 @@ class AddDuration(Tile):
             ) + timedelta(days=7-current_time.weekday())
         ajax_continue(self.request, [event])
         return u''
-    
-@tile(name='add_use',permission='view')
+
+
+@tile(name='add_use', interface=TokenNode, permission='edit')
 class AddUse(Tile):
 
     # action event to reload the page and update the tokens usage_count
@@ -174,6 +155,7 @@ class AddUse(Tile):
             self.model.attrs['usage_count'] += int(self.request.params.get('amount'))
         ajax_continue(self.request, [event])
         return u''
+
 
 class TokenForm(Form):
     form_name = 'tokenform'
@@ -277,7 +259,7 @@ class TokenForm(Form):
 class TokenAddForm(TokenForm):
 
     def save(self, widget, data):
-        super(TokenAddForm, self).save(widget, data) 
+        super(TokenAddForm, self).save(widget, data)
         self.model.parent[str(uuid.uuid4())] = self.model
         add_creation_metadata(self.request, self.model.attrs)
         self.model()

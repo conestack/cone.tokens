@@ -14,7 +14,6 @@ from pyramid.i18n import TranslationStringFactory
 from sqlalchemy import Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
-from sqlalchemy import Boolean
 from sqlalchemy import String
 from zope.interface import implementer
 import uuid
@@ -40,10 +39,7 @@ class TokenRecord(SQLBase):
 @node_info(
     name='token_node',
     title=_('token_node_title', default='Token'),
-    description=_(
-        'token_node_description',
-        default='Token'
-    ))
+    description=_('token_node_description', default='Token'))
 @implementer(ILeaf)
 class TokenNode(SQLRowNode):
     record_class = TokenRecord
@@ -81,10 +77,11 @@ class TokenContainer(SQLTableNode):
     @property
     def properties(self):
         props = Properties()
-        props.default_content_tile = 'listing'
         props.in_navtree = True
         props.action_up = True
         props.action_sharing = True
+        props.action_view = True
+        props.action_list = True
         return props
 
     @property

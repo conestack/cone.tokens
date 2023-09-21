@@ -11,6 +11,7 @@ class TokenNotExists(TokenException):
         self.message = f'The token {self.token_uid} doesn\'t exists'
         super().__init__(self.message)
 
+
 class InvalidToken(TokenException):
     
         def __init__(self, token_uid):

@@ -1,6 +1,6 @@
 from cone.app import main_hook
-from cone.tokens.model import TokenContainer
 from cone.tokens.browser import configure_resources
+from cone.tokens.model import TokenContainer
 import cone.app
 import logging
 
