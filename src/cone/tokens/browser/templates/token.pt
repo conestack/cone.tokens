@@ -19,12 +19,24 @@
           </span>
         </button>
       </li>
+      <li class="list-group-item">
+        <strong i18n:translate="value">Value</strong>:
+        <span tal:content="model.attrs['value']">
+          Value
+        </span>
+      </li>
       <li class="list-group-item flex-group">
         <div>
-          <strong i18n:translate="valid">Valid</strong>:
-          <span tal:content="model.attrs['valid_from'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
-          <strong> - </strong>
-          <span tal:content="model.attrs['valid_to'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
+        <strong i18n:translate="valid">Valid</strong>:
+          <tal:range condition="model.attrs['valid_from'] or model.attrs['valid_to']">
+            <span tal:content="context.format_date(model.attrs['valid_from'])"></span>
+            <strong> - </strong>
+            <span tal:content="context.format_date(model.attrs['valid_to'])"></span>
+          </tal:range>
+          <span tal:condition="not model.attrs['valid_from'] and not model.attrs['valid_to']"
+                i18n:translate="unlimited">
+              Unlimited
+          </span>
         </div>
         <div class="btn-group">
           <button class="btn btn-default"

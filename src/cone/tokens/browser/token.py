@@ -1,6 +1,6 @@
 from base64 import b64encode
-from cone.app.browser.ajax import AjaxEvent
 from cone.app.browser.ajax import ajax_continue
+from cone.app.browser.ajax import AjaxEvent
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
 from cone.app.browser.form import Form
@@ -9,17 +9,19 @@ from cone.app.browser.utils import make_url
 from cone.app.browser.utils import request_property
 from cone.app.utils import add_creation_metadata
 from cone.app.utils import update_creation_metadata
+from cone.sql import get_session
 from cone.tile import Tile
 from cone.tile import tile
 from cone.tile import tile
-from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
+from cone.tokens.model import TokenRecord
 from datetime import datetime
 from datetime import timedelta
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
+from yafowil.base import ExtractionError
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer
 import io
@@ -53,11 +55,12 @@ class TokenContent(ProtectedContentTile):
     @property
     def is_active(self):
         #check if token is active / valid,  doesnt check locktime
-        if self.model.attrs.get('usage_count') == 0:
+        attrs = self.model.attrs
+        if attrs.get('usage_count') == 0:
             return False
-        if datetime.now() > self.model.attrs.get('valid_to'):
+        if attrs.get('valid_to') and datetime.now() > attrs.get('valid_to'):
             return False
-        if datetime.now() < self.model.attrs.get('valid_from'):
+        if attrs.get('valid_from') and datetime.now() < attrs.get('valid_from'):
             return False
         return True
 
@@ -68,6 +71,11 @@ class TokenContent(ProtectedContentTile):
     @property
     def cssclass(self):
         return 'btn-success' if self.is_active else 'btn-danger'
+
+    def format_date(self, value):
+        if isinstance(value, datetime):
+            return value.strftime('%d.%m.%Y, %H:%M:%S')
+        return value
 
 
 @tile(
@@ -177,12 +185,27 @@ class TokenForm(Form):
         )
 
     def timerange_extractor(self, widget, data):
+        extracted = data.extracted
+        if extracted is UNSET:
+            return extracted
         valid_from = data.fetch('tokenform.valid_from').extracted
-        valid_to = data.fetch('tokenform.valid_to').extracted
-        if not valid_from or not valid_to:
-            return
-        if valid_from >= valid_to:
-            raise TokenValueError('valid_from must be before valid_to')
+        if valid_from and extracted:
+            if valid_from >= extracted:
+                raise ExtractionError('Token Start Date must be before End Date.')
+        return extracted
+
+    def value_extractor(self, widget, data):
+        extracted = data.extracted
+        if not extracted:
+            return extracted
+        session = get_session(self.request)
+        existing_value = session.query(TokenRecord) \
+            .filter(TokenRecord.value == extracted) \
+            .filter(TokenRecord.uid != self.model.record.uid) \
+            .one_or_none()
+        if existing_value:
+            raise ExtractionError('Value already used.')
+        return extracted
 
     def prepare(self):
         form = self.form = factory(
@@ -200,18 +223,39 @@ class TokenForm(Form):
             props={
                 'label': _('valid_from', default='Valid from'),
                 'datepicker': True,
+                'timepicker': True,
+                'time': True,
                 'locale': 'de',
                 'persist': True
             }
         )
         form['valid_to'] = factory(
-            '#field:datetime',
+            '#field:*valid_to:datetime',
             value=attrs.get('valid_to', UNSET),
             props={
                 'label': _('valid_to', default='Valid to'),
                 'datepicker': True,
+                'timepicker': True,
+                'time': True,
                 'locale': 'de',
                 'persist': True
+            },
+            custom={
+                'valid_to': {
+                    'extractors': [self.timerange_extractor]
+                }
+            }
+        )
+        form['value'] = factory(
+            '#field:*value:text',
+            value=attrs.get('value', UNSET),
+            props={
+                'label': _('value', default='Value')
+            },
+            custom={
+                'value': {
+                    'extractors': [self.value_extractor]
+                }
             }
         )
         form['usage_count'] = factory(
@@ -219,7 +263,7 @@ class TokenForm(Form):
             value=attrs.get('usage_count', UNSET),
             props={
                 'label': _('usage_count', default='Usage Count'),
-                'datatype': 'integer',
+                'datatype': int,
                 'emptyvalue': -1
             }
         )
@@ -228,23 +272,18 @@ class TokenForm(Form):
             value=attrs.get('lock_time', UNSET),
             props={
                 'label': _('lock_time', default='Lock Time'),
-                'datatype': 'integer',
+                'datatype': int,
                 'emptyvalue': 0
             }
         )
         form['save'] = factory(
-            'submit:*timerange_extractor',
+            'submit',
             props={
                 'action': 'save',
                 'expression': True,
                 'handler': self.save,
                 'next': self.next,
                 'label': _('save', default='Save')
-            },
-            custom={
-                'timerange_extractor': {
-                    'extractors': [self.timerange_extractor]
-                }
             }
         )
         form['cancel'] = factory(
@@ -268,7 +307,11 @@ class TokenAddForm(TokenForm):
 
     def save(self, widget, data):
         super(TokenAddForm, self).save(widget, data)
-        self.model.parent[str(uuid.uuid4())] = self.model
+        uid_ = str(uuid.uuid4())
+        self.model.parent[uid_] = self.model
+        value = data.fetch('tokenform.value').extracted
+        if not value:
+            self.model.record.value = uid_
         add_creation_metadata(self.request, self.model.attrs)
         self.model()
 
@@ -279,5 +322,8 @@ class TokenEditForm(TokenForm):
 
     def save(self, widget, data):
         super(TokenEditForm, self).save(widget, data)
+        value = data.fetch('tokenform.value').extracted
+        if not value:
+            self.model.record.value = str(self.model.record.uid)
         update_creation_metadata(self.request, self.model.attrs)
         self.model()
