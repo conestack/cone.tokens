@@ -26,6 +26,7 @@ class TokenRecord(SQLBase):
     __tablename__ = 'tokens'
 
     uid = Column(GUID, primary_key=True)
+    value = Column(String)
     last_used = Column(DateTime)
     valid_from = Column(DateTime)
     valid_to = Column(DateTime)
@@ -48,6 +49,7 @@ class TokenNode(SQLRowNode):
     def properties(self):
         props = Properties()
         props.action_up = True
+        props.action_up_tile = 'content'
         props.action_edit = True
         props.action_view = True
         return props
@@ -55,7 +57,7 @@ class TokenNode(SQLRowNode):
     @instance_property
     def metadata(self):
         md = Metadata()
-        md.title = str(self.attrs.get('uid'))
+        md.title = str(self.attrs.get('value'))
         md.creator = self.attrs.get('creator')
         md.created = self.attrs.get('created')
         md.modified = self.attrs.get('modified')

@@ -1,12 +1,20 @@
 <tal:tokens
   xmlns:tal="http://xml.zope.org/namespaces/tal"
   xmlns:ajax="http://namespaces.conestack.org/ajax"
+  xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+  i18n:domain="cone.tokens"
   omit-tag="True">
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
-  <div class="token-container">
-    Tokens
+  <div class="tokens-container">
+
+    <button class="scan-token">
+      <span class="label" i18n:translate="scan_token">Scan Token</span>
+      <span class="timer"></span>
+    </button>
+
+    <input type="text" name="token-uid" />
   </div>
 
 </tal:tokens>

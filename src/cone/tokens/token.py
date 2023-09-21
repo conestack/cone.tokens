@@ -5,7 +5,6 @@ from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
-from cone.tokens.exceptions import InvalidToken
 from cone.tokens.model import TokenRecord
 from datetime import datetime 
 from datetime import timedelta
@@ -24,7 +23,7 @@ class Tokens(object):
     def session(self):
         return get_session(self.request)
 
-    def _get_token(self,token_uid):
+    def _get_token(self, token_uid):
         session = self.session
         token = session\
             .query(TokenRecord)\
@@ -33,6 +32,13 @@ class Tokens(object):
         if not token:
             raise TokenNotExists(token_uid)
         return token
+
+    def _query_token(self, value):
+        session = self.session
+        return session\
+            .query(TokenRecord)\
+            .filter(TokenRecord.value == value)\
+            .one_or_none()
 
     def consume(self, token_uid):
         session = self.session
@@ -57,16 +63,20 @@ class Tokens(object):
     def add(
         self,
         token_uid,
+        value,
         valid_from,
         valid_to,
         usage_count,
         lock_time
     ):
-        session = self.session
         if valid_from >= valid_to:
             raise TokenValueError('valid_from must be before valid_to')
+        if not value:
+            value = token_uid
+        session = self.session
         token = TokenRecord()
         token.uid = token_uid
+        token.value = value
         token.valid_from = valid_from
         token.valid_to = valid_to
         token.lock_time = lock_time
@@ -80,6 +90,7 @@ class Tokens(object):
     def update(
         self,
         token_uid,
+        value=None,
         valid_from=None,
         valid_to=None,
         usage_count=None,
@@ -87,6 +98,11 @@ class Tokens(object):
     ):
         token = self._get_token(token_uid)
         session = self.session
+        if value and value != token.value:
+            token = self._query_token(value)
+            if token and token.uid != token_uid:
+                raise TokenValueError('Given value already used by another token')
+            token.value = value
         if valid_from:
             token.valid_from = valid_from
         if valid_to:

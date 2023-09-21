@@ -12,14 +12,6 @@ class TokenNotExists(TokenException):
         super().__init__(self.message)
 
 
-class InvalidToken(TokenException):
-    
-        def __init__(self, token_uid):
-            self.token_uid = token_uid
-            self.message = f'The token {self.token_uid} is invalid'
-            super().__init__(self.message)
-
-
 class TokenUsageCountExceeded(TokenException):
 
     def __init__(self, token_uid):

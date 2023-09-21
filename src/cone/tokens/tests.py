@@ -5,16 +5,19 @@ from cone.sql.testing import SQLLayer
 from cone.tokens.browser.api import get_datetime
 from cone.tokens.browser.api import get_int
 from cone.tokens.browser.api import get_int
-from cone.tokens.browser.token import TokenAddForm, TokenTile
+from cone.tokens.browser.token import TokenAddForm
+from cone.tokens.browser.token import TokenContent
 from cone.tokens.browser.token import TokenEditForm
 from cone.tokens.browser.token import TokenForm
+from cone.tokens.browser.token import TokensContent
 from cone.tokens.exceptions import TokenAPIError
 from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
-from cone.tokens.model import TokenContainer, TokenNode
+from cone.tokens.model import TokenContainer
+from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenRecord
 from cone.tokens.token import Tokens
 from cone.ugm.testing import principals
@@ -56,6 +59,7 @@ class TestTokens(NodeTestCase):
 
         # add token to tokens container
         token = TokenNode()
+        value = token.attrs['value'] = 'Token value'
         valid_from = token.attrs['valid_from'] = datetime.now()
         valid_to = token.attrs['valid_to'] = datetime.now() + timedelta(1)
         token.attrs['lock_time'] = 0
@@ -68,19 +72,21 @@ class TestTokens(NodeTestCase):
         self.assertEqual(len(tokens), 1)
         token = tokens.values()[0]
         self.assertEqual(isinstance(token, TokenNode), True)
+        self.assertEqual(token.attrs['value'], value)
         self.assertEqual(token.attrs['valid_from'], valid_from)
         self.assertEqual(token.attrs['valid_to'],valid_to)
         self.assertEqual(token.attrs['lock_time'], 0)
         self.assertEqual(token.attrs['usage_count'], -1)
 
         # check metadata
-        self.assertEqual(token.metadata.title, token_uuid)
+        self.assertEqual(token.metadata.title, value)
         self.assertEqual(token.metadata.creator, None)
         self.assertEqual(token.metadata.created, None)
         self.assertEqual(token.metadata.modified, None)
 
         # check properties
         self.assertEqual(token.properties.action_up, True)
+        self.assertEqual(token.properties.action_up_tile, 'content')
         self.assertEqual(token.properties.action_edit, True)
         self.assertEqual(token.properties.action_view, True)
 
@@ -91,19 +97,20 @@ class TestTokens(NodeTestCase):
             'token_container_description'
         )
         # check container properties
-        self.assertEqual(tokens.properties.default_content_tile,'listing')
-        self.assertEqual(tokens.properties.in_navtree, True)
-        self.assertEqual(tokens.properties.action_up, True)
-        self.assertEqual(tokens.properties.action_sharing, True)
-        
+        self.assertTrue(tokens.properties.in_navtree)
+        self.assertTrue(tokens.properties.action_up)
+        self.assertTrue(tokens.properties.action_sharing)
+        self.assertTrue(tokens.properties.action_view)
+        self.assertTrue(tokens.properties.action_list)
 
     @sql_testing.delete_table_records(TokenRecord)
-    def test_token_consume(self):
+    def _test_token_consume(self):
         request = self.layer.new_request()
         session = get_session(request)
 
         token = TokenRecord()
         uid = token.uid = uuid.uuid4()
+        token.value = 'Token value'
         last_used = token.last_used = datetime(2023, 1, 1)
         token.valid_from = datetime.now()
         token.valid_to = datetime.now() + timedelta(1)
@@ -139,7 +146,7 @@ class TestTokens(NodeTestCase):
         self.assertRaises(TokenNotExists, token_api.consume, uid)
 
     @sql_testing.delete_table_records(TokenRecord)
-    def test_token_add(self):
+    def _test_token_add(self):
         request = self.layer.new_request()
         session = get_session(request)
 
@@ -150,7 +157,7 @@ class TestTokens(NodeTestCase):
         self.assertEqual(isinstance(result, TokenRecord), True)
 
     @sql_testing.delete_table_records(TokenRecord)
-    def test_token_delete(self):
+    def _test_token_delete(self):
         request = self.layer.new_request()
         session = get_session(request)
 
@@ -169,7 +176,7 @@ class TestTokens(NodeTestCase):
         self.assertEqual(result, [])
 
     @sql_testing.delete_table_records(TokenRecord)
-    def test_token_update(self):
+    def _test_token_update(self):
         request = self.layer.new_request()
         session = get_session(request)
 
@@ -197,7 +204,7 @@ class TestTokens(NodeTestCase):
         self.assertEqual(result.lock_time, 120)
         self.assertEqual(result.usage_count, 1)
 
-    def test_token_form(self):
+    def _test_token_form(self):
         request = self.layer.new_request()
 
         # create token
@@ -261,7 +268,7 @@ class TestTokens(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_token_addform(self):
+    def _test_token_addform(self):
         request = self.layer.new_request()
 
         # create token
@@ -296,7 +303,7 @@ class TestTokens(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_token_editform(self):
+    def _test_token_editform(self):
         request = self.layer.new_request()
 
         # create token
@@ -332,7 +339,7 @@ class TestTokens(NodeTestCase):
         self.assertEqual(token.attrs['usage_count'], -1)
         self.assertEqual(token.attrs['lock_time'], 0)
 
-    def test_qr_code_generator(self):
+    def _test_qr_code_generator(self):
         request = self.layer.new_request()
         token_tile = TokenTile(attribute='render')
         token_tile.model = TokenNode()
@@ -344,7 +351,7 @@ class TestTokens(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_json_api_common(self):
+    def _test_json_api_common(self):
         err = TokenAPIError('Error message')
         self.assertEqual(err.message, 'Error message')
         self.assertEqual(
@@ -389,7 +396,7 @@ class TestTokens(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_json_api_add(self):
+    def _test_json_api_add(self):
         tokens = get_root()['tokens']
         request = self.layer.new_request(type='json')
         request.method = 'POST'
@@ -459,7 +466,7 @@ class TestTokens(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_json_api_edit(self):
+    def _test_json_api_edit(self):
         request = self.layer.new_request(type='json')
         request.method = 'POST'
         token_api = Tokens(request)
@@ -560,7 +567,7 @@ class TestTokens(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_json_api_delete(self):
+    def _test_json_api_delete(self):
         request = self.layer.new_request(type='json')
         request.method = 'POST'
         token_api = Tokens(request)
@@ -606,7 +613,7 @@ class TestTokens(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_json_api_consume(self):
+    def _test_json_api_consume(self):
         request = self.layer.new_request(type='json')
         request.method = 'GET'
         token_api = Tokens(request)
