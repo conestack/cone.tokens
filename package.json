@@ -1,0 +1,11 @@
+{
+  "name": "cone.tokens",
+  "version": "0.1.0-dev",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.3",
+    "jquery": "github:jquery/jquery",
+    "rollup": "^2.79.1",
+    "rollup-plugin-cleanup": "^3.2.1",
+    "sass": "^1.68.0"
+  }
+}

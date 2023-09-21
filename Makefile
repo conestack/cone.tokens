@@ -72,11 +72,11 @@ SCSS_SOURCE?=scss/styles.scss
 
 # The target file for the compiles Stylesheet.
 # Default: scss/styles.css
-SCSS_TARGET?=src/cone/tokens/browser/static/styles.css
+SCSS_TARGET?=src/cone/tokens/browser/static/cone.tokens.css
 
 # The target file for the compressed Stylesheet.
 # Default: scss/styles.min.css
-SCSS_MIN_TARGET?=src/cone/tokens/browser/static/styles.min.css
+SCSS_MIN_TARGET?=src/cone/tokens/browser/static/cone.tokens.min.css
 
 # Additional options to be passed to SCSS compiler.
 # Default: --no-source-map=none
