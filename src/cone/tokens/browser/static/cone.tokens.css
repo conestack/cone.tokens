@@ -1,8 +1,29 @@
-td.token-td {
-  vertical-align: middle !important;
+li.flex-group {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
-li.token-li {
-  display: block;
-  padding: 10px 15px;
+div.flex-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+div.panel.token {
+  flex: 1;
+  min-width: fit-content;
+}
+
+div.QR {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+div.QR > strong {
+  margin-top: 15px;
+}
+
+.stream_image {
+  margin: auto;
 }

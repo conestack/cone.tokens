@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cone.tokens 1.0\n"
-"POT-Creation-Date: 2023-09-21 11:24+0200\n"
+"POT-Creation-Date: 2023-09-21 13:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,51 +12,124 @@ msgstr ""
 "Generated-By: Lingua 4.15.0\n"
 
 #. Default: Token
-#: src/cone/tokens/model.py:41
+#: src/cone/tokens/model.py:42
 msgid "token_node_title"
 msgstr "Token"
 
 #. Default: Token
-#: src/cone/tokens/model.py:42
+#: src/cone/tokens/model.py:43
 msgid "token_node_description"
 msgstr "Token"
 
 #. Default: Tokens
-#: src/cone/tokens/model.py:67
+#: src/cone/tokens/model.py:69
 msgid "token_container_title"
 msgstr "Tokens"
 
 #. Default: Tokens
-#: src/cone/tokens/model.py:68
+#: src/cone/tokens/model.py:70
 msgid "token_container_description"
 msgstr "Tokens"
 
 #. Default: Valid from
-#: src/cone/tokens/browser/token.py:193
+#: src/cone/tokens/browser/token.py:201
 msgid "valid_from"
 msgstr "Gültig ab"
 
 #. Default: Valid to
-#: src/cone/tokens/browser/token.py:203
+#: src/cone/tokens/browser/token.py:211
 msgid "valid_to"
 msgstr "Gültig bis"
 
 #. Default: Usage Count
-#: src/cone/tokens/browser/token.py:213
+#: src/cone/tokens/browser/token.py:221
 msgid "usage_count"
 msgstr "Benutzungen"
 
 #. Default: Lock Time
-#: src/cone/tokens/browser/token.py:222
+#: src/cone/tokens/browser/token.py:230
+#: src/cone/tokens/browser/templates/token.pt:134
 msgid "lock_time"
-msgstr "Speerzeit"
+msgstr "Sperrzeit"
 
 #. Default: Save
-#: src/cone/tokens/browser/token.py:234
+#: src/cone/tokens/browser/token.py:242
 msgid "save"
 msgstr "Speichern"
 
 #. Default: Cancel
-#: src/cone/tokens/browser/token.py:249
+#: src/cone/tokens/browser/token.py:257
 msgid "cancel"
 msgstr "Abbrechen"
+
+#. Default: Valid
+#: src/cone/tokens/browser/templates/token.pt:24
+msgid "valid"
+msgstr "Gültig:"
+
+#. Default: Unlimited
+#: src/cone/tokens/browser/templates/token.pt:34
+#: src/cone/tokens/browser/templates/token.pt:88
+#: src/cone/tokens/browser/templates/token.pt:97
+msgid "unlimited"
+msgstr "Unlimitiert"
+
+#. Default: Morning
+#: src/cone/tokens/browser/templates/token.pt:42
+msgid "morning"
+msgstr "Vormittag"
+
+#. Default: Afternoon
+#: src/cone/tokens/browser/templates/token.pt:50
+msgid "afternoon"
+msgstr "Nachmittag"
+
+#. Default: Today
+#: src/cone/tokens/browser/templates/token.pt:58
+msgid "today"
+msgstr "Heute"
+
+#. Default: This Week
+#: src/cone/tokens/browser/templates/token.pt:66
+msgid "this_week"
+msgstr "Diese Woche"
+
+#. Default: This Month
+#: src/cone/tokens/browser/templates/token.pt:74
+msgid "this_month"
+msgstr "Dieser Monat"
+
+#. Default: Creator
+#: src/cone/tokens/browser/templates/token.pt:138
+msgid "creator"
+msgstr "Ersteller"
+
+#. Default: Created
+#: src/cone/tokens/browser/templates/token.pt:142
+msgid "created"
+msgstr "Erstellt"
+
+#. Default: Modified
+#: src/cone/tokens/browser/templates/token.pt:146
+msgid "modified"
+msgstr "Bearbeitet"
+
+#. Default: Scan Token
+#: src/cone/tokens/browser/templates/tokens.pt:13
+msgid "scan_token"
+msgstr ""
+
+#~ msgid "show"
+#~ msgstr "Anzeigen"
+
+#~ msgid "entries"
+#~ msgstr "Einträge"
+
+#~ msgid "search"
+#~ msgstr "Suchen"
+
+#~ msgid "to"
+#~ msgstr "bis"
+
+#~ msgid "of"
+#~ msgstr "von"

@@ -61,6 +61,14 @@ class TokenContent(ProtectedContentTile):
             return False
         return True
 
+    @property
+    def active_label(self):
+        return 'Active' if self.is_active else 'Inactive'
+
+    @property
+    def cssclass(self):
+        return 'btn-success' if self.is_active else 'btn-danger'
+
 
 @tile(
     name='content',
