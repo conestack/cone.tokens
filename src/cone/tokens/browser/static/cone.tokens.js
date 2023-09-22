@@ -1,31 +1,35 @@
-var cone_tokens = (function (exports, $$1, ts) {
+var cone_tokens = (function (exports, ts, jquery) {
     'use strict';
 
     class TokensOverview {
         static initialize(context) {
-            $('.tokens-overview-container', context).each(function() {
-                new TokensOverview($(this));
+            jquery.$('.tokens-overview-container', context).each(function() {
+                new TokensOverview(jquery.$(this));
             });
         }
         constructor(container) {
             this.container = container;
-            this.tokens_elem = $('#tokens-overview', container);
-            this.tokens = $('object.token_qr', this.tokens_elem);
-            this.tokens_title = $('#tokens-overview-title', container);
+            this.tokens_elem = jquery.$('#tokens-overview', container);
+            this.tokens = jquery.$('object.token_qr', this.tokens_elem);
+            this.tokens_title = jquery.$('#tokens-overview-title', container);
             this.set_token_size = this.set_token_size.bind(this);
-            this.size_input = $('<input />')
+            this.size_input = jquery.$('<input />')
                 .addClass('token-button')
                 .on('change', this.set_token_size);
-            this.size_input_label = $('<label />')
+            this.size_input_label = jquery.$('<label />')
                 .addClass('input-label')
                 .text('Token Size');
-            this.size_container = $('<div />')
+            this.size_container = jquery.$('<div />')
                 .addClass('token-size')
                 .append(this.size_input_label)
                 .append(this.size_input)
-                .append($('<span>%</span>'))
+                .append(jquery.$('<span>%</span>'))
                 .appendTo(this.tokens_title);
-            this.original_size = 256;
+            if (this.tokens.length) {
+                this.original_size = this.tokens[0].attr('width');
+            } else {
+                this.original_size = 256;
+            }
             this.token_size = 100;
         }
         get token_size() {
@@ -41,7 +45,7 @@ var cone_tokens = (function (exports, $$1, ts) {
                 `repeat( auto-fit, minmax(${px_value}px, 1fr) )`
             );
             this.tokens.each(function() {
-                let elem = $(this);
+                let elem = jquery.$(this);
                 elem.attr('width', `${px_value}px`);
                 elem.attr('height', `${px_value}px`);
             });
@@ -58,14 +62,14 @@ var cone_tokens = (function (exports, $$1, ts) {
     }
     class Tokens {
         static initialize(context) {
-            $('.tokens-container', context).each(function() {
-                new Tokens($(this));
+            jquery.$('.tokens-container', context).each(function() {
+                new Tokens(jquery.$(this));
             });
         }
         constructor(elem) {
             this.elem = elem;
-            this.token_uid_elem = $('[name=token-uid]', elem);
-            this.scan_token_elem = $('.scan-token', elem);
+            this.token_uid_elem = jquery.$('[name=token-uid]', elem);
+            this.scan_token_elem = jquery.$('.scan-token', elem);
             this.scan_token = this.scan_token.bind(this);
             this.scan_token_elem.on('click', (e) => {
                 this.scan_token();
@@ -85,7 +89,7 @@ var cone_tokens = (function (exports, $$1, ts) {
         }
     }
 
-    $$1(function() {
+    $(function() {
         ts.ajax.register(Tokens.initialize, true);
         ts.ajax.register(TokensOverview.initialize, true);
     });
@@ -97,4 +101,4 @@ var cone_tokens = (function (exports, $$1, ts) {
 
     return exports;
 
-})({}, jQuery, ts);
+})({}, ts, jQuery);

@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 export class TokensOverview {
     static initialize(context) {
         $('.tokens-overview-container', context).each(function() {
@@ -24,7 +26,11 @@ export class TokensOverview {
             .append(this.size_input)
             .append($('<span>%</span>'))
             .appendTo(this.tokens_title);
-        this.original_size = 256;
+        if (this.tokens.length) {
+            this.original_size = this.tokens[0].attr('width');
+        } else {
+            this.original_size = 256;
+        }
         this.token_size = 100; // percent
     }
 

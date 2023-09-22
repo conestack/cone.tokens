@@ -3,7 +3,7 @@
   "version": "0.1.0-dev",
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.3",
-    "jquery": "github:jquery/jquery",
+    "jquery": "git://github.com/jquery/jquery.git#2b6b5e0a3ba3029ec3ad1525a178920765e3adf1",
     "karma": "^6.4.2",
     "karma-chrome-launcher": "^3.2.0",
     "karma-coverage": "^2.2.1",
