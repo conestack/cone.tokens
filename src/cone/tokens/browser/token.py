@@ -92,7 +92,7 @@ class TokenContent(ProtectedContentTile):
     def format_date(self, value):
         if isinstance(value, datetime):
             return value.strftime('%d.%m.%Y, %H:%M:%S')
-        return value
+        return 'Unlimited'
 
 
 @tile(name='add_duration', interface=TokenNode, permission='edit')

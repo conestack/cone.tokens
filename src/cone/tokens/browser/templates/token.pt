@@ -7,161 +7,173 @@
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
-  <div class="flex-group">
-  <div class="panel panel-default token">
-    <ul class="list-group">
-      <li class="list-group-item">
-        <button type="button"
-                class="btn ${context.cssclass}">
-          <span class="glyphicon glyphicon-off"></span>
-          <span tal:content="context.active_label">
-            Active
-          </span>
-        </button>
-      </li>
-      <li class="list-group-item">
-        <strong i18n:translate="value">Value</strong>:
-        <span tal:content="model.attrs['value']">
-          Value
-        </span>
-      </li>
-      <li class="list-group-item flex-group">
-        <div>
-        <strong i18n:translate="valid">Valid</strong>:
-          <tal:range condition="model.attrs['valid_from'] or model.attrs['valid_to']">
-            <span tal:content="context.format_date(model.attrs['valid_from'])"></span>
-            <strong> - </strong>
-            <span tal:content="context.format_date(model.attrs['valid_to'])"></span>
-          </tal:range>
-          <span tal:condition="not model.attrs['valid_from'] and not model.attrs['valid_to']"
-                i18n:translate="unlimited">
-              Unlimited
-          </span>
-        </div>
-        <div class="btn-group">
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?duration=unlimited"
-            ajax:action="add_duration">
-            <span i18n:translate="unlimited">
-              Unlimited
-            </span>
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?duration=morning"
-            ajax:action="add_duration">
-            <span i18n:translate="morning">
-              Morning
-            </span>
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?duration=afternoon"
-            ajax:action="add_duration">
-            <span i18n:translate="afternoon">
-              Afternoon
-            </span>
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?duration=day"
-            ajax:action="add_duration">
-            <span i18n:translate="today">
-              Today
-            </span>
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?duration=week"
-            ajax:action="add_duration">
-            <span i18n:translate="this_week">
-              This Week
-            </span>
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?duration=week"
-            ajax:action="add_duration">
-            <span i18n:translate="this_month">
-              This Month
-            </span>
-          </button>
-        </div>
-      </li>
-      <li class="list-group-item flex-group">
-        <div>
-          <strong>Usage Count</strong>:
-          <span tal:condition="model.attrs['usage_count'] > -1"
-                tal:content="model.attrs['usage_count']">
-            Usage Count
-          </span>
-          <span tal:condition="model.attrs['usage_count'] == -1"
-                i18n:translate="unlimited">
-            Unlimited
-          </span>
-        </div>
-        <div class="btn-group">
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?amount=-1"
-            ajax:action="add_use">
-            <span i18n:translate="unlimited">
-              Unlimited
-            </span>
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?amount=1"
-            ajax:action="add_use">
-            1
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?amount=10"
-            ajax:action="add_use">
-            10
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?amount=20"
-            ajax:action="add_use">
-            20
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?amount=50"
-            ajax:action="add_use">
-            50
-          </button>
-          <button class="btn btn-default"
-            ajax:bind="click"
-            ajax:target="${context.nodeurl}?amount=100"
-            ajax:action="add_use">
-            100
-          </button>
-        </div>
-      </li>
-      <li class="list-group-item">
-        <strong i18n:translate="lock_time">Lock Time</strong>:
-        <span tal:content="context.lock_time_seconds"></span>
-      </li>
-      <li class="list-group-item">
-          <strong i18n:translate="creator">Creator</strong>:
-          <span tal:content="model.attrs['creator']"></span>
-      </li>
-      <li class="list-group-item">
-          <strong i18n:translate="created">Created</strong>:
-          <span tal:content="model.attrs['created'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
-      </li>
-      <li class="list-group-item">
-          <strong i18n:translate="modified">Modified</strong>:
-          <span tal:content="model.attrs['modified'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
-      </li>
-    </ul>
+  <div class="token-title list-group-item active">
+    <span i18n:translate="token">Token</span>
   </div>
+
+  <div class="flex-group">
+    <div class="panel panel-default token">
+
+      <ul class="list-group">
+
+        <li class="list-group-item">
+          <button type="button"
+                  class="btn ${context.cssclass} token-active">
+            <span class="glyphicon glyphicon-off"></span>
+            <span tal:content="context.active_label">
+              Active
+            </span>
+          </button>
+        </li>
+        <li class="list-group-item">
+          <strong i18n:translate="value">Value</strong>:
+          <span tal:content="model.attrs['value']">
+            Value
+          </span>
+        </li>
+
+        <li class="list-group-item flex-group">
+          <div>
+          <strong i18n:translate="valid">Valid</strong>:
+            <tal:range condition="model.attrs['valid_from'] or model.attrs['valid_to']">
+              <span tal:content="context.format_date(model.attrs['valid_from'])"></span>
+              <strong> - </strong>
+              <span tal:content="context.format_date(model.attrs['valid_to'])"></span>
+            </tal:range>
+            <span tal:condition="not model.attrs['valid_from'] and not model.attrs['valid_to']"
+                  i18n:translate="unlimited">
+                Unlimited
+            </span>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=unlimited"
+              ajax:action="add_duration">
+              <span i18n:translate="unlimited">
+                Unlimited
+              </span>
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=morning"
+              ajax:action="add_duration">
+              <span i18n:translate="morning">
+                Morning
+              </span>
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=afternoon"
+              ajax:action="add_duration">
+              <span i18n:translate="afternoon">
+                Afternoon
+              </span>
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=day"
+              ajax:action="add_duration">
+              <span i18n:translate="today">
+                Today
+              </span>
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=week"
+              ajax:action="add_duration">
+              <span i18n:translate="this_week">
+                This Week
+              </span>
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?duration=week"
+              ajax:action="add_duration">
+              <span i18n:translate="this_month">
+                This Month
+              </span>
+            </button>
+          </div>
+        </li>
+
+        <li class="list-group-item flex-group">
+          <div>
+            <strong>Usage Count</strong>:
+            <span tal:condition="model.attrs['usage_count'] > -1"
+                  tal:content="model.attrs['usage_count']">
+              Usage Count
+            </span>
+            <span tal:condition="model.attrs['usage_count'] == -1"
+                  i18n:translate="unlimited">
+              Unlimited
+            </span>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=-1"
+              ajax:action="add_use">
+              <span i18n:translate="unlimited">
+                Unlimited
+              </span>
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=1"
+              ajax:action="add_use">
+              1
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=10"
+              ajax:action="add_use">
+              10
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=20"
+              ajax:action="add_use">
+              20
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=50"
+              ajax:action="add_use">
+              50
+            </button>
+            <button class="btn btn-default"
+              ajax:bind="click"
+              ajax:target="${context.nodeurl}?amount=100"
+              ajax:action="add_use">
+              100
+            </button>
+          </div>
+        </li>
+
+        <li class="list-group-item">
+          <strong i18n:translate="lock_time">Lock Time</strong>:
+          <span tal:content="context.lock_time_seconds"></span>
+        </li>
+
+        <li class="list-group-item">
+            <strong i18n:translate="creator">Creator</strong>:
+            <span tal:content="model.attrs['creator']"></span>
+        </li>
+
+        <li class="list-group-item">
+            <strong i18n:translate="created">Created</strong>:
+            <span tal:content="model.attrs['created'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
+        </li>
+
+        <li class="list-group-item">
+            <strong i18n:translate="modified">Modified</strong>:
+            <span tal:content="model.attrs['modified'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
+        </li>
+      </ul>
+    </div>
+
     <div class="panel panel-default QR" tal:condition="context.qrcode">
-      <strong>QR CODE:</strong>
       <div class="stream_image">
         <object data="${context.qrcode}"
                 type="image/png"
@@ -169,5 +181,6 @@
                 width="256px" />
       </div>
     </div>
+
   </div>
 </tal:token>
