@@ -32,6 +32,9 @@ var cone_tokens = (function (exports, $$1, ts) {
             return this._token_size;
         }
         set token_size(size) {
+            if (!size) {
+                size = 100;
+            }
             let px_value = this.original_size * (size / 100);
             this.tokens_elem.css(
                 'grid-template-columns',
@@ -42,7 +45,7 @@ var cone_tokens = (function (exports, $$1, ts) {
                 elem.attr('width', `${px_value}px`);
                 elem.attr('height', `${px_value}px`);
             });
-            if (!this._token_size) {
+            if (!this.size_input.val()) {
                 this.size_input.val(size);
             }
             this._token_size = size;
