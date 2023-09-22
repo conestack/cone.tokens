@@ -121,6 +121,7 @@ class TokenAPI(object):
         if usage_count is not UNSET:
             token.usage_count = usage_count
         if token.valid_from and token.valid_to and token.valid_from >= token.valid_to:
+            session.rollback()
             raise TokenValueError('valid_from must be before valid_to')
         if use_tm():
             session.flush() # pragma: no cover

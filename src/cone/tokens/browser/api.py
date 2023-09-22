@@ -1,156 +1,43 @@
-from cone.tokens.exceptions import TokenAPIError
-from cone.tokens.exceptions import TokenLockTimeViolation
-from cone.tokens.exceptions import TokenNotExists
-from cone.tokens.exceptions import TokenTimeRangeViolation
-from cone.tokens.exceptions import TokenUsageCountExceeded
+from cone.tokens.api import TokenAPI
+from cone.tokens.exceptions import TokenException
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
-from cone.tokens.api import TokenAPI
 from pyramid.view import view_config
-import datetime
 import dateutil.parser
 import uuid
 
 
-def get_datetime(request, name, now_when_missing=False):
-    try:
-        return dateutil.parser.isoparse(request.params[name])
-    except KeyError:
-        if now_when_missing:
-            return datetime.datetime.now()
-        raise KeyError(f'`{name}` missing on request')
-    except ValueError:
-        raise TokenAPIError('Invalid datetime format')
+def read_string(request, param, kw, default=None):
+    if param in request.params:
+        value = request.params[param]
+        if not value:
+            value = default
+        kw[param] = value
 
 
-def get_int(request, name):
-    try:
-        return int(request.params[name])
-    except KeyError:
-        raise KeyError(f'`{name}` missing on request')
-    except ValueError:
-        raise TokenAPIError('Value is no integer')
+def read_datetime(request, param, kw, default=None):
+    if param in request.params:
+        value = request.params[param]
+        if not value:
+            kw[param] = default
+        else:
+            try:
+                kw[param] = dateutil.parser.isoparse(value)
+            except ValueError:
+                raise TokenValueError(f'{param}: invalid datetime format')
 
 
-@view_config(
-    name='add_token',
-    request_method='POST',
-    accept='application/json',
-    renderer='json',
-    context=TokenContainer,
-    permission='add')
-def add_token(model, request):
-    token_api = TokenAPI(request)
-    token_uid = uuid.uuid4()
-    valid_from = get_datetime(request, 'valid_from', now_when_missing=True)
-    try:
-        valid_to = get_datetime(request, 'valid_to')
-    except TokenAPIError as e:
-        return e.as_json()
-    except KeyError as e:
-        return dict(success=False, message=str(e))
-    try:
-        usage_count = get_int(request, 'usage_count')
-    except TokenAPIError as e:
-        return e.as_json()
-    except KeyError as e:
-        return dict(success=False, message=str(e))
-    try:
-        lock_time = get_int(request, 'lock_time')
-    except TokenAPIError as e:
-        return e.as_json()
-    except KeyError as e:
-        return dict(success=False, message=str(e))
-    try:
-        token_api.add(
-            token_uid,
-            valid_from,
-            valid_to,
-            usage_count,
-            lock_time
-        )
-    except TokenValueError as e:
-        return e.as_json()
-    except Exception as e:
-        return dict(success=False, message=str(e))
-    return dict(success=True, token_uid=str(token_uid))
-
-
-@view_config(
-    name='delete_token',
-    request_method='POST',
-    accept='application/json',
-    renderer='json',
-    context=TokenNode,
-    permission='delete')
-def delete_token(model, request):
-    token_api = TokenAPI(request)
-    token_uid = uuid.UUID(model.name)
-    try:
-        token_api.delete(token_uid)
-    except TokenNotExists as e:
-        return e.as_json()
-    except Exception as e:
-        return dict(success=False, message=str(e))
-    return dict(success=True)
-
-
-@view_config(
-    name='edit_token',
-    request_method='POST',
-    accept='application/json',
-    renderer='json',
-    context=TokenNode,
-    permission='edit')
-def edit_token(model, request):
-    token_api = TokenAPI(request)
-    token_uid = uuid.UUID(model.name)
-    try:
-        valid_from = get_datetime(request, 'valid_from')
-    except TokenAPIError as e:
-        return e.as_json()
-    except KeyError:
-        valid_from = None
-        pass
-    try:
-        valid_to = get_datetime(request, 'valid_to')
-    except TokenAPIError as e:
-        return e.as_json()
-    except KeyError:
-        valid_to = None
-        pass
-    try:
-        usage_count = get_int(request, 'usage_count')
-    except TokenAPIError as e:
-        return e.as_json()
-    except KeyError:
-        usage_count = None
-        pass
-    try:
-        lock_time = get_int(request, 'lock_time')
-    except TokenAPIError as e:
-       return e.as_json()
-    except KeyError:
-        lock_time = None
-        pass
-    if valid_from == None and valid_to == None and usage_count == None and lock_time == None:
-        return dict(success=False, message='Missing parameter')
-    try:
-        token_api.update(
-            token_uid,
-            valid_to=valid_to,
-            usage_count=usage_count,
-            lock_time=lock_time,
-            valid_from=valid_from
-        )
-    except TokenValueError as e:
-        return e.as_json()
-    except TokenNotExists as e:
-        return e.as_json()
-    except Exception as e:
-        return dict(success=False, message=str(e))
-    return dict(success=True)
+def read_int(request, param, kw, default=0):
+    if param in request.params:
+        value = request.params[param]
+        if not value:
+            kw[param] = default
+        else:
+            try:
+                kw[param] = int(request.params[param])
+            except ValueError:
+                raise TokenValueError(f'{param}: value is no integer')
 
 
 @view_config(
@@ -161,18 +48,85 @@ def edit_token(model, request):
     context=TokenNode,
     permission='view')
 def consume_token(model, request):
-    token_api = TokenAPI(request)
-    token_uid = uuid.UUID(model.name)
+    api = TokenAPI(request)
+    uid = uuid.UUID(model.name)
     try:
-        consumed = token_api.consume(token_uid)
-    except TokenUsageCountExceeded as e:
-        return e.as_json()
-    except TokenLockTimeViolation as e:
-        return e.as_json()
-    except TokenTimeRangeViolation as e:
-        return e.as_json()
-    except TokenNotExists as e:
+        consumed = api.consume(uid)
+    except TokenException as e:
         return e.as_json()
     except Exception as e:
         return dict(success=False, message=str(e))
     return dict(success=True, consumed=consumed)
+
+
+@view_config(
+    name='add_token',
+    request_method='POST',
+    accept='application/json',
+    renderer='json',
+    context=TokenContainer,
+    permission='add')
+def add_token(model, request):
+    api = TokenAPI(request)
+    uid = uuid.uuid4()
+    kw = dict()
+    read_string(request, 'value', kw)
+    try:
+        read_datetime(request, 'valid_from', kw)
+        read_datetime(request, 'valid_to', kw)
+        read_int(request, 'usage_count', kw, default=-1)
+        read_int(request, 'lock_time', kw)
+    except TokenValueError as e:
+        return e.as_json()
+    try:
+        api.add(uid, **kw)
+    except TokenException as e:
+        return e.as_json()
+    except Exception as e:
+        return dict(success=False, message=str(e))
+    return dict(success=True, token_uid=str(uid))
+
+
+@view_config(
+    name='update_token',
+    request_method='POST',
+    accept='application/json',
+    renderer='json',
+    context=TokenNode,
+    permission='edit')
+def update_token(model, request):
+    api = TokenAPI(request)
+    uid = uuid.UUID(model.name)
+    kw = dict()
+    read_string(request, 'value', kw)
+    try:
+        read_datetime(request, 'valid_from', kw)
+        read_datetime(request, 'valid_to', kw)
+        read_int(request, 'usage_count', kw, default=-1)
+        read_int(request, 'lock_time', kw)
+    except TokenValueError as e:
+        return e.as_json()
+    try:
+        api.update(uid, **kw)
+    except TokenException as e:
+        return e.as_json()
+    except Exception as e:
+        return dict(success=False, message=str(e))
+    return dict(success=True)
+
+
+@view_config(
+    name='delete_token',
+    request_method='POST',
+    accept='application/json',
+    renderer='json',
+    context=TokenNode,
+    permission='delete')
+def delete_token(model, request):
+    api = TokenAPI(request)
+    uid = uuid.UUID(model.name)
+    try:
+        api.delete(uid)
+    except Exception as e:
+        return dict(success=False, message=str(e))
+    return dict(success=True)
