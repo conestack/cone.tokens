@@ -9,6 +9,7 @@
 #: core.sources
 #: i18n.gettext
 #: i18n.lingua
+#: js.karma
 #: js.npm
 #: js.rollup
 #: js.scss
@@ -87,6 +88,16 @@ SCSS_OPTIONS?=--no-source-map=none
 # Rollup config file.
 # Default: rollup.conf.js
 ROLLUP_CONFIG?=js/rollup.conf.js
+
+## js.karma
+
+# Karma config file.
+# Default: karma.conf.js
+KARMA_CONFIG?=js/karma.conf.js
+
+# Karma additional command line options.
+# Default: --single-run
+KARMA_OPTIONS?=--single-run
 
 ## core.mxenv
 
@@ -286,6 +297,21 @@ NPM_DEV_PACKAGES+=\
 .PHONY: rollup
 rollup: $(NPM_TARGET)
 	@$(NPM_PREFIX)/node_modules/.bin/rollup --config $(ROLLUP_CONFIG)
+
+##############################################################################
+# karma
+##############################################################################
+
+# extend npm dev packages
+NPM_DEV_PACKAGES+=\
+	karma \
+	karma-coverage \
+	karma-chrome-launcher \
+	karma-module-resolver-preprocessor
+
+.PHONY: karma
+karma: $(NPM_TARGET)
+	@$(NPM_PREFIX)/node_modules/.bin/karma start $(KARMA_CONFIG) $(KARMA_OPTIONS)
 
 ##############################################################################
 # mxenv

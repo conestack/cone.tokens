@@ -8,6 +8,7 @@
 /sources/
 /var/
 /venv/
+/js/karma/
 __pycache__
 constraints-mxdev.txt
 htmlcov
