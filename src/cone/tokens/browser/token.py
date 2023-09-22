@@ -1,6 +1,6 @@
 from base64 import b64encode
-from cone.app.browser.ajax import ajax_continue
 from cone.app.browser.ajax import AjaxEvent
+from cone.app.browser.ajax import ajax_continue
 from cone.app.browser.authoring import ContentAddForm
 from cone.app.browser.authoring import ContentEditForm
 from cone.app.browser.form import Form
@@ -13,7 +13,6 @@ from cone.sql import get_session
 from cone.tile import Tile
 from cone.tile import tile
 from cone.tile import tile
-from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenRecord
 from datetime import datetime
@@ -21,6 +20,8 @@ from datetime import timedelta
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
+from pyramid.response import Response
+from pyramid.view import view_config
 from yafowil.base import ExtractionError
 from yafowil.base import factory
 from yafowil.persistence import node_attribute_writer
@@ -32,6 +33,27 @@ import uuid
 _ = TranslationStringFactory('cone.tokens')
 
 
+def qr_code(value):
+    img = qrcode.make(value)
+    data = io.BytesIO()
+    img.save(data, format='png')
+    return data.getvalue()
+
+
+def b64_qr_code(value):
+    return 'data:image/png;base64,' + b64encode(qr_code(value)).decode('utf-8')
+
+
+@view_config(name='qr_code', context=TokenNode, permission='view')
+def download_qr_code(model, request):
+    response = Response(
+        content_type='image/png',
+        content_disposition=f'attachment;filename={model.name}.png'
+    )
+    response.body = qr_code(model.attrs['value'])
+    return response
+
+
 @tile(
     name='content',
     path='templates/token.pt',
@@ -40,13 +62,8 @@ _ = TranslationStringFactory('cone.tokens')
 class TokenContent(ProtectedContentTile):
 
     @request_property
-    def stream_qrcode_token(self):
-        img = qrcode.make(self.model.attrs['uid'])
-        img_byte_arr = io.BytesIO()
-        img.save(img_byte_arr, format='PNG')
-        img_byte_arr = b64encode(img_byte_arr.getvalue()).decode('utf-8')
-        qr_src = 'data:image/png;base64,' + img_byte_arr
-        return qr_src
+    def qrcode(self):
+        return b64_qr_code(self.model.attrs['value'])
 
     @property
     def lock_time_seconds(self):
@@ -76,15 +93,6 @@ class TokenContent(ProtectedContentTile):
         if isinstance(value, datetime):
             return value.strftime('%d.%m.%Y, %H:%M:%S')
         return value
-
-
-@tile(
-    name='content',
-    path='templates/tokens.pt',
-    interface=TokenContainer,
-    permission='view')
-class TokensContent(ProtectedContentTile):
-    ...
 
 
 @tile(name='add_duration', interface=TokenNode, permission='edit')

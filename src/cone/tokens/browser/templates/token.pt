@@ -160,10 +160,10 @@
       </li>
     </ul>
   </div>
-    <div class="panel panel-default QR" tal:condition="context.stream_qrcode_token">
+    <div class="panel panel-default QR" tal:condition="context.qrcode">
       <strong>QR CODE:</strong>
       <div class="stream_image">
-        <object data="${context.stream_qrcode_token}"
+        <object data="${context.qrcode}"
                 type="image/png"
                 height="256px"
                 width="256px" />
