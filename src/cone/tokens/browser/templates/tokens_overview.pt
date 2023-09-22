@@ -1,0 +1,28 @@
+<tal:token
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:ajax="http://namespaces.conestack.org/ajax"
+  xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+  i18n:domain="cone.tokens"
+  omit-tag="True">
+
+  <tal:contextmenu replace="structure tile('contextmenu')" />
+
+  <div class="tokens-overview-container">
+    <div id="tokens-overview-title"
+         class="list-group-item active">
+      <span i18n:translate="tokens_overview">Overview</span>
+    </div>
+
+    <div id="tokens-overview"
+         tal:define="tokens context.tokens">
+      <tal:token repeat="token tokens">
+        <object class="token_qr"
+                data="${context.qrcode(token.value)}"
+                type="image/png"
+                height="256px"
+                width="256px">
+        </object>
+      </tal:token>
+    </div>
+  </div>
+</tal:token>
