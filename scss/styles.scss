@@ -26,6 +26,9 @@
     .token-title {
         border-radius: 4px 4px 0 0;
     }
+    .token-active {
+        pointer-events: none;
+    }
 
     // Tokens Overview
     .tokens-overview-container {

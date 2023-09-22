@@ -18,7 +18,7 @@
 
         <li class="list-group-item">
           <button type="button"
-                  class="btn ${context.cssclass}">
+                  class="btn ${context.cssclass} token-active">
             <span class="glyphicon glyphicon-off"></span>
             <span tal:content="context.active_label">
               Active
