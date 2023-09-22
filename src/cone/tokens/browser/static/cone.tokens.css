@@ -7,16 +7,18 @@
   div.flex-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
   }
   div.panel.token {
     flex: 1;
     min-width: fit-content;
+    border-right: 0;
+    box-shadow: 1px 0px 0px #e5e5e5;
   }
   div.QR {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 2px;
   }
   .stream_image {
     margin: auto;
