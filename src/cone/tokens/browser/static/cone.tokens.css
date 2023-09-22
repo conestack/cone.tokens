@@ -24,9 +24,17 @@
   .token-title {
     border-radius: 4px 4px 0 0;
   }
-  #tokens-overview {
+  .tokens-overview-container #tokens-overview {
     display: grid;
-    grid-template-columns: auto auto auto auto;
+  }
+  .tokens-overview-container #tokens-overview-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .tokens-overview-container #tokens-overview-title .token-size .token-button {
+    color: #000;
+    margin: 0 10px;
   }
 }
 @media print {
