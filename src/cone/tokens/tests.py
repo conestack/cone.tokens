@@ -2,6 +2,7 @@ from cone.app import get_root
 from cone.sql import get_session
 from cone.sql import testing as sql_testing
 from cone.sql.testing import SQLLayer
+from cone.tokens.api import TokenAPI
 from cone.tokens.browser.api import get_datetime
 from cone.tokens.browser.api import get_int
 from cone.tokens.browser.api import get_int
@@ -9,7 +10,9 @@ from cone.tokens.browser.token import TokenAddForm
 from cone.tokens.browser.token import TokenContent
 from cone.tokens.browser.token import TokenEditForm
 from cone.tokens.browser.token import TokenForm
-from cone.tokens.browser.token import TokensContent
+from cone.tokens.browser.token import b64_qr_code
+from cone.tokens.browser.token import qr_code
+from cone.tokens.browser.tokens import TokensContent
 from cone.tokens.exceptions import TokenAPIError
 from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
@@ -19,7 +22,6 @@ from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenRecord
-from cone.tokens.api import TokenAPI
 from cone.ugm.testing import principals
 from datetime import datetime 
 from datetime import timedelta
@@ -616,15 +618,42 @@ class TestTokenForms(NodeTestCase):
 class TestTokenViews(NodeTestCase):
     layer = tokens_layer
 
-    def _test_qr_code_generator(self):
+    def test_qr_code(self):
+        data = qr_code('A')
+        self.assertTrue(data.startswith(b'\x89PNG'))
+
+    def test_b64_qr_code(self):
+        data = b64_qr_code('A')
+        self.assertTrue(data.startswith('data:image/png;base64'))
+
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    def test_download_qr_code(self):
+        tokens = get_root()['tokens']
+        token_uid = uuid.UUID('57b9f6b1-b4c8-4aeb-9f12-22ab482546a2')
+        token = tokens[str(token_uid)] = TokenNode()
+        token.attrs['value'] = 'value'
+
         request = self.layer.new_request()
-        token_tile = TokenTile(attribute='render')
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(token, request, 'qr_code')
+        self.assertTrue(res.body.startswith(b'\x89PNG'))
+        self.assertEqual(res.content_type, 'image/png')
+        self.assertEqual(
+            res.content_disposition,
+            'attachment;filename=57b9f6b1-b4c8-4aeb-9f12-22ab482546a2.png'
+        )
+
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    def test_TokenContent(self):
+        request = self.layer.new_request()
+        token_tile = TokenContent()
         token_tile.model = TokenNode()
         token_tile.request = request
-        token_tile.prepare()
-        token_tile.model.attrs['uid'] = str(uuid.uuid4())
-        result = token_tile.stream_qrcode_token
-        self.assertEqual(result[:22], 'data:image/png;base64,')
+        # XXX
+
+
+class TestJSONAPI(NodeTestCase):
+    layer = tokens_layer
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
