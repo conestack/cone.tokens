@@ -12,7 +12,8 @@
   </div>
 
   <div class="flex-group">
-    <div class="panel panel-default token">
+    <div class="panel panel-default token"
+         data-token-settings='${context.token_settings}'>
 
       <ul class="list-group">
 
@@ -20,16 +21,12 @@
           <button type="button"
                   class="btn ${context.cssclass} token-active">
             <span class="glyphicon glyphicon-off"></span>
-            <span tal:content="context.active_label">
-              Active
-            </span>
+            <span tal:content="context.active_label">Active</span>
           </button>
         </li>
         <li class="list-group-item">
           <strong i18n:translate="value">Value</strong>:
-          <span tal:content="model.attrs['value']">
-            Value
-          </span>
+          <span tal:content="model.attrs['value']">Value</span>
         </li>
 
         <li class="list-group-item flex-group">
@@ -42,57 +39,21 @@
             </tal:range>
             <span tal:condition="not model.attrs['valid_from'] and not model.attrs['valid_to']"
                   i18n:translate="unlimited">
-                Unlimited
+              Unlimited
             </span>
           </div>
-          <div class="btn-group">
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?duration=unlimited"
-              ajax:action="add_duration">
-              <span i18n:translate="unlimited">
-                Unlimited
-              </span>
+          <div class="btn-group timeranges">
+            <button class="btn btn-default" data-timerange-scope="unlimited">
+              <span i18n:translate="unlimited">Unlimited</span>
             </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?duration=morning"
-              ajax:action="add_duration">
-              <span i18n:translate="morning">
-                Morning
-              </span>
+            <button class="btn btn-default" data-timerange-scope="morning">
+              <span i18n:translate="morning">Morning</span>
             </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?duration=afternoon"
-              ajax:action="add_duration">
-              <span i18n:translate="afternoon">
-                Afternoon
-              </span>
+            <button class="btn btn-default" data-timerange-scope="afternoon">
+              <span i18n:translate="afternoon">Afternoon</span>
             </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?duration=day"
-              ajax:action="add_duration">
-              <span i18n:translate="today">
-                Today
-              </span>
-            </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?duration=week"
-              ajax:action="add_duration">
-              <span i18n:translate="this_week">
-                This Week
-              </span>
-            </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?duration=week"
-              ajax:action="add_duration">
-              <span i18n:translate="this_month">
-                This Month
-              </span>
+            <button class="btn btn-default" data-timerange-scope="today">
+              <span i18n:translate="today">Today</span>
             </button>
           </div>
         </li>
@@ -109,45 +70,15 @@
               Unlimited
             </span>
           </div>
-          <div class="btn-group">
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?amount=-1"
-              ajax:action="add_use">
-              <span i18n:translate="unlimited">
-                Unlimited
-              </span>
+          <div class="btn-group usage-count">
+            <button class="btn btn-default" data-usage-count="-1">
+              <span i18n:translate="unlimited">Unlimited</span>
             </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?amount=1"
-              ajax:action="add_use">
-              1
-            </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?amount=10"
-              ajax:action="add_use">
-              10
-            </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?amount=20"
-              ajax:action="add_use">
-              20
-            </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?amount=50"
-              ajax:action="add_use">
-              50
-            </button>
-            <button class="btn btn-default"
-              ajax:bind="click"
-              ajax:target="${context.nodeurl}?amount=100"
-              ajax:action="add_use">
-              100
-            </button>
+            <button class="btn btn-default" data-usage-count="1">1</button>
+            <button class="btn btn-default" data-usage-count="10">10</button>
+            <button class="btn btn-default" data-usage-count="20">20</button>
+            <button class="btn btn-default" data-usage-count="50">50</button>
+            <button class="btn btn-default" data-usage-count="100">100</button>
           </div>
         </li>
 

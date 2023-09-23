@@ -1,29 +1,118 @@
-var cone_tokens = (function (exports, ts, jquery) {
+var cone_tokens = (function (exports, $, ts) {
     'use strict';
+
+    class Token {
+        static initialize(context) {
+            $('.token', context).each(function() {
+                new Token($(this));
+            });
+        }
+        constructor(elem) {
+            this.elem = elem;
+            this.settings = elem.data('token-settings');
+            const that = this;
+            $('.btn-group.timeranges button', elem).each(function() {
+                const button = $(this);
+                button.on('click', function(e) {
+                    that.set_timerange(button.data('timerange-scope'));
+                });
+            });
+            $('.btn-group.usage-count button', elem).each(function() {
+                const button = $(this);
+                button.on('click', function(e) {
+                    that.set_usage_count(button.data('usage-count'));
+                });
+            });
+        }
+        request_api(params) {
+            const settings = this.settings;
+            ts.ajax.request({
+                url: `${settings.base_url}/update_token`,
+                params: params,
+                type: 'json',
+                method: 'POST',
+                success: (data, status, request) => {
+                    if (data.success) {
+                        ts.ajax.action({
+                            name: 'content',
+                            selector: '#content',
+                            mode: 'inner',
+                            url: `${settings.base_url}`,
+                            params: {}
+                        });
+                    } else {
+                        ts.show_error(data.message);
+                    }
+                },
+                error: (request, status, error) => {
+                    ts.show_error(`Failed to request JSON API: ${error}`);
+                }
+            });
+        }
+        set_timerange(scope) {
+            const settings = this.settings,
+                timeranges = settings.timeranges;
+            let valid_from, valid_to;
+            if (scope == 'morning') {
+                const morning = timeranges.morning;
+                valid_from = new Date();
+                valid_from.setHours(morning.from.hour, morning.from.minute, 0);
+                valid_to = new Date();
+                valid_to.setHours(morning.to.hour, morning.to.minute, 0);
+            } else if (scope == 'afternoon') {
+                const afternoon = timeranges.afternoon;
+                valid_from = new Date();
+                valid_from.setHours(afternoon.from.hour, afternoon.from.minute, 0);
+                valid_to = new Date();
+                valid_to.setHours(afternoon.to.hour, afternoon.to.minute, 0);
+            } else if (scope == 'today') {
+                const today = timeranges.today;
+                valid_from = new Date();
+                valid_from.setHours(today.from.hour, today.from.minute, 0);
+                valid_to = new Date();
+                valid_to.setHours(today.to.hour, today.to.minute, 0);
+            }
+            function iso_date(date) {
+                if (date) {
+                    date = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                }
+                return date ? date.toISOString() : '';
+            }
+            this.request_api({
+                valid_from: iso_date(valid_from),
+                valid_to: iso_date(valid_to),
+            });
+        }
+        set_usage_count(usage_count) {
+            this.request_api({
+                usage_count: usage_count ? usage_count : '-1'
+            });
+        }
+    }
 
     class TokensOverview {
         static initialize(context) {
-            jquery.$('.tokens-overview-container', context).each(function() {
-                new TokensOverview(jquery.$(this));
+            $('.tokens-overview-container', context).each(function() {
+                new TokensOverview($(this));
             });
         }
         constructor(container) {
             this.container = container;
-            this.tokens_elem = jquery.$('#tokens-overview', container);
-            this.tokens = jquery.$('object.token_qr', this.tokens_elem);
-            this.tokens_title = jquery.$('#tokens-overview-title', container);
+            this.tokens_elem = $('#tokens-overview', container);
+            this.tokens = $('object.token_qr', this.tokens_elem);
+            this.tokens_title = $('#tokens-overview-title', container);
             this.set_token_size = this.set_token_size.bind(this);
-            this.size_input = jquery.$('<input />')
+            this.size_input = $('<input />')
                 .addClass('token-button')
                 .on('change', this.set_token_size);
-            this.size_input_label = jquery.$('<label />')
+            this.size_input_label = $('<label />')
                 .addClass('input-label')
                 .text('Token Size');
-            this.size_container = jquery.$('<div />')
+            this.size_container = $('<div />')
                 .addClass('token-size')
                 .append(this.size_input_label)
                 .append(this.size_input)
-                .append(jquery.$('<span>%</span>'))
+                .append($('<span>%</span>'))
                 .appendTo(this.tokens_title);
             if (this.tokens.length) {
                 this.original_size = this.tokens[0].attr('width');
@@ -45,7 +134,7 @@ var cone_tokens = (function (exports, ts, jquery) {
                 `repeat( auto-fit, minmax(${px_value}px, 1fr) )`
             );
             this.tokens.each(function() {
-                let elem = jquery.$(this);
+                let elem = $(this);
                 elem.attr('width', `${px_value}px`);
                 elem.attr('height', `${px_value}px`);
             });
@@ -62,14 +151,14 @@ var cone_tokens = (function (exports, ts, jquery) {
     }
     class Tokens {
         static initialize(context) {
-            jquery.$('.tokens-container', context).each(function() {
-                new Tokens(jquery.$(this));
+            $('.tokens-container', context).each(function() {
+                new Tokens($(this));
             });
         }
         constructor(elem) {
             this.elem = elem;
-            this.token_uid_elem = jquery.$('[name=token-uid]', elem);
-            this.scan_token_elem = jquery.$('.scan-token', elem);
+            this.token_uid_elem = $('[name=token-uid]', elem);
+            this.scan_token_elem = $('.scan-token', elem);
             this.scan_token = this.scan_token.bind(this);
             this.scan_token_elem.on('click', (e) => {
                 this.scan_token();
@@ -90,6 +179,7 @@ var cone_tokens = (function (exports, ts, jquery) {
     }
 
     $(function() {
+        ts.ajax.register(Token.initialize, true);
         ts.ajax.register(Tokens.initialize, true);
         ts.ajax.register(TokensOverview.initialize, true);
     });
@@ -101,4 +191,4 @@ var cone_tokens = (function (exports, ts, jquery) {
 
     return exports;
 
-})({}, ts, jQuery);
+})({}, jQuery, ts);
