@@ -83,7 +83,7 @@ QUnit.module('Token', hooks => {
 
         // define settings
         let settings = {
-            base_url: 'localhost:8081'
+            base_url: 'https://tld.com'
         };
         elem.data('token-settings', settings);
         let token = new Token(elem);
@@ -229,7 +229,7 @@ QUnit.module('Token', hooks => {
         // unlimited
         let unlimited_btn = $('button', usagecount)[0];
         $(unlimited_btn).trigger('click');
-        assert.verifySteps(['request_api -1']);
+        assert.verifySteps(['request_api null']);
         // 1
         let one_btn = $('button', usagecount)[1];
         $(one_btn).trigger('click');
