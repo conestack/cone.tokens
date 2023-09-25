@@ -85,7 +85,7 @@ var cone_tokens = (function (exports, $, ts) {
         }
         set_usage_count(usage_count) {
             this.request_api({
-                usage_count: usage_count ? usage_count : '-1'
+                usage_count: usage_count
             });
         }
     }
@@ -149,41 +149,44 @@ var cone_tokens = (function (exports, $, ts) {
             this.token_size = size;
         }
     }
-    class Tokens {
+    class TokenScanner {
         static initialize(context) {
             $('.tokens-container', context).each(function() {
-                new Tokens($(this));
+                new TokenScanner($(this));
             });
         }
         constructor(elem) {
             this.elem = elem;
-            let button = $('.scan-token', elem);
+            this.button = $('.scan-token', elem);
             this.scan_token = this.scan_token.bind(this);
-            button.on('click', (e) => {
+            this.button.on('click', (e) => {
                 this.scan_token();
             });
         }
         scan_token() {
-            let wrapper = $('<div/>').css('width', 0).css('overflow', 'hidden');
-            let input = $('<input type="text">');
+            let button = this.button,
+                wrapper = $('<div/>').css('width', 0).css('overflow', 'hidden'),
+                input = $('<input type="text">');
             wrapper.append(input);
             this.elem.append(wrapper);
+            button.removeClass('inactive').addClass('active');
             input[0].focus();
             input.one('change', () => {
                 let val = input.val();
                 console.log(val);
                 wrapper.remove();
+                button.removeClass('active').addClass('inactive');
             });
         }
     }
 
     $(function() {
         ts.ajax.register(Token.initialize, true);
-        ts.ajax.register(Tokens.initialize, true);
+        ts.ajax.register(TokenScanner.initialize, true);
         ts.ajax.register(TokensOverview.initialize, true);
     });
 
-    exports.Tokens = Tokens;
+    exports.TokenScanner = TokenScanner;
     exports.TokensOverview = TokensOverview;
 
     Object.defineProperty(exports, '__esModule', { value: true });

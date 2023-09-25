@@ -90,7 +90,7 @@ export class Token {
 
     set_usage_count(usage_count) {
         this.request_api({
-            usage_count: usage_count ? usage_count : '-1'
+            usage_count: usage_count
         });
     }
 }

@@ -18,7 +18,7 @@ class TestTokenAPI(NodeTestCase):
     layer = tokens_layer
 
     @sql_testing.delete_table_records(TokenRecord)
-    def test__get_token(self):
+    def test_get_token(self):
         request = self.layer.new_request()
         session = get_session(request)
 
@@ -29,18 +29,18 @@ class TestTokenAPI(NodeTestCase):
         session.commit()
 
         api = TokenAPI(request)
-        self.assertEqual(api._get_token(token_uid).uid, token_uid)
+        self.assertEqual(api.get_token(token_uid).uid, token_uid)
 
         invalid_uid = uuid.UUID('f9c98a6b-b773-4714-b965-98c7911e6236')
         with self.assertRaises(TokenNotExists) as arc:
-            api._get_token(invalid_uid)
+            api.get_token(invalid_uid)
         self.assertEqual(
             str(arc.exception),
             'Token f9c98a6b-b773-4714-b965-98c7911e6236 not exists'
         )
 
     @sql_testing.delete_table_records(TokenRecord)
-    def test__query_token(self):
+    def test_query_token(self):
         request = self.layer.new_request()
         session = get_session(request)
 
@@ -52,8 +52,8 @@ class TestTokenAPI(NodeTestCase):
         session.commit()
 
         api = TokenAPI(request)
-        self.assertEqual(api._query_token(''), None)
-        self.assertEqual(api._query_token(token_value).uid, token_uid)
+        self.assertEqual(api.query_token(''), None)
+        self.assertEqual(api.query_token(token_value).uid, token_uid)
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_consume(self):
@@ -142,11 +142,11 @@ class TestTokenAPI(NodeTestCase):
         token_uid = uuid.UUID('c27b6d86-8ac0-4261-9e62-151ff7e31ecb')
         api.add(token_uid)
 
-        token = api._get_token(token_uid)
+        token = api.get_token(token_uid)
         self.assertEqual(token.value, str(token_uid))
         self.assertEqual(token.valid_from, None)
         self.assertEqual(token.valid_to, None)
-        self.assertEqual(token.usage_count, -1)
+        self.assertEqual(token.usage_count, 0)
         self.assertEqual(token.lock_time, 0)
 
         token_uid = uuid.UUID('6556f43e-b0ce-4c14-a0c5-40b8f2cdab3a')
@@ -155,14 +155,14 @@ class TestTokenAPI(NodeTestCase):
             value='token value',
             valid_from=datetime(2023, 9, 21),
             valid_to=datetime(2023, 9, 22),
-            usage_count=0,
+            usage_count=1,
             lock_time=10
         )
-        token = api._get_token(token_uid)
+        token = api.get_token(token_uid)
         self.assertEqual(token.value, 'token value')
         self.assertEqual(token.valid_from, datetime(2023, 9, 21))
         self.assertEqual(token.valid_to, datetime(2023, 9, 22))
-        self.assertEqual(token.usage_count, 0)
+        self.assertEqual(token.usage_count, 1)
         self.assertEqual(token.lock_time, 10)
 
         with self.assertRaises(TokenValueError) as arc:

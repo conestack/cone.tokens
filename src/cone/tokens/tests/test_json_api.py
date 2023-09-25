@@ -86,6 +86,50 @@ class TestJSONAPI(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
+    def test_query_token(self):
+        tokens = get_root()['tokens']
+        request = self.layer.new_request(type='json')
+
+        with self.assertRaises(HTTPForbidden) as arc:
+            render_view_to_response(tokens, request, 'query_token')
+        self.assertEqual(
+            str(arc.exception),
+            'Unauthorized: query_token failed permission check'
+        )
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'query_token')
+        self.assertFalse(res.json['success'])
+        self.assertEqual(res.json['message'], 'Missing ``value`` parameter')
+
+        request.params['value'] = 'token value'
+        with patch.object(
+            TokenAPI,
+            'query_token',
+            side_effect=Exception('Exception')
+        ):
+            with self.layer.authenticated('admin'):
+                res = render_view_to_response(tokens, request, 'query_token')
+            self.assertFalse(res.json['success'])
+            self.assertEqual(res.json['message'], 'Exception')
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'query_token')
+        self.assertTrue(res.json['success'])
+        self.assertEqual(res.json['token'], None)
+
+        token_api = TokenAPI(request)
+        token_uid = uuid.uuid4()
+        token_api.add(token_uid, value='token value')
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'query_token')
+        self.assertTrue(res.json['success'])
+        self.assertTrue(res.json['token'] is not None)
+        self.assertEqual(res.json['token']['uid'], str(token_uid))
+
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @sql_testing.delete_table_records(TokenRecord)
     def test_add_token(self):
         tokens = get_root()['tokens']
         request = self.layer.new_request(type='json')
@@ -167,7 +211,7 @@ class TestJSONAPI(NodeTestCase):
         self.assertEqual(token.attrs['value'], token_uid)
         self.assertEqual(token.attrs['valid_from'], None)
         self.assertEqual(token.attrs['valid_to'], None)
-        self.assertEqual(token.attrs['usage_count'], -1)
+        self.assertEqual(token.attrs['usage_count'], 0)
         self.assertEqual(token.attrs['lock_time'], 0)
 
         request.params['value'] = ''
@@ -184,7 +228,7 @@ class TestJSONAPI(NodeTestCase):
         self.assertEqual(token.attrs['value'], token_uid)
         self.assertEqual(token.attrs['valid_from'], None)
         self.assertEqual(token.attrs['valid_to'], None)
-        self.assertEqual(token.attrs['usage_count'], -1)
+        self.assertEqual(token.attrs['usage_count'], 0)
         self.assertEqual(token.attrs['lock_time'], 0)
 
         request.params['value'] = 'value'
@@ -290,7 +334,7 @@ class TestJSONAPI(NodeTestCase):
         self.assertEqual(token.attrs['value'], str(token_uid))
         self.assertEqual(token.attrs['valid_from'], None)
         self.assertEqual(token.attrs['valid_to'], None)
-        self.assertEqual(token.attrs['usage_count'], -1)
+        self.assertEqual(token.attrs['usage_count'], 0)
         self.assertEqual(token.attrs['lock_time'], 0)
 
         request.params['value'] = 'value'
@@ -382,6 +426,7 @@ class TestJSONAPI(NodeTestCase):
             self.assertFalse(res.json['success'])
             self.assertEqual(res.json['message'], 'Exception')
 
+        token.attrs['usage_count'] = -1
         with self.layer.authenticated('admin'):
             res = render_view_to_response(token, request, 'consume_token')
         self.assertTrue(res.json['success'])
