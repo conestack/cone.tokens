@@ -1,6 +1,8 @@
 import $ from 'jquery';
+import ts from 'treibstoff';
 
 export class TokensOverview {
+
     static initialize(context) {
         $('.tokens-overview-container', context).each(function() {
             new TokensOverview($(this));
@@ -64,36 +66,89 @@ export class TokensOverview {
         this.token_size = size;
     }
 }
-export class Tokens {
+
+export class TokenScanner {
 
     static initialize(context) {
         $('.tokens-container', context).each(function() {
-            new Tokens($(this));
+            new TokenScanner($(this));
         });
     }
 
     constructor(elem) {
         this.elem = elem;
-        this.token_uid_elem = $('[name=token-uid]', elem);
-        this.scan_token_elem = $('.scan-token', elem);
+        this.base_url = elem.data('base-url');
+        this.button = $('.scan-token', elem);
+        this._input_wrapper = null;
+        this._input = null;
 
         this.scan_token = this.scan_token.bind(this);
-        this.scan_token_elem.on('click', (e) => {
+        this.button.on('click', (e) => {
             this.scan_token();
         });
     }
 
+    get active() {
+        return this._input !== null;
+    }
+
+    set active(value) {
+        if (value == this.value) {
+            return;
+        }
+        let button = this.button;
+        if (value) {
+            let wrapper = this._input_wrapper = $('<div/>')
+                .css('width', 0)
+                .css('overflow', 'hidden');
+            let input = this._input = $('<input type="text">');
+            wrapper.append(input);
+            this.elem.append(wrapper)
+            button.removeClass('inactive').addClass('active');
+            input[0].focus()
+        } else {
+            this._input_wrapper.remove();
+            this._input_wrapper = null;
+            this._input = null;
+            button.removeClass('active').addClass('inactive');
+        }
+    }
+
     scan_token() {
-        uid_elem = this.token_uid_elem;
-        uid_elem.val('');
-        uid_elem[0].focus();
-        uid_elem.on('change', () => {
-            console.log('change');
-            let val = uid_elem.val();
-            if (val.length == 36) {
-                uid_elem.val('');
-                uid_elem.off('change');
-            };
+        this.active = true;
+        let input = this._input;
+        input.one('change', () => {
+            this.query_token(input.val());
+        });
+    }
+
+    query_token(value) {
+        let that = this;
+        ts.ajax.request({
+            url: `${this.base_url}/query_token`,
+            params: {value: value},
+            type: 'json',
+            success: (data, status, request) => {
+                if (data.success) {
+                    if (!data.token) {
+                        this.active = false;
+                        ts.show_error('Token not exists');
+                    } else {
+                        ts.ajax.action({
+                            name: 'layout',
+                            selector: '#layout',
+                            mode: 'replace',
+                            url: `${this.base_url}/${data.token.uid}`,
+                            params: {}
+                        });
+                    }
+                } else {
+                    ts.show_error(data.message);
+                }
+            },
+            error: (request, status, error) => {
+                ts.show_error(`Failed to request JSON API: ${error}`);
+            }
         });
     }
 }

@@ -7,14 +7,13 @@
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
-  <div class="tokens-container">
+  <div class="tokens-container" data-base-url="${context.nodeurl}">
 
-    <button class="scan-token">
+    <button class="scan-token inactive">
       <span class="label" i18n:translate="scan_token">Scan Token</span>
       <span class="timer"></span>
     </button>
 
-    <input type="text" name="token-uid" />
   </div>
 
 </tal:tokens>

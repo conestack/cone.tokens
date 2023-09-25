@@ -24,7 +24,7 @@ class TokenAPI(object):
     def session(self):
         return get_session(self.request)
 
-    def _get_token(self, token_uid):
+    def get_token(self, token_uid):
         session = self.session
         token = session\
             .query(TokenRecord)\
@@ -34,7 +34,7 @@ class TokenAPI(object):
             raise TokenNotExists(token_uid)
         return token
 
-    def _query_token(self, value):
+    def query_token(self, value):
         session = self.session
         return session\
             .query(TokenRecord)\
@@ -43,7 +43,7 @@ class TokenAPI(object):
 
     def consume(self, token_uid):
         session = self.session
-        token = self._get_token(token_uid)
+        token = self.get_token(token_uid)
         if token.usage_count == 0:
             raise TokenUsageCountExceeded(token_uid)
         now = datetime.now()
@@ -71,11 +71,11 @@ class TokenAPI(object):
         value=None,
         valid_from=None,
         valid_to=None,
-        usage_count=-1,
+        usage_count=0,
         lock_time=0
     ):
         try:
-            self._get_token(token_uid)
+            self.get_token(token_uid)
             raise TokenValueError(f'Token with uid {token_uid} already exists')
         except TokenNotExists:
             if valid_from and valid_to and valid_from >= valid_to:
@@ -105,10 +105,10 @@ class TokenAPI(object):
         usage_count=UNSET,
         lock_time=UNSET
     ):
-        token = self._get_token(token_uid)
+        token = self.get_token(token_uid)
         session = self.session
         if value is not UNSET and value != token.value:
-            existing = self._query_token(value)
+            existing = self.query_token(value)
             if existing and existing.uid != token_uid:
                 raise TokenValueError('Given value already used by another token')
             token.value = value
@@ -130,7 +130,7 @@ class TokenAPI(object):
 
     def delete(self, token_uid):
         session = self.session
-        token = self._get_token(token_uid)
+        token = self.get_token(token_uid)
         session.delete(token)
         if use_tm():
             session.flush() # pragma: no cover

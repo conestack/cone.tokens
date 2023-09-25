@@ -111,7 +111,7 @@ class TestTokenForms(NodeTestCase):
         self.assertEqual(data.fetch('tokenform.value').extracted, '')
         self.assertEqual(data.fetch('tokenform.valid_from').extracted, None)
         self.assertEqual(data.fetch('tokenform.valid_to').extracted, None)
-        self.assertEqual(data.fetch('tokenform.usage_count').extracted, -1.)
+        self.assertEqual(data.fetch('tokenform.usage_count').extracted, 0)
         self.assertEqual(data.fetch('tokenform.lock_time').extracted, 0)
 
         # extraction with values
@@ -226,7 +226,7 @@ class TestTokenForms(NodeTestCase):
         self.assertEqual(token.attrs['value'], token.name)
         self.assertEqual(token.attrs['valid_from'], None)
         self.assertEqual(token.attrs['valid_to'], None)
-        self.assertEqual(token.attrs['usage_count'], -1)
+        self.assertEqual(token.attrs['usage_count'], 0)
         self.assertEqual(token.attrs['lock_time'], 0)
 
         # create another token with custom values

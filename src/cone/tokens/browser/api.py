@@ -40,13 +40,54 @@ def read_int(request, param, kw, default=0):
                 raise TokenValueError(f'{param}: value is no integer')
 
 
+def format_datetime(dt):
+    if not dt:
+        return None
+    return dt.isoformat()
+
+
+@view_config(
+    name='query_token',
+    request_method='GET',
+    accept='application/json',
+    renderer='json',
+    context=TokenContainer,
+    permission='view')
+def query_token(model, request):
+    api = TokenAPI(request)
+    try:
+        value = request.params['value']
+        token = api.query_token(value)
+        if not token:
+            return dict(success=True, token=None)
+        return dict(
+            success=True,
+            token=dict(
+                uid=str(token.uid),
+                value=token.value,
+                last_used=format_datetime(token.last_used),
+                valid_from=format_datetime(token.valid_from),
+                valid_to=format_datetime(token.valid_to),
+                usage_count=token.usage_count,
+                lock_time=token.lock_time,
+                creator=token.creator,
+                created=format_datetime(token.created),
+                modified=format_datetime(token.modified)
+            )
+        )
+    except KeyError:
+        return dict(success=False, message='Missing ``value`` parameter')
+    except Exception as e:
+        return dict(success=False, message=str(e))
+
+
 @view_config(
     name='consume_token',
     request_method='GET',
     accept='application/json',
     renderer='json',
     context=TokenNode,
-    permission='view')
+    permission='view')  # XXX: ``consume`` permission
 def consume_token(model, request):
     api = TokenAPI(request)
     uid = uuid.UUID(model.name)
@@ -74,7 +115,7 @@ def add_token(model, request):
     try:
         read_datetime(request, 'valid_from', kw)
         read_datetime(request, 'valid_to', kw)
-        read_int(request, 'usage_count', kw, default=-1)
+        read_int(request, 'usage_count', kw)
         read_int(request, 'lock_time', kw)
     except TokenValueError as e:
         return e.as_json()
@@ -102,7 +143,7 @@ def update_token(model, request):
     try:
         read_datetime(request, 'valid_from', kw)
         read_datetime(request, 'valid_to', kw)
-        read_int(request, 'usage_count', kw, default=-1)
+        read_int(request, 'usage_count', kw)
         read_int(request, 'lock_time', kw)
     except TokenValueError as e:
         return e.as_json()

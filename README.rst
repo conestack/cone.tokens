@@ -27,6 +27,24 @@ JSON API
 ``cone.tokens`` provides a JSON API for token management.
 
 
+query_token
+-----------
+
+Query token by value. It expects a ``GET`` request.
+
+**Schema**: URL/tokens/query_token
+
+**Params**
+
+- ``value``: A string containing the token value to look up.
+
+**Response**
+
+- ``success``: True or False.
+- ``token``: Token data or null if token not exists.
+- ``message``: On failure the error message is returned.
+
+
 add_token
 ---------
 
@@ -44,9 +62,10 @@ add_token
 
 **Response**
 
-- ``success``: True or False
-- ``token_uid``: On success the token uid is returned
-- ``message``: On failure the error message is returned
+- ``success``: True or False.
+- ``token_uid``: On success the token uid is returned.
+- ``message``: On failure the error message is returned.
+
 
 consume_token
 -------------
@@ -61,9 +80,10 @@ consume_token
 
 **Response**
 
-- ``success``: True or False
-- ``consumed``: On success flag whether token consumption was valid
-- ``message``: On failure the error message is returned
+- ``success``: True or False.
+- ``consumed``: On success flag whether token consumption was valid.
+- ``message``: On failure the error message is returned.
+
 
 update_token
 ------------
@@ -82,8 +102,9 @@ update_token
 
 **Response**
 
-- ``success``: True or False
-- ``message``: On failure the error message is returned
+- ``success``: True or False.
+- ``message``: On failure the error message is returned.
+
 
 delete_token
 ------------
@@ -98,8 +119,19 @@ delete_token
 
 **Response**
 
-- ``success``: True or False
-- ``message``: On failure the error message is returned
+- ``success``: True or False.
+- ``message``: On failure the error message is returned.
+
+
+TODO
+====
+
+- Creation and modification metadata in JSON API.
+- Bulk token creation.
+- Token default settings.
+- Token consumption persistent logging.
+- Introduce ``consume`` permission for JSON API.
+- Use TokenAPI where appropriate instead of querying database directly.
 
 
 Contributors

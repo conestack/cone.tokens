@@ -41,6 +41,16 @@
     color: #000;
     margin: 0 10px;
   }
+  .tokens-container .scan-token {
+    width: 100%;
+    height: 60px;
+  }
+  .tokens-container .scan-token.inactive {
+    background-color: #dd0000;
+  }
+  .tokens-container .scan-token.active {
+    background-color: #00dd00;
+  }
 }
 @media print {
   #tokens-overview-title {

@@ -209,7 +209,7 @@ class TokenForm(Form):
             props={
                 'label': _('usage_count', default='Usage Count'),
                 'datatype': int,
-                'emptyvalue': -1
+                'emptyvalue': 0
             }
         )
         form['lock_time'] = factory(
