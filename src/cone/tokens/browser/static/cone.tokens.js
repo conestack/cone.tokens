@@ -157,25 +157,72 @@ var cone_tokens = (function (exports, $, ts) {
         }
         constructor(elem) {
             this.elem = elem;
+            this.base_url = elem.data('base-url');
             this.button = $('.scan-token', elem);
+            this._input_wrapper = null;
+            this._input = null;
             this.scan_token = this.scan_token.bind(this);
             this.button.on('click', (e) => {
                 this.scan_token();
             });
         }
-        scan_token() {
-            let button = this.button,
-                wrapper = $('<div/>').css('width', 0).css('overflow', 'hidden'),
-                input = $('<input type="text">');
-            wrapper.append(input);
-            this.elem.append(wrapper);
-            button.removeClass('inactive').addClass('active');
-            input[0].focus();
-            input.one('change', () => {
-                let val = input.val();
-                console.log(val);
-                wrapper.remove();
+        get active() {
+            return this._input !== null;
+        }
+        set active(value) {
+            if (value == this.value) {
+                return;
+            }
+            let button = this.button;
+            if (value) {
+                let wrapper = this._input_wrapper = $('<div/>')
+                    .css('width', 0)
+                    .css('overflow', 'hidden');
+                let input = this._input = $('<input type="text">');
+                wrapper.append(input);
+                this.elem.append(wrapper);
+                button.removeClass('inactive').addClass('active');
+                input[0].focus();
+            } else {
+                this._input_wrapper.remove();
+                this._input_wrapper = null;
+                this._input = null;
                 button.removeClass('active').addClass('inactive');
+            }
+        }
+        scan_token() {
+            this.active = true;
+            let input = this._input;
+            input.one('change', () => {
+                this.query_token(input.val());
+            });
+        }
+        query_token(value) {
+            ts.ajax.request({
+                url: `${this.base_url}/query_token`,
+                params: {value: value},
+                type: 'json',
+                success: (data, status, request) => {
+                    if (data.success) {
+                        if (!data.token) {
+                            this.active = false;
+                            ts.show_error('Token not exists');
+                        } else {
+                            ts.ajax.action({
+                                name: 'layout',
+                                selector: '#layout',
+                                mode: 'replace',
+                                url: `${this.base_url}/${data.token.uid}`,
+                                params: {}
+                            });
+                        }
+                    } else {
+                        ts.show_error(data.message);
+                    }
+                },
+                error: (request, status, error) => {
+                    ts.show_error(`Failed to request JSON API: ${error}`);
+                }
             });
         }
     }

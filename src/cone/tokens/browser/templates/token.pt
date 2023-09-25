@@ -74,6 +74,7 @@
             <button class="btn btn-default" data-usage-count="-1">
               <span i18n:translate="unlimited">Unlimited</span>
             </button>
+            <button class="btn btn-default" data-usage-count="0">0</button>
             <button class="btn btn-default" data-usage-count="1">1</button>
             <button class="btn btn-default" data-usage-count="10">10</button>
             <button class="btn btn-default" data-usage-count="20">20</button>
