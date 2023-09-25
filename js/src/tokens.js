@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import ts from 'treibstoff';
 
 export class TokensOverview {
     static initialize(context) {
@@ -74,26 +75,24 @@ export class Tokens {
 
     constructor(elem) {
         this.elem = elem;
-        this.token_uid_elem = $('[name=token-uid]', elem);
-        this.scan_token_elem = $('.scan-token', elem);
+        let button = $('.scan-token', elem);
 
         this.scan_token = this.scan_token.bind(this);
-        this.scan_token_elem.on('click', (e) => {
+        button.on('click', (e) => {
             this.scan_token();
         });
     }
 
     scan_token() {
-        uid_elem = this.token_uid_elem;
-        uid_elem.val('');
-        uid_elem[0].focus();
-        uid_elem.on('change', () => {
-            console.log('change');
-            let val = uid_elem.val();
-            if (val.length == 36) {
-                uid_elem.val('');
-                uid_elem.off('change');
-            };
+        let wrapper = $('<div/>').css('width', 0).css('overflow', 'hidden');
+        let input = $('<input type="text">');
+        wrapper.append(input);
+        this.elem.append(wrapper);
+        input[0].focus();
+        input.one('change', () => {
+            let val = input.val();
+            console.log(val);
+            wrapper.remove();
         });
     }
 }
