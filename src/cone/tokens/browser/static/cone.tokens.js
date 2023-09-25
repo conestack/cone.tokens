@@ -115,7 +115,7 @@ var cone_tokens = (function (exports, $, ts) {
                 .append($('<span>%</span>'))
                 .appendTo(this.tokens_title);
             if (this.tokens.length) {
-                this.original_size = this.tokens[0].attr('width');
+                this.original_size = parseInt($(this.tokens[0]).attr('width'));
             } else {
                 this.original_size = 256;
             }
