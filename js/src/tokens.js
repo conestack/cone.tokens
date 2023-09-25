@@ -2,6 +2,7 @@ import $ from 'jquery';
 import ts from 'treibstoff';
 
 export class TokensOverview {
+
     static initialize(context) {
         $('.tokens-overview-container', context).each(function() {
             new TokensOverview($(this));
@@ -65,7 +66,8 @@ export class TokensOverview {
         this.token_size = size;
     }
 }
-export class Tokens {
+
+export class TokenScanner {
 
     static initialize(context) {
         $('.tokens-container', context).each(function() {

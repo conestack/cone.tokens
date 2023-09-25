@@ -46,6 +46,20 @@
             }
         }
     }
+
+    // token scanning
+    .tokens-container {
+        .scan-token {
+            width: 100%;
+            height: 60px;
+        }
+        .scan-token.inactive {
+            background-color: #dd0000;
+        }
+        .scan-token.active {
+            background-color: #00dd00;
+        }
+    }
 }
 
 @media print {

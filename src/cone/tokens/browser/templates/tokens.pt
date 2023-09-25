@@ -9,7 +9,7 @@
 
   <div class="tokens-container">
 
-    <button class="scan-token">
+    <button class="scan-token inactive">
       <span class="label" i18n:translate="scan_token">Scan Token</span>
       <span class="timer"></span>
     </button>
