@@ -103,9 +103,9 @@ export class TokenScanner {
                 .css('overflow', 'hidden');
             let input = this._input = $('<input type="text">');
             wrapper.append(input);
-            this.elem.append(wrapper)
+            this.elem.append(wrapper);
             button.removeClass('inactive').addClass('active');
-            input[0].focus()
+            input[0].focus();
         } else {
             this._input_wrapper.remove();
             this._input_wrapper = null;
