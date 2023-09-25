@@ -1,3 +1,4 @@
+from cone.app import import_from_string
 from cone.app import main_hook
 from cone.tokens.browser import configure_resources
 from cone.tokens.model import TokenContainer
@@ -22,4 +23,8 @@ def initialize_tokens(config, global_config, settings):
     config.scan('cone.tokens.browser')
 
     # register entry node
-    cone.app.register_entry('tokens', TokenContainer)
+    tokens_entry_factory = settings.get(
+        'cone.tokens.entryfactory',
+        'cone.tokens.model.TokenContainer'
+    )
+    cone.app.register_entry('tokens', import_from_string(tokens_entry_factory))
