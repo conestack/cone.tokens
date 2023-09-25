@@ -1,12 +1,13 @@
+from cone.app.interfaces import INavigationLeaf
 from cone.app.model import Metadata
 from cone.app.model import Properties
+from cone.app.model import UUIDAttributeAware
 from cone.app.model import node_info
 from cone.sql import SQLBase
 from cone.sql.acl import SQLPrincipalACL
 from cone.sql.model import GUID
 from cone.sql.model import SQLRowNode
 from cone.sql.model import SQLTableNode
-from node.interfaces import ILeaf
 from node.interfaces import IUUID
 from node.utils import instance_property
 from plumber import plumbing
@@ -41,9 +42,11 @@ class TokenRecord(SQLBase):
     name='token_node',
     title=_('token_node_title', default='Token'),
     description=_('token_node_description', default='Token'))
-@implementer(ILeaf)
+@plumbing(UUIDAttributeAware)
+@implementer(INavigationLeaf)
 class TokenNode(SQLRowNode):
     record_class = TokenRecord
+    uuid_attribute_name = 'uid'
 
     @property
     def properties(self):
