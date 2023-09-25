@@ -11,7 +11,7 @@
     <span i18n:translate="token">Token</span>
   </div>
 
-  <div class="flex-group">
+  <div class="token-overview">
     <div class="panel panel-default token"
          data-token-settings='${context.token_settings}'>
 
