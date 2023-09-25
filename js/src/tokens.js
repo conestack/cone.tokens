@@ -14,7 +14,7 @@ export class TokensOverview {
         this.tokens_title = $('#tokens-overview-title', container);
 
         this.set_token_size = this.set_token_size.bind(this);
-        this.size_input = $('<input />')
+        this.size_input = $('<input type="number" />')
             .addClass('token-button')
             .on('change', this.set_token_size);
         this.size_input_label = $('<label />')
