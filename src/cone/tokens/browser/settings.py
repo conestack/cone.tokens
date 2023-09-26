@@ -34,6 +34,7 @@ class TokenSettingsForm(Form):
     action_resource = u'edit'
     form_name = 'tokensettingsform'
     show_contextmenu = False
+    form_heading = _('token_settings', default='Token Settings')
 
     @property
     def message_factory(self):

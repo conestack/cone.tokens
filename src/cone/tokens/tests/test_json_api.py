@@ -8,13 +8,16 @@ from cone.tokens.exceptions import TokenException
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenRecord
 from cone.tokens.model import TokenUsageRecord
+from cone.tokens.settings import tokens_config
 from cone.tokens.tests import tokens_layer
+from cone.ugm import testing
 from cone.ugm.testing import principals
 from datetime import datetime 
 from node.tests import NodeTestCase
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.view import render_view_to_response
 from unittest.mock import patch
+import os
 import uuid
 
 
@@ -131,7 +134,9 @@ class TestJSONAPI(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_add_token(self):
+    @testing.temp_directory
+    def test_add_token(self, tempdir):
+        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
         tokens = get_root()['tokens']
         request = self.layer.new_request(type='json')
         request.method = 'POST'

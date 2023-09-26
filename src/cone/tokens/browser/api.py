@@ -3,6 +3,7 @@ from cone.tokens.exceptions import TokenException
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
+from cone.tokens.settings import get_settings_node
 from pyramid.view import view_config
 import dateutil.parser
 import uuid
@@ -108,6 +109,7 @@ def consume_token(model, request):
     context=TokenContainer,
     permission='add')
 def add_token(model, request):
+    settings = get_settings_node(model)
     api = TokenAPI(request)
     uid = uuid.uuid4()
     kw = dict()
@@ -115,8 +117,18 @@ def add_token(model, request):
     try:
         read_datetime(request, 'valid_from', kw)
         read_datetime(request, 'valid_to', kw)
-        read_int(request, 'usage_count', kw)
-        read_int(request, 'lock_time', kw)
+        read_int(
+            request,
+            'usage_count',
+            kw,
+            default=settings.attrs['default_usage_count']
+        )
+        read_int(
+            request,
+            'lock_time',
+            kw,
+            default=settings.attrs['default_locktime']
+        )
     except TokenValueError as e:
         return e.as_json()
     try:

@@ -4,10 +4,6 @@
            i18n:domain="cone.tokens"
            omit-tag="True">
   <div>
-
-    <h1>Time Settings</h1>
-
     <tal:settings replace="structure tile('editform')" />
-
   </div>
 </tal:block>
