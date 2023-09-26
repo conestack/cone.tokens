@@ -51,8 +51,7 @@ class TestModel(NodeTestCase):
         token.attrs['created'] = datetime(2023, 9, 21)
         token.attrs['modified'] = datetime(2023, 9, 21)
 
-        token_uuid = str(uuid.uuid4())
-        tokens[token_uuid] = token
+        tokens[str(token.uuid)] = token
         token()
 
         # check if token has been added

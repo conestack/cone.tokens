@@ -247,7 +247,7 @@ class TokenForm(Form):
         value = data.fetch('tokenform.value').extracted
         # token uid gets used as value if no value given
         if not value:
-            value = self.token_uid
+            value = str(self.model.uuid)
         self.model.attrs['value'] = value
 
 
@@ -255,13 +255,9 @@ class TokenForm(Form):
 @plumbing(ContentAddForm)
 class TokenAddForm(TokenForm):
 
-    @request_property
-    def token_uid(self):
-        return str(uuid.uuid4())
-
     def save(self, widget, data):
         super(TokenAddForm, self).save(widget, data)
-        self.model.parent[self.token_uid] = self.model
+        self.model.parent[str(self.model.uuid)] = self.model
         add_creation_metadata(self.request, self.model.attrs)
         self.model()
 
@@ -269,10 +265,6 @@ class TokenAddForm(TokenForm):
 @tile(name='editform', interface=TokenNode, permission='edit')
 @plumbing(ContentEditForm)
 class TokenEditForm(TokenForm):
-
-    @property
-    def token_uid(self):
-        return self.model.name
 
     def save(self, widget, data):
         super(TokenEditForm, self).save(widget, data)
