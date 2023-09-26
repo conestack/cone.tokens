@@ -99,42 +99,11 @@ class TokenContainer(SQLTableNode):
         return md
 
 
-class TokenConsumptionRecord(SQLBase):
-    __tablename__ = 'token_consumption'
+class TokenUsageRecord(SQLBase):
+    __tablename__ = 'token_usage'
 
     uid = Column(GUID, primary_key=True)
     token_uid = Column(GUID)
     timestamp = Column(DateTime)
     error_code = Column(Integer)
-    creator = Column(String)
-    created = Column(DateTime)
-    modified = Column(DateTime)
-
-
-@node_info(
-    name='token_consumption',
-    title=_('token_consumption_title', default='Token Consumption'),
-    description=_('token_consumption_description', default='Token Consumption Records'))
-@plumbing(SQLPrincipalACL)
-@implementer(IUUID)
-class TokenConsumption(SQLTableNode):
-    record_class = TokenConsumptionRecord
-    uuid = uuid.UUID('c40ef458-832f-42e6-9add-2dda2afb8920')
-
-    @property
-    def properties(self):
-        props = Properties()
-        props.in_navtree = True
-        props.action_up = True
-        props.action_sharing = True
-        props.action_view = True
-        props.action_list = True
-        return props
-
-    @property
-    def metadata(self):
-        md = Metadata()
-        info = self.nodeinfo
-        md.title = info.title
-        md.description = info.description
-        return md
+    user = Column(String)

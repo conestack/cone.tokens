@@ -7,6 +7,7 @@ from cone.tokens.browser.api import read_string
 from cone.tokens.exceptions import TokenException
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenRecord
+from cone.tokens.model import TokenUsageRecord
 from cone.tokens.tests import tokens_layer
 from cone.ugm.testing import principals
 from datetime import datetime 
@@ -388,6 +389,7 @@ class TestJSONAPI(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
+    @sql_testing.delete_table_records(TokenUsageRecord)
     def test_consume_token(self):
         request = self.layer.new_request(type='json')
         request.method = 'GET'
