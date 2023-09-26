@@ -33,8 +33,8 @@ class TestTokenViews(NodeTestCase):
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     def test_download_qr_code(self):
         tokens = get_root()['tokens']
-        token_uid = uuid.UUID('57b9f6b1-b4c8-4aeb-9f12-22ab482546a2')
-        token = tokens[str(token_uid)] = TokenNode()
+        token = TokenNode()
+        tokens[str(token.uuid)] = token
         token.attrs['value'] = 'value'
 
         request = self.layer.new_request()
@@ -44,7 +44,7 @@ class TestTokenViews(NodeTestCase):
         self.assertEqual(res.content_type, 'image/png')
         self.assertEqual(
             res.content_disposition,
-            'attachment;filename=57b9f6b1-b4c8-4aeb-9f12-22ab482546a2.png'
+            f'attachment;filename={token.name}.png'
         )
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
@@ -262,8 +262,8 @@ class TestTokenForms(NodeTestCase):
 
         # create token
         tokens = get_root()['tokens']
-        token_uid = str(uuid.uuid4())
-        token = tokens[token_uid] = TokenNode()
+        token = TokenNode()
+        tokens[str(token.uuid)] = token
         token.attrs['value'] = 'token value'
         token.attrs['valid_from'] = datetime(2023, 9, 21, 10, 0)
         token.attrs['valid_to'] = datetime(2023, 9, 22, 12, 0)

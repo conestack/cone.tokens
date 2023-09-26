@@ -21,6 +21,12 @@ Features:
 * JSON API for token management
 
 
+Application ini file configuration
+==================================
+
+- **cone.tokens.entryfactory**: Node class used as entry node factory
+
+
 JSON API
 ========
 
