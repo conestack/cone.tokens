@@ -2,8 +2,6 @@ from cone.app import import_from_string
 from cone.app import main_hook
 from cone.app import register_config
 from cone.tokens.browser import configure_resources
-from cone.tokens.model import TokenContainer
-from cone.tokens.settings import token_cfg
 from cone.tokens.settings import TokenSettings
 import cone.app
 import logging

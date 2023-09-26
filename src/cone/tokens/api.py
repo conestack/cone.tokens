@@ -6,10 +6,11 @@ from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenRecord
-from datetime import datetime 
+from datetime import datetime
 from datetime import timedelta
 from node.utils import UNSET
 from pyramid.i18n import TranslationStringFactory
+from pyramid.threadlocal import get_current_request
 
 
 _ = TranslationStringFactory('cone.tokens')
@@ -90,6 +91,12 @@ class TokenAPI(object):
             token.valid_to = valid_to
             token.lock_time = lock_time
             token.usage_count = usage_count
+            request = get_current_request()
+            if request and hasattr(request, 'authenticated_userid'):
+                token.creator = request.authenticated_userid
+            now = datetime.now()
+            token.created = now
+            token.modified = now
             session.add(token)
             if use_tm():
                 session.flush() # pragma: no cover
@@ -123,6 +130,7 @@ class TokenAPI(object):
         if token.valid_from and token.valid_to and token.valid_from >= token.valid_to:
             session.rollback()
             raise TokenValueError('valid_from must be before valid_to')
+        token.modified = datetime.now()
         if use_tm():
             session.flush() # pragma: no cover
         else:

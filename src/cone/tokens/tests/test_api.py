@@ -8,6 +8,7 @@ from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenRecord
 from cone.tokens.tests import tokens_layer
+from cone.ugm.testing import principals
 from datetime import datetime 
 from datetime import timedelta
 from node.tests import NodeTestCase
@@ -135,12 +136,26 @@ class TestTokenAPI(NodeTestCase):
             'Token 577989d4-1673-4639-a579-dd468b294713 not exists'
         )
 
+    @principals(
+        users={
+            'user_1': {}
+        },
+        groups={
+            'group_1': {}
+        },
+        membership={
+            'group_1': ['user_1']
+        },
+        roles={
+            'user_1': ['manager']
+    })
     @sql_testing.delete_table_records(TokenRecord)
     def test_add(self):
         request = self.layer.new_request()
         api = TokenAPI(request)
         token_uid = uuid.UUID('c27b6d86-8ac0-4261-9e62-151ff7e31ecb')
-        api.add(token_uid)
+        with self.layer.authenticated('user_1'):
+            api.add(token_uid)
 
         token = api.get_token(token_uid)
         self.assertEqual(token.value, str(token_uid))
@@ -148,6 +163,9 @@ class TestTokenAPI(NodeTestCase):
         self.assertEqual(token.valid_to, None)
         self.assertEqual(token.usage_count, 0)
         self.assertEqual(token.lock_time, 0)
+        self.assertEqual(token.creator, 'user_1')
+        self.assertTrue(token.created)
+        self.assertTrue(token.modified)
 
         token_uid = uuid.UUID('6556f43e-b0ce-4c14-a0c5-40b8f2cdab3a')
         api.add(
@@ -164,6 +182,7 @@ class TestTokenAPI(NodeTestCase):
         self.assertEqual(token.valid_to, datetime(2023, 9, 22))
         self.assertEqual(token.usage_count, 1)
         self.assertEqual(token.lock_time, 10)
+        self.assertEqual(token.creator, None)
 
         with self.assertRaises(TokenValueError) as arc:
             api.add(
