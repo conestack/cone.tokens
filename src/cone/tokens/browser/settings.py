@@ -32,12 +32,17 @@ class TokenSettingsContent(ProtectedContentTile):
 @plumbing(SettingsBehavior, ContentEditForm)
 class TokenSettingsForm(Form):
     action_resource = u'edit'
-    form_name = 'timeform'
+    form_name = 'tokensettingsform'
     show_contextmenu = False
 
     @property
     def message_factory(self):
         return _
+
+    @property
+    def config_file(self):
+        from cone.tokens import config_file_path
+        return config_file_path
 
     def timerange_extractor(self, widget, data):
         start = data.extracted['start']
@@ -202,12 +207,11 @@ class TokenSettingsForm(Form):
 
     def save(self, widget, data):
         data_ = {
-            "morning": data.fetch('timeform.morning').extracted,
-            "afternoon": data.fetch('timeform.afternoon').extracted,
-            "today": data.fetch('timeform.today').extracted,
-            "default_locktime": data.fetch('timeform.default_locktime').extracted,
-            "default_uses": data.fetch('timeform.default_uses').extracted
+            "morning": data.fetch('tokensettingsform.morning').extracted,
+            "afternoon": data.fetch('tokensettingsform.afternoon').extracted,
+            "today": data.fetch('tokensettingsform.today').extracted,
+            "default_locktime": data.fetch('tokensettingsform.default_locktime').extracted,
+            "default_uses": data.fetch('tokensettingsform.default_uses').extracted
         }
-        from cone.tokens import config_file_path
-        with open(config_file_path, "w") as f:
+        with open(self.config_file, "w") as f:
             json.dump(data_, f)
