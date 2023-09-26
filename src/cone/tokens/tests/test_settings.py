@@ -1,7 +1,8 @@
 from cone.app import get_root
 from cone.tokens.browser.settings import TokenSettingsForm
-from cone.tokens.settings import token_cfg
 from cone.tokens.settings import TokenSettings
+from cone.tokens.settings import get_settings_node
+from cone.tokens.settings import tokens_config
 from cone.tokens.tests import tokens_layer
 from cone.ugm import testing
 from node.tests import NodeTestCase
@@ -15,13 +16,10 @@ class TestSettings(NodeTestCase):
 
     @testing.temp_directory
     def test_model_settings(self, tempdir):
-        path = os.path.join(tempdir, 'tokens.json')
-
-        class MyTokenSettings(TokenSettings):
-            config_file = path
+        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
 
         # default - no config file exists
-        settings = MyTokenSettings()
+        settings = TokenSettings()
         attrs = settings.attrs
         self.assertEqual(attrs['morning']['start'], '08:00')
         self.assertEqual(attrs['morning']['end'], '12:00')
@@ -29,11 +27,11 @@ class TestSettings(NodeTestCase):
         self.assertEqual(attrs['afternoon']['end'], '18:00')
         self.assertEqual(attrs['today']['start'], '08:00')
         self.assertEqual(attrs['today']['end'], '18:00')
-        self.assertEqual(attrs['default_locktime'], '3600')
-        self.assertEqual(attrs['default_uses'], '10')
+        self.assertEqual(attrs['default_locktime'], '0')
+        self.assertEqual(attrs['default_usage_count'], '0')
 
         # config file exists
-        with open(path, 'w') as f:
+        with open(tokens_config.config_file, 'w') as f:
             attrs['morning']['start'] = '09:00'
             attrs['default_locktime'] = '2000'
             json.dump(attrs, f)
@@ -44,14 +42,10 @@ class TestSettings(NodeTestCase):
 
     @testing.temp_directory
     def test_BrowserSettingsForm(self, tempdir):
-        config_file = os.path.join(tempdir, 'tokens.json')
-        token_cfg.token_settings = config_file
-        TokenSettings.config_file = config_file
-
-        model = get_root()['settings']['token_settings']
+        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
+        model = get_settings_node(get_root())
         request = self.layer.new_request()
 
-        TokenSettingsForm.config_file = config_file
         tile = TokenSettingsForm()
         tile.model = model
         tile.request = request
@@ -63,7 +57,7 @@ class TestSettings(NodeTestCase):
             'afternoon',
             'today',
             'default_locktime',
-            'default_uses',
+            'default_usage_count',
             'save',
             'cancel',
             'came_from'
@@ -88,7 +82,7 @@ class TestSettings(NodeTestCase):
             UNSET
         )
         self.assertEqual(
-            data.fetch('tokensettingsform.default_uses').extracted,
+            data.fetch('tokensettingsform.default_usage_count').extracted,
             UNSET
         )
 
@@ -100,11 +94,11 @@ class TestSettings(NodeTestCase):
         request.params['tokensettingsform.today.start'] = '9:00'
         request.params['tokensettingsform.today.end'] = '19:00'
         request.params['tokensettingsform.default_locktime'] = '2000'
-        request.params['tokensettingsform.default_uses'] = '5'
+        request.params['tokensettingsform.default_usage_count'] = '5'
         data = tile.form.extract(request=request)
         tile.save(model, data)
 
-        with open(config_file) as f:
+        with open(tokens_config.config_file) as f:
             form_data = json.load(f)
         self.assertEqual(form_data['morning']['start'], '09:00')
         self.assertEqual(form_data['morning']['end'], '10:00')
@@ -113,4 +107,4 @@ class TestSettings(NodeTestCase):
         self.assertEqual(form_data['today']['start'], '09:00')
         self.assertEqual(form_data['today']['end'], '19:00')
         self.assertEqual(form_data['default_locktime'], 2000)
-        self.assertEqual(form_data['default_uses'], 5)
+        self.assertEqual(form_data['default_usage_count'], 5)

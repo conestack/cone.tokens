@@ -24,7 +24,11 @@ Features:
 Application ini file configuration
 ==================================
 
-- **cone.tokens.entryfactory**: Node class used as entry node factory
+- **cone.tokens.config_file**: Required. Path to tokens json config file.
+
+- **cone.tokens.settings_node_path**: Optional. Application node path to token settings node.
+
+- **cone.tokens.entryfactory**: Optional. Node class used as entry node factory.
 
 
 JSON API

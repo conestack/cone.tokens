@@ -11,6 +11,7 @@ from cone.sql import get_session
 from cone.tile import tile
 from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenRecord
+from cone.tokens.settings import get_settings_node
 from datetime import datetime
 from node.utils import UNSET
 from plumber import plumbing
@@ -58,7 +59,7 @@ class TokenContent(ProtectedContentTile):
 
     @property
     def token_settings(self):
-        attrs = self.model.root['settings']['token_settings'].attrs
+        attrs = get_settings_node(self.model).attrs
         return json.dumps({
             'base_url': self.nodeurl,
             'timeranges': attrs
@@ -190,10 +191,10 @@ class TokenForm(Form):
                 }
             }
         )
-        settings = self.model.root['settings']['token_settings']
+        settings = get_settings_node(self.model)
         usage_count = attrs['usage_count']
         if usage_count is None:
-            usage_count = settings.attrs['default_uses']
+            usage_count = settings.attrs['default_usage_count']
         form['usage_count'] = factory(
             '#field:number',
             value=usage_count,

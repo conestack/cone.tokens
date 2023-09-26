@@ -9,13 +9,16 @@ from cone.tokens.browser.token import b64_qr_code
 from cone.tokens.browser.token import qr_code
 from cone.tokens.model import TokenNode
 from cone.tokens.model import TokenRecord
+from cone.tokens.settings import tokens_config
 from cone.tokens.tests import tokens_layer
+from cone.ugm import testing
 from cone.ugm.testing import principals
 from datetime import datetime 
 from node.tests import NodeTestCase
 from node.utils import UNSET
 from pyramid.view import render_view_to_response
 from yafowil.base import ExtractionError
+import os
 import uuid
 
 
@@ -59,11 +62,14 @@ class TestTokenViews(NodeTestCase):
 class TestTokenForms(NodeTestCase):
     layer = tokens_layer
 
-    def test_TokenForm(self):
+    @testing.temp_directory
+    def test_TokenForm(self, tempdir):
+        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
         request = self.layer.new_request()
 
         # create token
-        token = TokenNode()
+        tokens = get_root()['tokens']
+        token = TokenNode(parent=tokens)
 
         class TestTokenForm(TokenForm):
             def next(self, request):
@@ -192,7 +198,9 @@ class TestTokenForms(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_TokenAddForm(self):
+    @testing.temp_directory
+    def test_TokenAddForm(self, tempdir):
+        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
         request = self.layer.new_request()
 
         # create token
@@ -257,7 +265,9 @@ class TestTokenForms(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    def test_TokenEditForm(self):
+    @testing.temp_directory
+    def test_TokenEditForm(self, tempdir):
+        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
         request = self.layer.new_request()
 
         # create token

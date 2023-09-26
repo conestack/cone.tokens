@@ -158,7 +158,7 @@ var cone_tokens = (function (exports, $, ts) {
             const settings = this.token_settings;
             let params = {
                 'lock_time': settings['timeranges']['default_locktime'],
-                'usage_count': settings['timeranges']['default_uses']
+                'usage_count': settings['timeranges']['default_usage_count']
             };
             for (let i=0; i<amount; i++) {
                 ts.ajax.request({

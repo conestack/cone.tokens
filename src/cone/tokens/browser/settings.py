@@ -5,7 +5,7 @@ from cone.app.browser.settings import SettingsBehavior
 from cone.app.browser.utils import make_url
 from cone.tile import tile
 from cone.tokens.settings import TokenSettings
-from node.utils import UNSET
+from cone.tokens.settings import tokens_config
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
 from yafowil.base import ExtractionError
@@ -39,11 +39,6 @@ class TokenSettingsForm(Form):
     def message_factory(self):
         return _
 
-    @property
-    def config_file(self):
-        from cone.tokens import config_file_path
-        return config_file_path
-
     def timerange_extractor(self, widget, data):
         start = data.extracted['start']
         end = data.extracted['end']
@@ -71,9 +66,10 @@ class TokenSettingsForm(Form):
 
     def prepare(self):
         action = make_url(
-                self.request,
-                node=self.model,
-                resource=self.action_resource)
+            self.request,
+            node=self.model,
+            resource=self.action_resource
+        )
         form = self.form = factory('#form', name=self.form_name, props={
             'action': action,
             'persist_writer': node_attribute_writer
@@ -178,13 +174,13 @@ class TokenSettingsForm(Form):
                 'required': _('default_locktime_required', default='Default Locktime is required.'),
                 'label': _('default_locktime', default='Default Locktime')
             })
-        form['default_uses'] = factory(
+        form['default_usage_count'] = factory(
             '#field:number',
-            value=self.model.attrs['default_uses'],
+            value=self.model.attrs['default_usage_count'],
             props={
                 'datatype': int,
-                'required': _('default_uses_required', default='Default number of uses required.'),
-                'label': _('default_uses', default='Default Uses')
+                'required': _('default_usage_count_required', default='Default number of uses required.'),
+                'label': _('default_usage_count', default='Default Uses')
             })
         form['save'] = factory(
             'submit',
@@ -206,12 +202,13 @@ class TokenSettingsForm(Form):
         })
 
     def save(self, widget, data):
-        data_ = {
-            "morning": data.fetch('tokensettingsform.morning').extracted,
-            "afternoon": data.fetch('tokensettingsform.afternoon').extracted,
-            "today": data.fetch('tokensettingsform.today').extracted,
-            "default_locktime": data.fetch('tokensettingsform.default_locktime').extracted,
-            "default_uses": data.fetch('tokensettingsform.default_uses').extracted
-        }
-        with open(self.config_file, "w") as f:
-            json.dump(data_, f)
+        def fetch(name):
+            return data.fetch(f'tokensettingsform.{name}').extracted
+        with open(tokens_config.config_file, 'w') as f:
+            json.dump({
+                'morning': fetch('morning'),
+                'afternoon': fetch('afternoon'),
+                'today': fetch('today'),
+                'default_locktime': fetch('default_locktime'),
+                'default_usage_count': fetch('default_usage_count')
+            }, f, indent=4)

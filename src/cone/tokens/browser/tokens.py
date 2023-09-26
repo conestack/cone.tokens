@@ -1,5 +1,5 @@
-from bda.intellidatetime import convert
 from bda.intellidatetime import DateTimeConversionError
+from bda.intellidatetime import convert
 from cone.app.browser import render_main_template
 from cone.app.browser.actions import LinkAction
 from cone.app.browser.contextmenu import context_menu_item
@@ -11,9 +11,11 @@ from cone.tile import tile
 from cone.tokens.browser.token import b64_qr_code
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenRecord
+from cone.tokens.settings import get_settings_node
 from pyramid.i18n import TranslationStringFactory
 from pyramid.view import view_config
 import json
+
 
 _ = TranslationStringFactory('cone.tokens')
 
@@ -61,7 +63,7 @@ class TokensOverview(ProtectedContentTile):
 
     @request_property
     def token_settings(self):
-        attrs = self.model.root['settings']['token_settings'].attrs
+        attrs = get_settings_node(self.model).attrs
         return json.dumps({
             'base_url': self.nodeurl,
             'timeranges': attrs
