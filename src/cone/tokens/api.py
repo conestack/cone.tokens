@@ -1,3 +1,4 @@
+from cone import sql
 from cone.sql import get_session
 from cone.sql import use_tm
 from cone.tokens.exceptions import TokenLockTimeViolation
@@ -18,11 +19,13 @@ _ = TranslationStringFactory('cone.tokens')
 
 class TokenAPI(object):
 
-    def __init__(self, request):
+    def __init__(self, request=None):
        self.request = request
 
     @property
     def session(self):
+        if self.request is None:
+            return sql.session_factory()
         return get_session(self.request)
 
     def get_token(self, token_uid):
@@ -60,7 +63,7 @@ class TokenAPI(object):
         if token.usage_count != -1:
             token.usage_count -= 1
         token.last_used = now
-        if use_tm():
+        if use_tm() and self.request is not None:
             session.flush() # pragma: no cover
         else:
             session.commit()
