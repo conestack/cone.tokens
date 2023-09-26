@@ -63,10 +63,8 @@ class TokensOverview(ProtectedContentTile):
 
     @request_property
     def token_settings(self):
-        attrs = get_settings_node(self.model).attrs
         return json.dumps({
-            'base_url': self.nodeurl,
-            'timeranges': attrs
+            'base_url': self.nodeurl
         })
 
     @request_property

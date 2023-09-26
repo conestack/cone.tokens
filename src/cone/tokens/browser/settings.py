@@ -171,6 +171,7 @@ class TokenSettingsForm(Form):
             value=self.model.attrs['default_locktime'],
             props={
                 'datatype': int,
+                'min': 0,
                 'required': _('default_locktime_required', default='Default Locktime is required.'),
                 'label': _('default_locktime', default='Default Locktime')
             })
@@ -179,6 +180,7 @@ class TokenSettingsForm(Form):
             value=self.model.attrs['default_usage_count'],
             props={
                 'datatype': int,
+                'min': -1,
                 'required': _('default_usage_count_required', default='Default number of uses required.'),
                 'label': _('default_usage_count', default='Default Uses')
             })

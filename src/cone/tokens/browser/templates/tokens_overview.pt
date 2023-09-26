@@ -9,12 +9,11 @@
 
   <div class="tokens-overview-container"
        data-token-settings="${context.token_settings}">
-    <div id="tokens-overview-title"
-         class="list-group-item active"
-         ajax:target="${context.nodeurl}">
+
+    <div id="tokens-overview-title" class="list-group-item active">
       <span i18n:translate="tokens_overview">Overview</span>
 
-      <div class="form-inline">
+      <div class="form-inline add-tokens">
         <label for="amount" i18n:translate="amount">Amount</label>
         <input type="number"
                 name="amount"

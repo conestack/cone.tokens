@@ -29,8 +29,8 @@ default_token_settings = {
     'morning': {'start': '08:00', 'end': '12:00'},
     'afternoon': {'start': '12:00', 'end': '18:00'},
     'today': {'start': '08:00', 'end': '18:00'},
-    'default_locktime': '0',
-    'default_usage_count': '0',
+    'default_locktime': 0,
+    'default_usage_count': 0,
 }
 
 

@@ -18,8 +18,14 @@ export class TokensOverview {
 
         // add tokens
         this.add_tokens_container = $('.add-tokens', this.tokens_title);
-        this.add_tokens_input = $('input[name="amount"]', this.add_tokens_container);
-        this.add_tokens_btn = $('button[name="add-tokens"]', this.add_tokens_container);
+        this.add_tokens_input = $(
+            'input[name="amount"]',
+            this.add_tokens_container
+        );
+        this.add_tokens_btn = $(
+            'button[name="add-tokens"]',
+            this.add_tokens_container
+        );
         this.add_tokens = this.add_tokens.bind(this);
         this.add_tokens_btn.on('click', this.add_tokens);
 
@@ -31,7 +37,6 @@ export class TokensOverview {
             .addClass('datepicker')
             .data('date-locale', 'de');
         this.filter = $('button[name="filter"]', this.tokens_title);
-        this.target = this.tokens_title.attr('ajax:target');
         this.filter_tokens = this.filter_tokens.bind(this);
         this.filter.on('click', this.filter_tokens);
 
@@ -80,33 +85,33 @@ export class TokensOverview {
             name: 'tokens_overview',
             mode: 'inner',
             selector: '#content',
-            url: this.target,
+            url: this.token_settings.base_url,
             params: params
         });
     }
 
     add_tokens(evt) {
-        let amount = this.add_tokens_input.val();
-        const settings = this.token_settings;
-        let params = {
-            'lock_time': settings['timeranges']['default_locktime'],
-            'usage_count': settings['timeranges']['default_usage_count']
-        };
-        for (let i=0; i<amount; i++) {
+        const base_url = this.token_settings.base_url;
+        function add(amount, count) {
             ts.ajax.request({
-                url: `${settings.base_url}/add_token`,
-                params: params,
+                url: `${base_url}/add_token`,
+                params: {},
                 type: 'json',
                 method: 'POST',
                 success: (data, status, request) => {
                     if (data.success) {
-                        ts.ajax.action({
-                            name: 'tokens_overview',
-                            selector: '#content',
-                            mode: 'inner',
-                            url: `${settings.base_url}`,
-                            params: {}
-                        });
+                        count += 1;
+                        if (amount === count) {
+                            ts.ajax.action({
+                                name: 'tokens_overview',
+                                selector: '#content',
+                                mode: 'inner',
+                                url: base_url,
+                                params: {}
+                            });
+                        } else {
+                            add(amount, count);
+                        }
                     } else {
                         ts.show_error(data.message);
                     }
@@ -116,6 +121,8 @@ export class TokensOverview {
                 }
             });
         }
+        let amount = parseInt(this.add_tokens_input.val());
+        add(amount, 0);
     }
 
     set_token_size(evt) {

@@ -27,8 +27,8 @@ class TestSettings(NodeTestCase):
         self.assertEqual(attrs['afternoon']['end'], '18:00')
         self.assertEqual(attrs['today']['start'], '08:00')
         self.assertEqual(attrs['today']['end'], '18:00')
-        self.assertEqual(attrs['default_locktime'], '0')
-        self.assertEqual(attrs['default_usage_count'], '0')
+        self.assertEqual(attrs['default_locktime'], 0)
+        self.assertEqual(attrs['default_usage_count'], 0)
 
         # config file exists
         with open(tokens_config.config_file, 'w') as f:
