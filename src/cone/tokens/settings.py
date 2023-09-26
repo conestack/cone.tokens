@@ -9,16 +9,17 @@ import os
 _ = TranslationStringFactory('cone.tokens')
 
 
-time_cfg = Properties()
-time_cfg.time_settings = ''
+token_cfg = Properties()
+token_cfg.token_settings = ''
 
-class TimeSettings(BaseNode):
+class TokenSettings(BaseNode):
 
     @property
     def config_file(self):
-        return 'time.json'
+        from cone.tokens import config_file_path
+        return config_file_path
 
-    @instance_property
+    @property
     def attrs(self):
         config_file = self.config_file
         if not os.path.isfile(config_file):
@@ -32,10 +33,10 @@ class TimeSettings(BaseNode):
     def metadata(self):
         metadata = Metadata()
         metadata.title = _(
-            'time_settings_node',
-            default='Time Settings')
+            'token_settings_node',
+            default='Token Settings')
         metadata.description = _(
-            'time_settings_node_description',
-            default='Time definition settings'
+            'token_settings_node_description',
+            default='Token definition settings'
         )
         return metadata

@@ -59,22 +59,10 @@ class TokenContent(ProtectedContentTile):
 
     @property
     def token_settings(self):
+        attrs = self.model.root['settings']['token_settings'].attrs
         return json.dumps({
             'base_url': self.nodeurl,
-            'timeranges': {
-                'morning': {
-                    'from': {'hour': 8, 'minute': 0},
-                    'to': {'hour': 12, 'minute': 0},
-                },
-                'afternoon': {
-                    'from': {'hour': 12, 'minute': 0},
-                    'to': {'hour': 18, 'minute': 0}
-                },
-                'today': {
-                    'from': {'hour': 8, 'minute': 0},
-                    'to': {'hour': 18, 'minute': 0}
-                }
-            }
+            'timeranges': attrs
         })
 
     @request_property

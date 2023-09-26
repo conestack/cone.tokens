@@ -4,13 +4,15 @@ from cone.app.browser.layout import ProtectedContentTile
 from cone.app.browser.settings import SettingsBehavior
 from cone.app.browser.utils import make_url
 from cone.tile import tile
-from cone.tokens.settings import TimeSettings
+from cone.tokens.settings import TokenSettings
 from node.utils import UNSET
 from plumber import plumbing
 from pyramid.i18n import TranslationStringFactory
 from yafowil.base import ExtractionError
 from yafowil.base import factory
+from yafowil.compound import compound_extractor
 from yafowil.persistence import node_attribute_writer
+import datetime
 import json
 
 
@@ -19,23 +21,48 @@ _ = TranslationStringFactory('cone.ugm')
 
 @tile(
     name='content',
-    path='templates/time_settings.pt',
-    interface=TimeSettings,
+    path='templates/token_settings.pt',
+    interface=TokenSettings,
     permission='manage')
-class TimeSettingsContent(ProtectedContentTile):
+class TokenSettingsContent(ProtectedContentTile):
     pass
 
 
-# XXX permission
-@tile(name='editform', interface=TimeSettings, permission='edit')
+@tile(name='editform', interface=TokenSettings, permission='edit')
 @plumbing(SettingsBehavior, ContentEditForm)
-class TimeSettingsForm(Form):
+class TokenSettingsForm(Form):
     action_resource = u'edit'
     form_name = 'timeform'
+    show_contextmenu = False
 
     @property
     def message_factory(self):
         return _
+
+    def timerange_extractor(self, widget, data):
+        start = data.extracted['start']
+        end = data.extracted['end']
+        if start:
+            s = start.split(':')
+            s_h = int(s[0])
+            s_m = int(s[1])
+        if end:
+            e = end.split(':')
+            e_h = int(e[0])
+            e_m = int(e[1])
+        if start and end:
+            now = datetime.datetime.now()
+            dt_st = now.replace(hour=s_h, minute=s_m, second=0, microsecond=0)
+            dt_end = now.replace(hour=e_h, minute=e_m, second=0, microsecond=0)
+            if dt_st > dt_end:
+                raise ExtractionError(_(
+                    'end_time_before_start_time',
+                    default='Start Time must be before End Time.'
+                ))
+        return {
+            'start': start,
+            'end': end
+        }
 
     def prepare(self):
         action = make_url(
@@ -47,71 +74,113 @@ class TimeSettingsForm(Form):
             'persist_writer': node_attribute_writer
         })
         form['morning'] = factory(
-            '#field:compound',
+            '#field:error:*morning:compound',
             props={
-                'label': 'Morning'
-            }
-        )
-        form['morning.start'] = factory(
+                'label': _('morning', default='Morning')
+            },
+            custom = {
+                'morning': {
+                    'extractors': [compound_extractor, self.timerange_extractor]
+                }
+            })
+        start_required = _('start_time_required', default='Start Time is required.')
+        end_required = _('end_time_required', default='End Time is required.')
+        form['morning']['start'] = factory(
             '#field:time',
-            value=UNSET,
+            value=self.model.attrs['morning']['start'],
             props={
-                'label': 'Start',
+                'required': start_required,
+                'label': _('start', default='Start'),
                 'timepicker': True,
-                'time': True
-        })
-        form['morning.end'] = factory(
+                'time': True,
+                'persist': True
+            })
+        form['morning']['end'] = factory(
             '#field:time',
-            value=UNSET,
+            value=self.model.attrs['morning']['end'],
             props={
-                'label': 'End',
+                'required': end_required,
+                'label': _('end', default='End'),
                 'timepicker': True,
-                'time': True
-        })
+                'time': True,
+                'persist': True
+            })
         form['afternoon'] = factory(
-            '#field:compound',
+            '#field:error:*afternoon:compound',
             props={
-                'label': 'Afternoon'
-            }
-        )
-        form['afternoon.start'] = factory(
+                'label': _('afternoon', default='Afternoon')
+            },
+            custom = {
+                'afternoon': {
+                    'extractors': [compound_extractor, self.timerange_extractor]
+                }
+            })
+        form['afternoon']['start'] = factory(
             '#field:time',
-            value=UNSET,
+            value=self.model.attrs['afternoon']['start'],
             props={
-                'label': 'Start',
+                'required': start_required,
+                'label': _('start', default='Start'),
                 'timepicker': True,
-                'time': True
-        })
-        form['afternoon.end'] = factory(
+                'time': True,
+                'persist': True
+            })
+        form['afternoon']['end'] = factory(
             '#field:time',
-            value=UNSET,
+            value=self.model.attrs['afternoon']['end'],
             props={
-                'label': 'End',
+                'required': end_required,
+                'label': _('end', default='End'),
                 'timepicker': True,
-                'time': True
-        })
+                'time': True,
+                'persist': True
+            })
         form['today'] = factory(
-            '#field:compound',
+            '#field:error:*today:compound',
             props={
-                'label': 'Today'
-            }
-        )
-        form['today.start'] = factory(
+                'label': _('today', default='Today')
+            },
+            custom = {
+                'today': {
+                    'extractors': [compound_extractor, self.timerange_extractor]
+                }
+            })
+        form['today']['start'] = factory(
             '#field:time',
-            value=UNSET,
+            value=self.model.attrs['today']['start'],
             props={
-                'label': 'Start',
+                'required': start_required,
+                'label': _('start', default='Start'),
                 'timepicker': True,
-                'time': True
-        })
-        form['today.end'] = factory(
+                'time': True,
+                'persist': True
+            })
+        form['today']['end'] = factory(
             '#field:time',
-            value=UNSET,
+            value=self.model.attrs['today']['end'],
             props={
-                'label': 'End',
+                'required': end_required,
+                'label': _('end', default='End'),
                 'timepicker': True,
-                'time': True
-        })
+                'time': True,
+                'persist': True
+            })
+        form['default_locktime'] = factory(
+            '#field:number',
+            value=self.model.attrs['default_locktime'],
+            props={
+                'datatype': int,
+                'required': _('default_locktime_required', default='Default Locktime is required.'),
+                'label': _('default_locktime', default='Default Locktime')
+            })
+        form['default_uses'] = factory(
+            '#field:number',
+            value=self.model.attrs['default_uses'],
+            props={
+                'datatype': int,
+                'required': _('default_uses_required', default='Default number of uses required.'),
+                'label': _('default_uses', default='Default Uses')
+            })
         form['save'] = factory(
             'submit',
             props={
@@ -132,11 +201,13 @@ class TimeSettingsForm(Form):
         })
 
     def save(self, widget, data):
-        # XXX: custom extractor for compound
-        morning = data.fetch('timeform.%s' % 'morning').extracted
-
-        with open('time.json') as f:
-            dat = json.load(f)
-        dat['morning'] = morning
-        with open("time.json", "w") as f:
-            json.dump(dat, f)
+        data_ = {
+            "morning": data.fetch('timeform.morning').extracted,
+            "afternoon": data.fetch('timeform.afternoon').extracted,
+            "today": data.fetch('timeform.today').extracted,
+            "default_locktime": data.fetch('timeform.default_locktime').extracted,
+            "default_uses": data.fetch('timeform.default_uses').extracted
+        }
+        from cone.tokens import config_file_path
+        with open(config_file_path, "w") as f:
+            json.dump(data_, f)
