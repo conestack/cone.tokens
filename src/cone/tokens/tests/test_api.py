@@ -39,6 +39,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token f9c98a6b-b773-4714-b965-98c7911e6236 not exists'
         )
+        self.assertEqual(arc.exception.error_code, 1)
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_query_token(self):
@@ -88,6 +89,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token 577989d4-1673-4639-a579-dd468b294713 usage count exceeded'
         )
+        self.assertEqual(arc.exception.error_code, 2)
 
         token.usage_count = -1
         token.lock_time = 120
@@ -98,6 +100,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token 577989d4-1673-4639-a579-dd468b294713 is locked'
         )
+        self.assertEqual(arc.exception.error_code, 3)
 
         token.lock_time = 0
         session.commit()
@@ -111,6 +114,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token 577989d4-1673-4639-a579-dd468b294713 out of time range'
         )
+        self.assertEqual(arc.exception.error_code, 4)
 
         token.valid_from = None
         token.valid_to = datetime.now() - timedelta(days=1)
@@ -121,6 +125,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token 577989d4-1673-4639-a579-dd468b294713 out of time range'
         )
+        self.assertEqual(arc.exception.error_code, 4)
 
         token.valid_from = datetime.now() - timedelta(days=1)
         token.valid_to = datetime.now() + timedelta(days=1)
@@ -135,6 +140,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token 577989d4-1673-4639-a579-dd468b294713 not exists'
         )
+        self.assertEqual(arc.exception.error_code, 1)
 
     @principals(
         users={
@@ -194,6 +200,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token with uid 6556f43e-b0ce-4c14-a0c5-40b8f2cdab3a already exists'
         )
+        self.assertEqual(arc.exception.error_code, 7)
 
         token_uid = uuid.UUID('9c9196f0-8b5b-42e7-b389-b13b267c9378')
         with self.assertRaises(TokenValueError) as arc:
@@ -206,6 +213,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'valid_from must be before valid_to'
         )
+        self.assertEqual(arc.exception.error_code, 7)
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_delete(self):
@@ -225,6 +233,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token cc3ebacb-1fc1-42ea-bc24-051b60d60545 not exists'
         )
+        self.assertEqual(arc.exception.error_code, 1)
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_update(self):
@@ -249,6 +258,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Given value already used by another token'
         )
+        self.assertEqual(arc.exception.error_code, 7)
 
         with self.assertRaises(TokenValueError) as arc:
             api.update(
@@ -260,6 +270,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'valid_from must be before valid_to'
         )
+        self.assertEqual(arc.exception.error_code, 7)
 
         api.update(
             token_uid,

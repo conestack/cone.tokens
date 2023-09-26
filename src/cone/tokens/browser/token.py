@@ -23,7 +23,6 @@ from yafowil.persistence import node_attribute_writer
 import io
 import json
 import qrcode
-import uuid
 
 
 _ = TranslationStringFactory('cone.tokens')
