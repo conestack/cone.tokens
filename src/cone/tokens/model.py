@@ -55,6 +55,7 @@ class TokenNode(SQLRowNode):
         props.action_up_tile = 'content'
         props.action_edit = True
         props.action_view = True
+        props.action_delete = True
         return props
 
     @instance_property
