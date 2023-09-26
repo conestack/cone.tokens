@@ -7,10 +7,54 @@
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
-  <div class="tokens-overview-container">
+  <div class="tokens-overview-container"
+       data-token-settings="${context.token_settings}">
     <div id="tokens-overview-title"
-         class="list-group-item active">
+         class="list-group-item active"
+         ajax:target="${context.nodeurl}">
       <span i18n:translate="tokens_overview">Overview</span>
+
+      <div class="form-inline">
+        <label for="amount" i18n:translate="amount">Amount</label>
+        <input type="number"
+                name="amount"
+                class="form-control add-tokens-amount" />
+        <button name="add-tokens"
+                class="btn btn-default"
+                i18n:translate="add_token">
+          Add Tokens
+        </button>
+      </div>
+
+      <div class="form-inline">
+        <label for="start" i18n:translate="start">Start</label>
+        <input type="text"
+               name="start"
+               class="form-control"
+               value="${context.format_date(context.start)}" />
+      </div>
+
+      <div class="form-inline">
+        <label for="end" i18n:translate="end">End</label>
+        <input type="text"
+               name="end"
+               class="form-control"
+               value="${context.format_date(context.end)}" />
+        <button name="filter"
+                class="btn btn-default"
+                i18n:translate="filter">
+        Filter
+      </button>
+      </div>
+
+      <div class="form-inline">
+        <label for="token-size" i18n:translate="token_size">Token Size</label>
+        <input type="number"
+            name="token-size"
+            class="form-control token-button"
+            value="100" />
+        %
+      </div>
     </div>
 
     <div id="tokens-overview"

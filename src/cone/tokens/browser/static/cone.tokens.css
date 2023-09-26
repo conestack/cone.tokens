@@ -36,10 +36,24 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
   }
   .tokens-overview-container #tokens-overview-title .token-size .token-button {
     color: #000;
     margin: 0 10px;
+  }
+  .tokens-overview-container #tokens-overview-title button.datepicker-trigger {
+    transform: translateX(-100%);
+  }
+  .tokens-overview-container #tokens-overview-title input.add-tokens-amount {
+    width: 70px;
+  }
+  .tokens-overview-container #tokens-overview-title input.token-button {
+    width: 70px;
+  }
+  .tokens-overview-container #tokens-overview-title > div > * {
+    display: inline-block;
   }
   .tokens-container .scan-token {
     width: 100%;

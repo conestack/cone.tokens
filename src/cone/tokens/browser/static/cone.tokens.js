@@ -91,19 +91,25 @@ var cone_tokens = (function (exports, $, ts) {
             this.tokens_elem = $('#tokens-overview', container);
             this.tokens = $('object.token_qr', this.tokens_elem);
             this.tokens_title = $('#tokens-overview-title', container);
+            this.token_settings = this.container.data('token-settings');
+            this.add_tokens_container = $('.add-tokens', this.tokens_title);
+            this.add_tokens_input = $('input[name="amount"]', this.add_tokens_container);
+            this.add_tokens_btn = $('button[name="add-tokens"]', this.add_tokens_container);
+            this.add_tokens = this.add_tokens.bind(this);
+            this.add_tokens_btn.on('click', this.add_tokens);
+            this.start = $('input[name="start"]', this.tokens_title)
+                .addClass('datepicker')
+                .data('date-locale', 'de');
+            this.end = $('input[name="end"]', this.tokens_title)
+                .addClass('datepicker')
+                .data('date-locale', 'de');
+            this.filter = $('button[name="filter"]', this.tokens_title);
+            this.target = this.tokens_title.attr('ajax:target');
+            this.filter_tokens = this.filter_tokens.bind(this);
+            this.filter.on('click', this.filter_tokens);
             this.set_token_size = this.set_token_size.bind(this);
-            this.size_input = $('<input type="number" />')
-                .addClass('token-button')
-                .on('change', this.set_token_size);
-            this.size_input_label = $('<label />')
-                .addClass('input-label')
-                .text('Token Size');
-            this.size_container = $('<div />')
-                .addClass('token-size')
-                .append(this.size_input_label)
-                .append(this.size_input)
-                .append($('<span>%</span>'))
-                .appendTo(this.tokens_title);
+            this.size_input = $('input[name="token-size"]');
+            this.size_input.on('change', this.set_token_size);
             if (this.tokens.length) {
                 this.original_size = parseInt($(this.tokens[0]).attr('width'));
             } else {
@@ -132,6 +138,52 @@ var cone_tokens = (function (exports, $, ts) {
                 this.size_input.val(size);
             }
             this._token_size = size;
+        }
+        filter_tokens(evt) {
+            evt.preventDefault();
+            let params = {
+                start: this.start.val(),
+                end: this.end.val()
+            };
+            ts.ajax.action({
+                name: 'tokens_overview',
+                mode: 'inner',
+                selector: '#content',
+                url: this.target,
+                params: params
+            });
+        }
+        add_tokens(evt) {
+            let amount = this.add_tokens_input.val();
+            const settings = this.token_settings;
+            let params = {
+                'lock_time': settings['timeranges']['default_locktime'],
+                'usage_count': settings['timeranges']['default_uses']
+            };
+            for (let i=0; i<amount; i++) {
+                ts.ajax.request({
+                    url: `${settings.base_url}/add_token`,
+                    params: params,
+                    type: 'json',
+                    method: 'POST',
+                    success: (data, status, request) => {
+                        if (data.success) {
+                            ts.ajax.action({
+                                name: 'tokens_overview',
+                                selector: '#content',
+                                mode: 'inner',
+                                url: `${settings.base_url}`,
+                                params: {}
+                            });
+                        } else {
+                            ts.show_error(data.message);
+                        }
+                    },
+                    error: (request, status, error) => {
+                        ts.show_error(`Failed to request JSON API: ${error}`);
+                    }
+                });
+            }
         }
         set_token_size(evt) {
             evt.preventDefault();

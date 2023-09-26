@@ -190,18 +190,25 @@ class TokenForm(Form):
                 }
             }
         )
+        settings = self.model.root['settings']['token_settings']
+        usage_count = attrs['usage_count']
+        if usage_count is None:
+            usage_count = settings.attrs['default_uses']
         form['usage_count'] = factory(
             '#field:number',
-            value=attrs.get('usage_count', UNSET),
+            value=usage_count,
             props={
                 'label': _('usage_count', default='Usage Count'),
                 'datatype': int,
                 'emptyvalue': 0
             }
         )
+        lock_time = attrs['lock_time']
+        if lock_time is None:
+            lock_time = settings.attrs['default_locktime']
         form['lock_time'] = factory(
             '#field:number',
-            value=attrs.get('lock_time', UNSET),
+            value=lock_time,
             props={
                 'label': _('lock_time', default='Lock Time'),
                 'datatype': int,

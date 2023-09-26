@@ -43,10 +43,26 @@
             display: flex;
             align-items: baseline;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
 
             .token-size .token-button {
                 color: #000;
                 margin: 0 10px;
+            }
+
+            button.datepicker-trigger {
+                transform: translateX(-100%);
+            }
+
+            input.add-tokens-amount {
+                width: 70px;
+            }
+            input.token-button {
+                width: 70px;
+            }
+            > div > * {
+                display: inline-block;
             }
         }
     }

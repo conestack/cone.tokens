@@ -1,8 +1,11 @@
+from bda.intellidatetime import convert
+from bda.intellidatetime import DateTimeConversionError
 from cone.app.browser import render_main_template
 from cone.app.browser.actions import LinkAction
 from cone.app.browser.contextmenu import context_menu_item
 from cone.app.browser.layout import ProtectedContentTile
 from cone.app.browser.utils import make_url
+from cone.app.browser.utils import request_property
 from cone.sql import get_session
 from cone.tile import tile
 from cone.tokens.browser.token import b64_qr_code
@@ -10,6 +13,7 @@ from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenRecord
 from pyramid.i18n import TranslationStringFactory
 from pyramid.view import view_config
+import json
 
 _ = TranslationStringFactory('cone.tokens')
 
@@ -55,11 +59,45 @@ def tokens_overview(model, request):
     permission='view')
 class TokensOverview(ProtectedContentTile):
 
+    @request_property
+    def token_settings(self):
+        attrs = self.model.root['settings']['token_settings'].attrs
+        return json.dumps({
+            'base_url': self.nodeurl,
+            'timeranges': attrs
+        })
+
+    @request_property
+    def start(self):
+        try:
+            return convert(self.request.params.get('start', ''), locale='de')
+        except DateTimeConversionError:
+            return None
+
+    @request_property
+    def end(self):
+        try:
+            return convert(self.request.params.get('end', ''), locale='de')
+        except DateTimeConversionError:
+            return None
+
     @property
     def tokens(self):
+        start = self.start
+        end = self.end
         session = get_session(self.request)
-        tokens = session.query(TokenRecord).all()
+        query = session.query(TokenRecord)
+        if start:
+            query = query.filter(TokenRecord.created >= start)
+        if end:
+            query = query.filter(TokenRecord.created <= end)
+        tokens = query.all()
         return tokens
 
     def qrcode(self, value):
         return b64_qr_code(value)
+
+    def format_date(self, date, default=''):
+        if not date:
+            return default
+        return date.strftime('%d.%m.%Y')
