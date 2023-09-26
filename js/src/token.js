@@ -56,25 +56,15 @@ export class Token {
     set_timerange(scope) {
         const settings = this.settings,
             timeranges = settings.timeranges;
-        let valid_from, valid_to;
-        if (scope == 'morning') {
-            const morning = timeranges.morning;
+        let timerange, valid_from, valid_to;
+        if (Object.keys(timeranges).includes(scope)) {
+            timerange = timeranges[scope];
+            let start = timerange.start.split(':');
             valid_from = new Date();
-            valid_from.setHours(morning.from.hour, morning.from.minute, 0);
+            valid_from.setHours(start[0], start[1], 0);
+            let end = timerange.end.split(':');
             valid_to = new Date();
-            valid_to.setHours(morning.to.hour, morning.to.minute, 0);
-        } else if (scope == 'afternoon') {
-            const afternoon = timeranges.afternoon;
-            valid_from = new Date();
-            valid_from.setHours(afternoon.from.hour, afternoon.from.minute, 0);
-            valid_to = new Date();
-            valid_to.setHours(afternoon.to.hour, afternoon.to.minute, 0);
-        } else if (scope == 'today') {
-            const today = timeranges.today;
-            valid_from = new Date();
-            valid_from.setHours(today.from.hour, today.from.minute, 0);
-            valid_to = new Date();
-            valid_to.setHours(today.to.hour, today.to.minute, 0);
+            valid_to.setHours(end[0], end[1], 0);
         }
         function iso_date(date) {
             if (date) {
