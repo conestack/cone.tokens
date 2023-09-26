@@ -7,6 +7,7 @@ from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenRecord
+from cone.tokens.model import TokenUsageRecord
 from cone.tokens.tests import tokens_layer
 from cone.ugm.testing import principals
 from datetime import datetime 
@@ -58,6 +59,7 @@ class TestTokenAPI(NodeTestCase):
         self.assertEqual(api.query_token(token_value).uid, token_uid)
 
     @sql_testing.delete_table_records(TokenRecord)
+    @sql_testing.delete_table_records(TokenUsageRecord)
     def test_consume(self):
         request = self.layer.new_request()
         session = get_session(request)
@@ -200,7 +202,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Token with uid 6556f43e-b0ce-4c14-a0c5-40b8f2cdab3a already exists'
         )
-        self.assertEqual(arc.exception.error_code, 7)
+        self.assertEqual(arc.exception.error_code, 5)
 
         token_uid = uuid.UUID('9c9196f0-8b5b-42e7-b389-b13b267c9378')
         with self.assertRaises(TokenValueError) as arc:
@@ -213,7 +215,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'valid_from must be before valid_to'
         )
-        self.assertEqual(arc.exception.error_code, 7)
+        self.assertEqual(arc.exception.error_code, 5)
 
     @sql_testing.delete_table_records(TokenRecord)
     def test_delete(self):
@@ -258,7 +260,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'Given value already used by another token'
         )
-        self.assertEqual(arc.exception.error_code, 7)
+        self.assertEqual(arc.exception.error_code, 5)
 
         with self.assertRaises(TokenValueError) as arc:
             api.update(
@@ -270,7 +272,7 @@ class TestTokenAPI(NodeTestCase):
             str(arc.exception),
             'valid_from must be before valid_to'
         )
-        self.assertEqual(arc.exception.error_code, 7)
+        self.assertEqual(arc.exception.error_code, 5)
 
         api.update(
             token_uid,

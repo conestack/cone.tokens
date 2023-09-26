@@ -6,12 +6,15 @@ from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
+from cone.tokens.model import TokenUsageRecord
 from cone.tokens.model import TokenRecord
 from datetime import datetime
 from datetime import timedelta
 from node.utils import UNSET
+from node.utils import instance_property
 from pyramid.i18n import TranslationStringFactory
 from pyramid.threadlocal import get_current_request
+import uuid
 
 
 _ = TranslationStringFactory('cone.tokens')
@@ -22,11 +25,23 @@ class TokenAPI(object):
     def __init__(self, request=None):
        self.request = request
 
-    @property
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, tb):
+        self.session.close()
+
+    @instance_property
     def session(self):
         if self.request is None:
             return sql.session_factory()
         return get_session(self.request)
+
+    def flush_or_commit(self):
+        if use_tm() and self.request is not None:
+            self.session.flush() # pragma: no cover
+        else:
+            self.session.commit()
 
     def get_token(self, token_uid):
         session = self.session
@@ -45,28 +60,48 @@ class TokenAPI(object):
             .filter(TokenRecord.value == value)\
             .one_or_none()
 
+    @property
+    def _authenticated_userid(self):
+        request = get_current_request()
+        if request:
+            return request.authenticated_userid
+
+    def _log_usage(self, token_uid, error_code=None):
+        record = TokenUsageRecord()
+        record.uid = uuid.uuid4()
+        record.token_uid = token_uid
+        record.timestamp = datetime.now()
+        record.error_code = error_code
+        record.user = self._authenticated_userid
+        self.session.add(record)
+        self.flush_or_commit()
+
     def consume(self, token_uid):
-        session = self.session
         token = self.get_token(token_uid)
         if token.usage_count == 0:
-            raise TokenUsageCountExceeded(token_uid)
+            exc = TokenUsageCountExceeded(token_uid)
+            self._log_usage(token_uid, error_code=exc.error_code)
+            raise exc
         now = datetime.now()
         if token.last_used:
             if token.last_used + timedelta(0, token.lock_time) > now:
-                raise TokenLockTimeViolation(token_uid)
+                exc = TokenLockTimeViolation(token_uid)
+                self._log_usage(token_uid, error_code=exc.error_code)
+                raise exc
         valid_from = token.valid_from
         valid_to = token.valid_to
         if valid_from and now < valid_from:
-            raise TokenTimeRangeViolation(token_uid)
+            exc = TokenTimeRangeViolation(token_uid)
+            self._log_usage(token_uid, error_code=exc.error_code)
+            raise exc
         if valid_to and now > valid_to:
-            raise TokenTimeRangeViolation(token_uid)
+            exc = TokenTimeRangeViolation(token_uid)
+            self._log_usage(token_uid, error_code=exc.error_code)
+            raise exc
         if token.usage_count != -1:
             token.usage_count -= 1
         token.last_used = now
-        if use_tm() and self.request is not None:
-            session.flush() # pragma: no cover
-        else:
-            session.commit()
+        self._log_usage(token_uid)
         return True
 
     def add(
@@ -94,17 +129,12 @@ class TokenAPI(object):
             token.valid_to = valid_to
             token.lock_time = lock_time
             token.usage_count = usage_count
-            request = get_current_request()
-            if request and hasattr(request, 'authenticated_userid'):
-                token.creator = request.authenticated_userid
+            token.creator = self._authenticated_userid
             now = datetime.now()
             token.created = now
             token.modified = now
             session.add(token)
-            if use_tm():
-                session.flush() # pragma: no cover
-            else:
-                session.commit()
+            self.flush_or_commit()
 
     def update(
         self,
@@ -134,16 +164,10 @@ class TokenAPI(object):
             session.rollback()
             raise TokenValueError('valid_from must be before valid_to')
         token.modified = datetime.now()
-        if use_tm():
-            session.flush() # pragma: no cover
-        else:
-            session.commit()
+        self.flush_or_commit()
 
     def delete(self, token_uid):
         session = self.session
         token = self.get_token(token_uid)
         session.delete(token)
-        if use_tm():
-            session.flush() # pragma: no cover
-        else:
-            session.commit()
+        self.flush_or_commit()
