@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.1 (unreleased)
+0.1 (2023-09-27)
 ----------------
 
 - Initial work.
