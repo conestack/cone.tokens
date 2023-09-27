@@ -4,7 +4,8 @@ Changes
 0.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Actually upload package to pypi.
+  [rnix]
 
 
 0.1 (2023-09-27)
