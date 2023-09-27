@@ -136,12 +136,7 @@ delete_token
 TODO
 ====
 
-- Creation and modification metadata in JSON API.
-- Bulk token creation.
-- Token default settings.
-- Token consumption persistent logging.
 - Introduce ``consume`` permission for JSON API.
-- Use TokenAPI where appropriate instead of querying database directly.
 
 
 Contributors
