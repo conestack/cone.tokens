@@ -4,7 +4,7 @@ from cone.app.model import Properties
 from cone.app.model import UUIDAttributeAware
 from cone.app.model import node_info
 from cone.sql import SQLBase
-from cone.sql.acl import SQLPrincipalACL
+#from cone.sql.acl import SQLPrincipalACL
 from cone.sql.model import GUID
 from cone.sql.model import SQLRowNode
 from cone.sql.model import SQLTableNode
@@ -73,7 +73,7 @@ class TokenNode(SQLRowNode):
     title=_('token_container_title', default='Tokens'),
     description=_('token_container_description', default='Tokens'),
     addables=['token_node'])
-@plumbing(SQLPrincipalACL)
+#@plumbing(SQLPrincipalACL)
 @implementer(IUUID)
 class TokenContainer(SQLTableNode):
     record_class = TokenRecord
@@ -85,7 +85,7 @@ class TokenContainer(SQLTableNode):
         props = Properties()
         props.in_navtree = True
         props.action_up = True
-        props.action_sharing = True
+        #props.action_sharing = True
         props.action_view = True
         props.action_list = True
         return props
