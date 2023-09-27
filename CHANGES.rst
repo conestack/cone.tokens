@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.2 (unreleased)
+0.2 (2023-09-27)
 ----------------
 
 - Actually upload package to pypi.
