@@ -43,7 +43,7 @@ class TokenSettings(BaseNode):
             msg = f'Configuration file {config_file} not exists. Create it.'
             logging.info(msg)
             with open(config_file, 'w') as f:
-                json.dump(default_token_settings, f)
+                json.dump(default_token_settings, f, indent=4)
             return default_token_settings
         with open(config_file) as f:
             data = json.load(f)
