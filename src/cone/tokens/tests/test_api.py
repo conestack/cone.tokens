@@ -19,6 +19,11 @@ import uuid
 class TestTokenAPI(NodeTestCase):
     layer = tokens_layer
 
+    def test_contextmanager(self):
+        api = TokenAPI()
+        with api:
+            api.query_token(uuid.uuid4())
+
     @sql_testing.delete_table_records(TokenRecord)
     def test_get_token(self):
         request = self.layer.new_request()
