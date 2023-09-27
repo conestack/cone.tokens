@@ -60,6 +60,14 @@ class TokenAPI(object):
             .filter(TokenRecord.value == value)\
             .one_or_none()
 
+    def token_values(self, token_uids):
+        session = self.session
+        res = session\
+            .query(TokenRecord.value)\
+            .filter(TokenRecord.uid.in_(token_uids))\
+            .all()
+        return [it[0] for it in res]
+
     @property
     def _authenticated_userid(self):
         request = get_current_request()

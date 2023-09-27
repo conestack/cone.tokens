@@ -64,6 +64,33 @@ class TestTokenAPI(NodeTestCase):
         self.assertEqual(api.query_token(token_value).uid, token_uid)
 
     @sql_testing.delete_table_records(TokenRecord)
+    def test_token_values(self):
+        request = self.layer.new_request()
+        session = get_session(request)
+
+        token = TokenRecord()
+        token.uid = uuid.UUID('7217e39a-e39a-4e34-ae6d-30f127169962')
+        token.value = '1'
+        session.add(token)
+
+        token = TokenRecord()
+        token.uid = uuid.UUID('f9330598-eabd-415c-8049-beed35b9e9ab')
+        token.value = '2'
+        session.add(token)
+
+        session.commit()
+
+        api = TokenAPI(request)
+        self.assertEqual(
+            api.token_values([
+                uuid.UUID('7217e39a-e39a-4e34-ae6d-30f127169962'),
+                uuid.UUID('f9330598-eabd-415c-8049-beed35b9e9ab'),
+                uuid.UUID('1258a13a-7694-4c42-bbd9-64464c558a06')
+            ]),
+            ['1', '2']
+        )
+
+    @sql_testing.delete_table_records(TokenRecord)
     @sql_testing.delete_table_records(TokenUsageRecord)
     def test_consume(self):
         request = self.layer.new_request()
