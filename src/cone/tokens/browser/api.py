@@ -127,7 +127,7 @@ def add_token(model, request):
             request,
             'usage_count',
             kw,
-            default=settings.attrs['default_uses']
+            default=settings.attrs['default_usage_count']
         )
         read_int(
             request,

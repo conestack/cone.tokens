@@ -4,7 +4,11 @@ Changes
 0.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Tokens can be bulk deleted.
+  [lenadax]
+
+- Tokens can be created from scanned value.
+  [rnix]
 
 
 0.2 (2023-09-27)

@@ -74,10 +74,11 @@ class TokenAPI(object):
         if request:
             return request.authenticated_userid
 
-    def _log_usage(self, token_uid, error_code=None):
+    def _log_usage(self, token_uid, token_value, error_code=None):
         record = TokenUsageRecord()
         record.uid = uuid.uuid4()
         record.token_uid = token_uid
+        record.token_value = token_value
         record.timestamp = datetime.now()
         record.error_code = error_code
         record.user = self._authenticated_userid
@@ -88,28 +89,28 @@ class TokenAPI(object):
         token = self.get_token(token_uid)
         if token.usage_count == 0:
             exc = TokenUsageCountExceeded(token_uid)
-            self._log_usage(token_uid, error_code=exc.error_code)
+            self._log_usage(token_uid, token.value, error_code=exc.error_code)
             raise exc
         now = datetime.now()
         if token.last_used:
             if token.last_used + timedelta(0, token.lock_time) > now:
                 exc = TokenLockTimeViolation(token_uid)
-                self._log_usage(token_uid, error_code=exc.error_code)
+                self._log_usage(token_uid, token.value, error_code=exc.error_code)
                 raise exc
         valid_from = token.valid_from
         valid_to = token.valid_to
         if valid_from and now < valid_from:
             exc = TokenTimeRangeViolation(token_uid)
-            self._log_usage(token_uid, error_code=exc.error_code)
+            self._log_usage(token_uid, token.value, error_code=exc.error_code)
             raise exc
         if valid_to and now > valid_to:
             exc = TokenTimeRangeViolation(token_uid)
-            self._log_usage(token_uid, error_code=exc.error_code)
+            self._log_usage(token_uid, token.value, error_code=exc.error_code)
             raise exc
         if token.usage_count != -1:
             token.usage_count -= 1
         token.last_used = now
-        self._log_usage(token_uid)
+        self._log_usage(token_uid, token.value)
         return True
 
     def add(

@@ -114,6 +114,7 @@ class TestTokenAPI(NodeTestCase):
 
         usage_record = session.query(TokenUsageRecord).one()
         self.assertEqual(usage_record.token_uid, token_uid)
+        self.assertEqual(usage_record.token_value, 'token value')
         self.assertIsInstance(usage_record.timestamp, datetime)
         self.assertEqual(usage_record.error_code, None)
         self.assertEqual(usage_record.user, None)

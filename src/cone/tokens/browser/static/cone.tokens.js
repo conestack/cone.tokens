@@ -289,6 +289,16 @@ var cone_tokens = (function (exports, $, ts) {
                 this.query_token(input.val());
             });
         }
+        load_token(token_uid) {
+            console.log('load token: ' + token_uid);
+            ts.ajax.action({
+                name: 'layout',
+                selector: '#layout',
+                mode: 'replace',
+                url: `${this.base_url}/${token_uid}`,
+                params: {}
+            });
+        }
         query_token(value) {
             ts.ajax.request({
                 url: `${this.base_url}/query_token`,
@@ -298,15 +308,30 @@ var cone_tokens = (function (exports, $, ts) {
                     if (data.success) {
                         if (!data.token) {
                             this.active = false;
-                            ts.show_error('Token not exists');
-                        } else {
-                            ts.ajax.action({
-                                name: 'layout',
-                                selector: '#layout',
-                                mode: 'replace',
-                                url: `${this.base_url}/${data.token.uid}`,
-                                params: {}
+                            ts.show_dialog({
+                                title: 'Token not exists?',
+                                message: 'Do you want to create it?',
+                                on_confirm: () => {
+                                    ts.ajax.request({
+                                        url: `${this.base_url}/add_token`,
+                                        params: {value: value},
+                                        type: 'json',
+                                        method: 'POST',
+                                        success: (data, status, request) => {
+                                            if (data.success) {
+                                                this.load_token(data.token_uid);
+                                            } else {
+                                                ts.show_error(data.message);
+                                            }
+                                        },
+                                        error: (request, status, error) => {
+                                            ts.show_error(`Failed to request JSON API: ${error}`);
+                                        }
+                                    });
+                                }
                             });
+                        } else {
+                            this.load_token(data.token.uid);
                         }
                     } else {
                         ts.show_error(data.message);

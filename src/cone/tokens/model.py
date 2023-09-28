@@ -104,6 +104,7 @@ class TokenUsageRecord(SQLBase):
 
     uid = Column(GUID, primary_key=True)
     token_uid = Column(GUID)
+    token_value = Column(String)
     timestamp = Column(DateTime)
     error_code = Column(Integer)
     user = Column(String)
