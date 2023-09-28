@@ -148,34 +148,16 @@ QUnit.module('Token', hooks => {
         let settings = {
             timeranges: {
                 "morning": {
-                    "from": {
-                        "hour": 8,
-                        "minute": 0
-                    },
-                    "to": {
-                        "hour": 12,
-                        "minute": 0
-                    }
+                    "start": '08:00',
+                    "end": '12:00'
                 },
                 "afternoon": {
-                    "from": {
-                        "hour": 12,
-                        "minute": 0
-                    },
-                    "to": {
-                        "hour": 18,
-                        "minute": 0
-                    }
+                    "start": '12:00',
+                    "end": '18:00'
                 },
                 "today": {
-                    "from": {
-                        "hour": 8,
-                        "minute": 0
-                    },
-                    "to": {
-                        "hour": 18,
-                        "minute": 0
-                    }
+                    "start": '08:00',
+                    "end": '18:00'
                 }
             }
         };

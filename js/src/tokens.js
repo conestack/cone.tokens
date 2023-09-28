@@ -50,7 +50,7 @@ export class TokensOverview {
         this.delete_tokens_btn.on('click', this.delete_tokens);
 
         this.set_token_size = this.set_token_size.bind(this);
-        this.size_input = $('input[name="token-size"]');
+        this.size_input = $('input[name="token-size"]', this.tokens_title);
         this.size_input.on('change', this.set_token_size);
         if (this.tokens.length) {
             this.original_size = parseInt($(this.tokens[0]).attr('width'));
@@ -130,7 +130,12 @@ export class TokensOverview {
                 }
             });
         }
-        let amount = parseInt(this.add_tokens_input.val());
+        let amount = this.add_tokens_input.val();
+        if (!amount) {
+            return;
+        } else {
+            amount = parseInt(amount);
+        }
         add(amount, 0);
     }
 
