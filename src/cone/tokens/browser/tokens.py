@@ -83,6 +83,9 @@ class TokensOverview(ProtectedContentTile):
 
     @property
     def tokens(self):
+        action = self.request.params.get('ajax.action', None)
+        if not action:
+            return
         start = self.start
         end = self.end
         session = get_session(self.request)

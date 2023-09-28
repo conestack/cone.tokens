@@ -4,9 +4,15 @@ from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenNode
 from cone.tokens.settings import get_settings_node
+from pyramid.i18n import get_localizer
+from pyramid.i18n import TranslationStringFactory
 from pyramid.view import view_config
 import dateutil.parser
+import json
 import uuid
+
+
+_ = TranslationStringFactory('cone.tokens')
 
 
 def read_string(request, param, kw, default=None):
@@ -138,6 +144,36 @@ def add_token(model, request):
     except Exception as e:
         return dict(success=False, message=str(e))
     return dict(success=True, token_uid=str(uid))
+
+
+@view_config(
+    name='delete_tokens',
+    request_method='POST',
+    accept='application/json',
+    renderer='json',
+    context=TokenContainer,
+    permission='delete')
+def delete_tokens(model, request):
+    api = TokenAPI(request)
+    token_uids = request.params.get('token_uids', None)
+    if not token_uids:
+        return
+    token_uids = json.loads(token_uids)
+    token_count = len(token_uids)
+    for t_uid in token_uids:
+        uid = uuid.UUID(t_uid)
+        try:
+            api.delete(uid)
+        except Exception as e:
+            return dict(success=False, message=str(e))
+    ts = _(
+        'deleted_tokens',
+        default='Successfully deleted ${count} Tokens.',
+        mapping={'count': token_count}
+    )
+    localizer = get_localizer(request)
+    message = localizer.translate(ts)
+    return dict(success=True, message=message)
 
 
 @view_config(

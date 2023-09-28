@@ -40,6 +40,15 @@ export class TokensOverview {
         this.filter_tokens = this.filter_tokens.bind(this);
         this.filter.on('click', this.filter_tokens);
 
+        // delete tokens
+        this.delete_tokens_container = $('.delete-tokens', this.tokens_title);
+        this.delete_tokens_btn = $(
+            'button[name="delete-tokens"]',
+            this.delete_tokens_container
+        );
+        this.delete_tokens = this.delete_tokens.bind(this);
+        this.delete_tokens_btn.on('click', this.delete_tokens);
+
         this.set_token_size = this.set_token_size.bind(this);
         this.size_input = $('input[name="token-size"]');
         this.size_input.on('change', this.set_token_size);
@@ -123,6 +132,38 @@ export class TokensOverview {
         }
         let amount = parseInt(this.add_tokens_input.val());
         add(amount, 0);
+    }
+
+    delete_tokens(evt) {
+        const base_url = this.token_settings.base_url;
+        let uids = [];
+        for (let token of this.tokens) {
+            let uid = $(token).data('token-uid');
+            uids.push(uid);
+        }
+        ts.ajax.request({
+            url: `${base_url}/delete_tokens`,
+            params: {token_uids: JSON.stringify(uids)},
+            type: 'json',
+            method: 'POST',
+            success: (data, status, request) => {
+                if (data.success) {
+                    ts.ajax.action({
+                        name: 'tokens_overview',
+                        selector: '#content',
+                        mode: 'inner',
+                        url: base_url,
+                        params: {}
+                    });
+                    ts.show_message({message: data.message, flavor:''})
+                } else {
+                    ts.show_error(data.message);
+                }
+            },
+            error: (request, status, error) => {
+                ts.show_error(`Failed to request JSON API: ${error}`);
+            }
+        });
     }
 
     set_token_size(evt) {

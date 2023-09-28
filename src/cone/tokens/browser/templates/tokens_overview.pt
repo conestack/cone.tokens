@@ -46,6 +46,14 @@
       </button>
       </div>
 
+      <div class="form-inline delete-tokens">
+        <button name="delete-tokens"
+                class="btn btn-danger"
+                i18n:translate="delete_token">
+          Delete selected Tokens
+        </button>
+      </div>
+
       <div class="form-inline">
         <label for="token-size" i18n:translate="token_size">Token Size</label>
         <input type="number"
@@ -61,6 +69,7 @@
       <tal:token repeat="token tokens">
         <object class="token_qr"
                 data="${context.qrcode(token.value)}"
+                data-token-uid="${token.uid}"
                 type="image/png"
                 height="256px"
                 width="256px">
