@@ -60,7 +60,7 @@
 
         <li class="list-group-item flex-group">
           <div>
-            <strong>Usage Count</strong>:
+            <strong i18n:translate="usage_count">Usage Count</strong>:
             <span tal:condition="model.attrs['usage_count'] > -1"
                   tal:content="model.attrs['usage_count']">
               Usage Count

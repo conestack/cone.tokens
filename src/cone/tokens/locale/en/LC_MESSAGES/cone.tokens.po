@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cone.tokens 1.0\n"
-"POT-Creation-Date: 2023-09-27 13:37+0200\n"
+"POT-Creation-Date: 2023-09-28 13:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,6 +69,7 @@ msgstr "Valid to"
 
 #. Default: Usage Count
 #: src/cone/tokens/browser/token.py:202
+#: src/cone/tokens/browser/templates/token.pt:63
 msgid "usage_count"
 msgstr "Usage Count"
 
@@ -87,6 +88,12 @@ msgstr "Save"
 #: src/cone/tokens/browser/token.py:236
 msgid "cancel"
 msgstr "Cancel"
+
+#. Default: Successfully deleted ${count} Tokens.
+#: src/cone/tokens/browser/api.py:169
+#, fuzzy
+msgid "deleted_tokens"
+msgstr "Add Tokens"
 
 #. Default: Token Settings
 #: src/cone/tokens/browser/settings.py:37
@@ -118,7 +125,7 @@ msgstr "End Time is required."
 #: src/cone/tokens/browser/settings.py:95
 #: src/cone/tokens/browser/settings.py:125
 #: src/cone/tokens/browser/settings.py:155
-#: src/cone/tokens/browser/templates/tokens_overview.pt:29
+#: src/cone/tokens/browser/templates/tokens_overview.pt:30
 msgid "start"
 msgstr "Start"
 
@@ -126,7 +133,7 @@ msgstr "Start"
 #: src/cone/tokens/browser/settings.py:105
 #: src/cone/tokens/browser/settings.py:135
 #: src/cone/tokens/browser/settings.py:165
-#: src/cone/tokens/browser/templates/tokens_overview.pt:37
+#: src/cone/tokens/browser/templates/tokens_overview.pt:38
 msgid "end"
 msgstr "End"
 
@@ -212,16 +219,21 @@ msgid "amount"
 msgstr "Amount"
 
 #. Default: Add Tokens
-#: src/cone/tokens/browser/templates/tokens_overview.pt:23
+#: src/cone/tokens/browser/templates/tokens_overview.pt:24
 msgid "add_token"
 msgstr "Add Tokens"
 
 #. Default: Filter
-#: src/cone/tokens/browser/templates/tokens_overview.pt:44
+#: src/cone/tokens/browser/templates/tokens_overview.pt:45
 msgid "filter"
 msgstr "Filter"
 
+#. Default: Delete selected Tokens
+#: src/cone/tokens/browser/templates/tokens_overview.pt:53
+msgid "delete_token"
+msgstr "Delete selected Tokens"
+
 #. Default: Token Size
-#: src/cone/tokens/browser/templates/tokens_overview.pt:50
+#: src/cone/tokens/browser/templates/tokens_overview.pt:59
 msgid "token_size"
 msgstr "Token Size"
