@@ -16,8 +16,9 @@
       <div class="form-inline add-tokens">
         <label for="amount" i18n:translate="amount">Amount</label>
         <input type="number"
-                name="amount"
-                class="form-control add-tokens-amount" />
+               name="amount"
+               min=0
+               class="form-control add-tokens-amount" />
         <button name="add-tokens"
                 class="btn btn-default"
                 i18n:translate="add_token">
@@ -58,6 +59,7 @@
         <label for="token-size" i18n:translate="token_size">Token Size</label>
         <input type="number"
             name="token-size"
+            min=0
             class="form-control token-button"
             value="100" />
         %
