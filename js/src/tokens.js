@@ -141,32 +141,39 @@ export class TokensOverview {
 
     delete_tokens(evt) {
         const base_url = this.token_settings.base_url;
-        let uids = [];
-        for (let token of this.tokens) {
-            let uid = $(token).data('token-uid');
-            uids.push(uid);
-        }
-        ts.ajax.request({
-            url: `${base_url}/delete_tokens`,
-            params: {token_uids: JSON.stringify(uids)},
-            type: 'json',
-            method: 'POST',
-            success: (data, status, request) => {
-                if (data.success) {
-                    ts.ajax.action({
-                        name: 'tokens_overview',
-                        selector: '#content',
-                        mode: 'inner',
-                        url: base_url,
-                        params: {}
-                    });
-                    ts.show_message({message: data.message, flavor:''})
-                } else {
-                    ts.show_error(data.message);
+
+        ts.show_dialog({
+            title: 'Delete tokens?',
+            message: 'Do you really want to delete selected tokens?',
+            on_confirm: () => {
+                let uids = [];
+                for (let token of this.tokens) {
+                    let uid = $(token).data('token-uid');
+                    uids.push(uid);
                 }
-            },
-            error: (request, status, error) => {
-                ts.show_error(`Failed to request JSON API: ${error}`);
+                ts.ajax.request({
+                    url: `${base_url}/delete_tokens`,
+                    params: {token_uids: JSON.stringify(uids)},
+                    type: 'json',
+                    method: 'POST',
+                    success: (data, status, request) => {
+                        if (data.success) {
+                            ts.ajax.action({
+                                name: 'tokens_overview',
+                                selector: '#content',
+                                mode: 'inner',
+                                url: base_url,
+                                params: {}
+                            });
+                            ts.show_message({message: data.message, flavor:''})
+                        } else {
+                            ts.show_error(data.message);
+                        }
+                    },
+                    error: (request, status, error) => {
+                        ts.show_error(`Failed to request JSON API: ${error}`);
+                    }
+                });
             }
         });
     }
