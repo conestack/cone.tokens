@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.3 (unreleased)
+0.3 (2023-09-28)
 ----------------
 
 - Tokens can be bulk deleted.
