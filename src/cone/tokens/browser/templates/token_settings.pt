@@ -1,9 +1,0 @@
-<tal:block xmlns:tal="http://xml.zope.org/namespaces/tal"
-           xmlns:ajax="http://namespaces.conestack.org/ajax"
-           xmlns:i18n="http://xml.zope.org/namespaces/i18n"
-           i18n:domain="cone.tokens"
-           omit-tag="True">
-  <div>
-    <tal:settings replace="structure tile('editform')" />
-  </div>
-</tal:block>
