@@ -1,7 +1,7 @@
 from cone.app.browser.authoring import ContentEditForm
 from cone.app.browser.form import Form
 from cone.app.browser.layout import ProtectedContentTile
-from cone.app.browser.settings import SettingsBehavior
+from cone.app.browser.settings import SettingsForm
 from cone.app.browser.utils import make_url
 from cone.tile import tile
 from cone.tokens.settings import TokenSettings
@@ -29,7 +29,7 @@ class TokenSettingsContent(ProtectedContentTile):
 
 
 @tile(name='editform', interface=TokenSettings, permission='edit')
-@plumbing(SettingsBehavior, ContentEditForm)
+@plumbing(SettingsForm, ContentEditForm)
 class TokenSettingsForm(Form):
     action_resource = u'edit'
     form_name = 'tokensettingsform'
