@@ -1,9 +1,7 @@
-from cone.app.browser.authoring import ContentEditForm
 from cone.app.browser.form import Form
-from cone.app.browser.layout import ProtectedContentTile
-from cone.app.browser.settings import SettingsBehavior
+from cone.app.browser.settings import SettingsForm
+from cone.app.browser.settings import settings_form
 from cone.app.browser.utils import make_url
-from cone.tile import tile
 from cone.tokens.settings import TokenSettings
 from cone.tokens.settings import tokens_config
 from plumber import plumbing
@@ -19,26 +17,10 @@ import json
 _ = TranslationStringFactory('cone.ugm')
 
 
-@tile(
-    name='content',
-    path='templates/token_settings.pt',
-    interface=TokenSettings,
-    permission='manage')
-class TokenSettingsContent(ProtectedContentTile):
-    pass
-
-
-@tile(name='editform', interface=TokenSettings, permission='edit')
-@plumbing(SettingsBehavior, ContentEditForm)
+@settings_form(TokenSettings)
+@plumbing(SettingsForm)
 class TokenSettingsForm(Form):
-    action_resource = u'edit'
     form_name = 'tokensettingsform'
-    show_contextmenu = False
-    form_heading = _('token_settings', default='Token Settings')
-
-    @property
-    def message_factory(self):
-        return _
 
     def timerange_extractor(self, widget, data):
         start = data.extracted['start']
@@ -173,7 +155,10 @@ class TokenSettingsForm(Form):
             props={
                 'datatype': int,
                 'min': 0,
-                'required': _('default_locktime_required', default='Default Locktime is required.'),
+                'required': _(
+                    'default_locktime_required',
+                    default='Default Locktime is required.'
+                ),
                 'label': _('default_locktime', default='Default Locktime')
             })
         form['default_usage_count'] = factory(
@@ -182,7 +167,10 @@ class TokenSettingsForm(Form):
             props={
                 'datatype': int,
                 'min': -1,
-                'required': _('default_usage_count_required', default='Default number of uses required.'),
+                'required': _(
+                    'default_usage_count_required',
+                    default='Default number of uses required.'
+                ),
                 'label': _('default_usage_count', default='Default Uses')
             })
         form['save'] = factory(

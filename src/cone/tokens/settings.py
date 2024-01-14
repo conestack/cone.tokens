@@ -1,5 +1,6 @@
-from cone.app.model import BaseNode
 from cone.app.model import Metadata
+from cone.app.model import SettingsNode
+from cone.app.model import node_info
 from node.utils import instance_property
 from pyramid.i18n import TranslationStringFactory
 import json
@@ -34,7 +35,12 @@ default_token_settings = {
 }
 
 
-class TokenSettings(BaseNode):
+@node_info(
+    name='token_settings',
+    title=_('token_settings', default='Token Settings'),
+    description=_('token_settings_description', default='Token Settings'),
+    icon='glyphicon glyphicon-asterisk')
+class TokenSettings(SettingsNode):
 
     @property
     def attrs(self):
