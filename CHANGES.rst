@@ -4,7 +4,8 @@ Changes
 0.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Adopt Settings UI changes from ``cone.app``.
+  [rnix]
 
 
 0.3 (2023-09-28)
