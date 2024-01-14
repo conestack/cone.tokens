@@ -40,6 +40,7 @@ class TestSettings(NodeTestCase):
         self.assertEqual(attrs['morning']['start'], '09:00')
         self.assertEqual(attrs['default_locktime'], '2000')
 
+    @testing.principals(users={'admin': {}}, roles={'admin': ['manager']})
     @testing.temp_directory
     def test_BrowserSettingsForm(self, tempdir):
         tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
@@ -49,7 +50,8 @@ class TestSettings(NodeTestCase):
         tile = TokenSettingsForm()
         tile.model = model
         tile.request = request
-        tile.prepare()
+        with self.layer.authenticated('admin'):
+            tile.prepare()
 
         form = tile.form
         self.assertEqual(form.keys(), [
