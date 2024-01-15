@@ -61,7 +61,6 @@ class TestSettings(NodeTestCase):
             'default_locktime',
             'default_usage_count',
             'save',
-            'cancel',
             'came_from'
         ])
         self.assertEqual(form['morning'].keys(), ['start', 'end'])
