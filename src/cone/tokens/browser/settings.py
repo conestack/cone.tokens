@@ -181,16 +181,7 @@ class TokenSettingsForm(Form):
                 'handler': self.save,
                 'next': self.next,
                 'label': 'Save'
-        })
-        form['cancel'] = factory(
-            'submit',
-            props={
-                'action': 'cancel',
-                'expression': True,
-                'skip': True,
-                'next': self.next,
-                'label': 'Cancel'
-        })
+            })
 
     def save(self, widget, data):
         def fetch(name):
