@@ -102,7 +102,7 @@ export class TokensOverview {
     add_tokens(evt) {
         const base_url = this.token_settings.base_url;
         function add(amount, count) {
-            ts.ajax.request({
+            ts.http_request({
                 url: `${base_url}/add_token`,
                 params: {},
                 type: 'json',
@@ -151,7 +151,7 @@ export class TokensOverview {
                     let uid = $(token).data('token-uid');
                     uids.push(uid);
                 }
-                ts.ajax.request({
+                ts.http_request({
                     url: `${base_url}/delete_tokens`,
                     params: {token_uids: JSON.stringify(uids)},
                     type: 'json',
@@ -252,7 +252,7 @@ export class TokenScanner {
     }
 
     query_token(value) {
-        ts.ajax.request({
+        ts.http_request({
             url: `${this.base_url}/query_token`,
             params: {value: value},
             type: 'json',
@@ -264,7 +264,7 @@ export class TokenScanner {
                             title: 'Token not exists?',
                             message: 'Do you want to create it?',
                             on_confirm: () => {
-                                ts.ajax.request({
+                                ts.http_request({
                                     url: `${this.base_url}/add_token`,
                                     params: {value: value},
                                     type: 'json',

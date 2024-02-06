@@ -9,11 +9,13 @@
 #: core.sources
 #: i18n.gettext
 #: i18n.lingua
-#: js.karma
 #: js.npm
 #: js.rollup
 #: js.scss
+#: js.wtr
 #: qa.coverage
+#: qa.isort
+#: qa.ruff
 #: qa.test
 #
 # SETTINGS (ALL CHANGES MADE BELOW SETTINGS WILL BE LOST)
@@ -50,7 +52,10 @@ NPM_PACKAGES?=
 
 # Packages which get installed with `--save-dev` option.
 # No default value.
-NPM_DEV_PACKAGES?=
+NPM_DEV_PACKAGES?=\
+	qunit \
+	web-test-runner-qunit \
+	git://github.com/jquery/jquery.git\#2b6b5e0a3ba3029ec3ad1525a178920765e3adf1
 
 # Packages which get installed with `--save-prod` option.
 # No default value.
@@ -64,6 +69,16 @@ NPM_OPT_PACKAGES?=
 # and `--save-bundle`.
 # No default value.
 NPM_INSTALL_OPTS?=
+
+## js.wtr
+
+# Web test runner config file.
+# Default: wtr.config.mjs
+WTR_CONFIG?=js/wtr.config.mjs
+
+# Web test runner additional command line options.
+# Default: --coverage
+WTR_OPTIONS?=--coverage
 
 ## js.scss
 
@@ -88,16 +103,6 @@ SCSS_OPTIONS?=--no-source-map=none
 # Rollup config file.
 # Default: rollup.conf.js
 ROLLUP_CONFIG?=js/rollup.conf.js
-
-## js.karma
-
-# Karma config file.
-# Default: karma.conf.js
-KARMA_CONFIG?=js/karma.conf.js
-
-# Karma additional command line options.
-# Default: --single-run
-KARMA_OPTIONS?=--single-run
 
 ## core.mxenv
 
@@ -135,6 +140,18 @@ MXDEV?=mxdev
 # mxmake to install in virtual environment.
 # Default: mxmake
 MXMAKE?=mxmake
+
+## qa.ruff
+
+# Source folder to scan for Python files to run ruff on.
+# Default: src
+RUFF_SRC?=src
+
+## qa.isort
+
+# Source folder to scan for Python files to run isort on.
+# Default: src
+ISORT_SRC?=src
 
 ## core.mxfiles
 
@@ -198,6 +215,7 @@ DIRTY_TARGETS?=
 CLEAN_TARGETS?=
 PURGE_TARGETS?=
 CHECK_TARGETS?=
+TYPECHECK_TARGETS?=
 FORMAT_TARGETS?=
 
 # Defensive settings for make: https://tech.davis-hansson.com/p/make/
@@ -271,6 +289,19 @@ DIRTY_TARGETS+=npm-dirty
 CLEAN_TARGETS+=npm-clean
 
 ##############################################################################
+# web test runner
+##############################################################################
+
+# extend npm dev packages
+NPM_DEV_PACKAGES+=\
+	@web/test-runner \
+	@web/dev-server-import-maps
+
+.PHONY: wtr
+wtr: $(NPM_TARGET)
+	@$(NPM_PREFIX)/node_modules/.bin/web-test-runner $(WTR_OPTIONS) --config $(WTR_CONFIG)
+
+##############################################################################
 # scss
 ##############################################################################
 
@@ -297,21 +328,6 @@ NPM_DEV_PACKAGES+=\
 .PHONY: rollup
 rollup: $(NPM_TARGET)
 	@$(NPM_PREFIX)/node_modules/.bin/rollup --config $(ROLLUP_CONFIG)
-
-##############################################################################
-# karma
-##############################################################################
-
-# extend npm dev packages
-NPM_DEV_PACKAGES+=\
-	karma \
-	karma-coverage \
-	karma-chrome-launcher \
-	karma-module-resolver-preprocessor
-
-.PHONY: karma
-karma: $(NPM_TARGET)
-	@$(NPM_PREFIX)/node_modules/.bin/karma start $(KARMA_CONFIG) $(KARMA_OPTIONS)
 
 ##############################################################################
 # mxenv
@@ -374,6 +390,74 @@ endif
 INSTALL_TARGETS+=mxenv
 DIRTY_TARGETS+=mxenv-dirty
 CLEAN_TARGETS+=mxenv-clean
+
+##############################################################################
+# ruff
+##############################################################################
+
+RUFF_TARGET:=$(SENTINEL_FOLDER)/ruff.sentinel
+$(RUFF_TARGET): $(MXENV_TARGET)
+	@echo "Install Ruff"
+	@$(MXENV_PATH)pip install ruff
+	@touch $(RUFF_TARGET)
+
+.PHONY: ruff-check
+ruff-check: $(RUFF_TARGET)
+	@echo "Run ruff check"
+	@$(MXENV_PATH)ruff check $(RUFF_SRC)
+
+.PHONY: ruff-format
+ruff-format: $(RUFF_TARGET)
+	@echo "Run ruff format"
+	@$(MXENV_PATH)ruff format $(RUFF_SRC)
+
+.PHONY: ruff-dirty
+ruff-dirty:
+	@rm -f $(RUFF_TARGET)
+
+.PHONY: ruff-clean
+ruff-clean: ruff-dirty
+	@test -e $(MXENV_PATH)pip && $(MXENV_PATH)pip uninstall -y ruff || :
+
+INSTALL_TARGETS+=$(RUFF_TARGET)
+CHECK_TARGETS+=ruff-check
+FORMAT_TARGETS+=ruff-format
+DIRTY_TARGETS+=ruff-dirty
+CLEAN_TARGETS+=ruff-clean
+
+##############################################################################
+# isort
+##############################################################################
+
+ISORT_TARGET:=$(SENTINEL_FOLDER)/isort.sentinel
+$(ISORT_TARGET): $(MXENV_TARGET)
+	@echo "Install isort"
+	@$(MXENV_PATH)pip install isort
+	@touch $(ISORT_TARGET)
+
+.PHONY: isort-check
+isort-check: $(ISORT_TARGET)
+	@echo "Run isort check"
+	@$(MXENV_PATH)isort --check $(ISORT_SRC)
+
+.PHONY: isort-format
+isort-format: $(ISORT_TARGET)
+	@echo "Run isort format"
+	@$(MXENV_PATH)isort $(ISORT_SRC)
+
+.PHONY: isort-dirty
+isort-dirty:
+	@rm -f $(ISORT_TARGET)
+
+.PHONY: isort-clean
+isort-clean: isort-dirty
+	@test -e $(MXENV_PATH)pip && $(MXENV_PATH)pip uninstall -y isort || :
+
+INSTALL_TARGETS+=$(ISORT_TARGET)
+CHECK_TARGETS+=isort-check
+FORMAT_TARGETS+=isort-format
+DIRTY_TARGETS+=isort-dirty
+CLEAN_TARGETS+=isort-clean
 
 ##############################################################################
 # sources
@@ -666,6 +750,9 @@ runtime-clean:
 
 .PHONY: check
 check: $(CHECK_TARGETS)
+
+.PHONY: typecheck
+typecheck: $(TYPECHECK_TARGETS)
 
 .PHONY: format
 format: $(FORMAT_TARGETS)

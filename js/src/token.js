@@ -29,7 +29,7 @@ export class Token {
 
     request_api(params) {
         const settings = this.settings;
-        ts.ajax.request({
+        ts.http_request({
             url: `${settings.base_url}/update_token`,
             params: params,
             type: 'json',

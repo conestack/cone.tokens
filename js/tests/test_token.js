@@ -56,11 +56,11 @@ QUnit.module('Token', hooks => {
         let force_success = false;
         let force_data_success = false;
 
-        // patch ts.ajax.request and action
-        const original_ts_request = ts.ajax.request;
+        // patch ts.http_request and action
+        const original_ts_request = ts.http_request;
         const original_ts_action = ts.ajax.action;
         const original_ts_error = ts.show_error;
-        ts.ajax.request = function(opts) {
+        ts.http_request = function(opts) {
             if (force_success) {
                 if (force_data_success) {
                     opts.success({success: force_data_success});
@@ -113,7 +113,7 @@ QUnit.module('Token', hooks => {
         assert.verifySteps(['ajax_success']);
 
         // reset ts ajax
-        ts.ajax.request = original_ts_request;
+        ts.http_request = original_ts_request;
         ts.ajax.action = original_ts_action;
         ts.show_error = original_ts_error;
     });

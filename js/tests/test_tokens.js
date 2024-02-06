@@ -96,7 +96,7 @@ QUnit.module('TokensOverview', hooks => {
     });
 
     QUnit.test('filter_tokens', assert => {
-        // patch ts.ajax.request and action
+        // patch ts.http_request and action
         const original_ts_action = ts.ajax.action;
         ts.ajax.action = function(opts) {
             assert.step('ajax_success');
@@ -127,11 +127,11 @@ QUnit.module('TokensOverview', hooks => {
         let force_data_success = false;
         let data_token = false;
 
-        // patch ts.ajax.request and action
-        const original_ts_request = ts.ajax.request;
+        // patch ts.http_request and action
+        const original_ts_request = ts.http_request;
         const original_ts_action = ts.ajax.action;
         const original_ts_error = ts.show_error;
-        ts.ajax.request = function(opts) {
+        ts.http_request = function(opts) {
             if (force_success) {
                 if (force_data_success) {
                     opts.success({
@@ -185,7 +185,7 @@ QUnit.module('TokensOverview', hooks => {
         assert.verifySteps(['ajax_success', 'https://tld.com']);
 
         // reset ts ajax
-        ts.ajax.request = original_ts_request;
+        ts.http_request = original_ts_request;
         ts.ajax.action = original_ts_action;
         ts.show_error = original_ts_error;
     });
@@ -197,12 +197,12 @@ QUnit.module('TokensOverview', hooks => {
         let force_data_success = false;
         let token_uids = [];
 
-        // patch ts.ajax.request and action
-        const original_ts_request = ts.ajax.request;
+        // patch ts.http_request and action
+        const original_ts_request = ts.http_request;
         const original_ts_action = ts.ajax.action;
         const original_ts_error = ts.show_error;
         const original_ts_message = ts.show_message;
-        ts.ajax.request = function(opts) {
+        ts.http_request = function(opts) {
             if (force_success) {
                 if (force_data_success) {
                     opts.success({
@@ -236,11 +236,13 @@ QUnit.module('TokensOverview', hooks => {
 
         // ajax failure
         ov.delete_tokens();
+        $('.modal button.ok').trigger('click');
         assert.verifySteps(['Failed to request JSON API: ']);
 
         // force success
         force_success = true;
         ov.delete_tokens();
+        $('.modal button.ok').trigger('click');
         assert.verifySteps(['ajax_fail']);
 
         // force data success
@@ -248,6 +250,7 @@ QUnit.module('TokensOverview', hooks => {
         let token_1_uid = $($('.token_qr')[0]).data('token-uid');
         let token_2_uid = $($('.token_qr')[1]).data('token-uid');
         ov.delete_tokens();
+        $('.modal button.ok').trigger('click');
         assert.verifySteps([
             'ajax_success',
             'https://tld.com',
@@ -255,7 +258,7 @@ QUnit.module('TokensOverview', hooks => {
         ]);
 
         // reset ts ajax
-        ts.ajax.request = original_ts_request;
+        ts.http_request = original_ts_request;
         ts.ajax.action = original_ts_action;
         ts.show_error = original_ts_error;
         ts.show_message = original_ts_message;
@@ -328,16 +331,16 @@ QUnit.module('TokenScanner', hooks => {
         assert.verifySteps(['query_token token-1']);
     });
 
+    let force_success = false;
     QUnit.test('query_token', assert => {
-        let force_success = false;
         let force_data_success = false;
         let data_token = false;
 
-        // patch ts.ajax.request and action
-        const original_ts_request = ts.ajax.request;
+        // patch ts.http_request and action
+        const original_ts_request = ts.http_request;
         const original_ts_action = ts.ajax.action;
         const original_ts_error = ts.show_error;
-        ts.ajax.request = function(opts) {
+        ts.http_request = function(opts) {
             if (force_success) {
                 if (force_data_success) {
                     opts.success({
@@ -390,7 +393,7 @@ QUnit.module('TokenScanner', hooks => {
         ]);
 
         // reset ts ajax
-        ts.ajax.request = original_ts_request;
+        ts.http_request = original_ts_request;
         ts.ajax.action = original_ts_action;
         ts.show_error = original_ts_error;
     });
