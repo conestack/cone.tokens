@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.4 (unreleased)
+0.4 (2024-02-12)
 ----------------
 
 - Adopt Settings UI changes from ``cone.app``.
