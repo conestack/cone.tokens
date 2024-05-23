@@ -9,7 +9,7 @@ def read_file(name):
         return f.read()
 
 
-version = '0.5.dev0'
+version = '0.5'
 shortdesc = 'cone token api'
 longdesc = '\n\n'.join([read_file(name) for name in [
     'README.rst',

@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.5 (unreleased)
+0.5 (2024-05-23)
 ----------------
 
 - Update Makefile.
