@@ -26,7 +26,7 @@ var cone_tokens = (function (exports, $, ts) {
         }
         request_api(params) {
             const settings = this.settings;
-            ts.ajax.request({
+            ts.http_request({
                 url: `${settings.base_url}/update_token`,
                 params: params,
                 type: 'json',
@@ -168,7 +168,7 @@ var cone_tokens = (function (exports, $, ts) {
         add_tokens(evt) {
             const base_url = this.token_settings.base_url;
             function add(amount, count) {
-                ts.ajax.request({
+                ts.http_request({
                     url: `${base_url}/add_token`,
                     params: {},
                     type: 'json',
@@ -215,7 +215,7 @@ var cone_tokens = (function (exports, $, ts) {
                         let uid = $(token).data('token-uid');
                         uids.push(uid);
                     }
-                    ts.ajax.request({
+                    ts.http_request({
                         url: `${base_url}/delete_tokens`,
                         params: {token_uids: JSON.stringify(uids)},
                         type: 'json',
@@ -306,7 +306,7 @@ var cone_tokens = (function (exports, $, ts) {
             });
         }
         query_token(value) {
-            ts.ajax.request({
+            ts.http_request({
                 url: `${this.base_url}/query_token`,
                 params: {value: value},
                 type: 'json',
@@ -318,7 +318,7 @@ var cone_tokens = (function (exports, $, ts) {
                                 title: 'Token not exists?',
                                 message: 'Do you want to create it?',
                                 on_confirm: () => {
-                                    ts.ajax.request({
+                                    ts.http_request({
                                         url: `${this.base_url}/add_token`,
                                         params: {value: value},
                                         type: 'json',

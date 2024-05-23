@@ -80,7 +80,7 @@ class TokenContainer(SQLTableNode):
     child_factory = TokenNode
     uuid = uuid.UUID('c40ef458-832f-42e6-9add-2dda2afb8920')
 
-    @property
+    @instance_property
     def properties(self):
         props = Properties()
         props.in_navtree = True
@@ -90,7 +90,7 @@ class TokenContainer(SQLTableNode):
         props.action_list = True
         return props
 
-    @property
+    @instance_property
     def metadata(self):
         md = Metadata()
         info = self.nodeinfo

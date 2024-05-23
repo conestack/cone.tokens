@@ -4,7 +4,15 @@ Changes
 0.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Update Makefile.
+  [rnix]
+
+- ``properties`` and ``metadata`` of ``cone.tokens.model.Tokens`` are instance
+  properties now.
+  [rnix]
+
+- Use ``ts.http_request`` instead of ``ts.ajax.request``.
+  [rnix]
 
 
 0.4 (2024-02-12)
