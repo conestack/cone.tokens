@@ -7,107 +7,101 @@
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
-  <div class="token-title list-group-item active">
-    <span i18n:translate="token">Token</span>
-  </div>
+  <div class="token-overview card mt-3">
 
-  <div class="token-overview">
-    <div class="panel panel-default token"
-         data-token-settings='${context.token_settings}'>
-
-      <ul class="list-group">
-
-        <li class="list-group-item">
-          <button type="button"
-                  class="btn ${context.cssclass} token-active">
-            <span class="glyphicon glyphicon-off"></span>
-            <span tal:content="context.active_label">Active</span>
-          </button>
-        </li>
-        <li class="list-group-item">
-          <strong i18n:translate="value">Value</strong>:
-          <span tal:content="model.attrs['value']">Value</span>
-        </li>
-
-        <li class="list-group-item flex-group">
-          <div>
-          <strong i18n:translate="valid">Valid</strong>:
-            <tal:range condition="model.attrs['valid_from'] or model.attrs['valid_to']">
-              <span tal:content="context.format_date(model.attrs['valid_from'])"></span>
-              <strong> - </strong>
-              <span tal:content="context.format_date(model.attrs['valid_to'])"></span>
-            </tal:range>
-            <span tal:condition="not model.attrs['valid_from'] and not model.attrs['valid_to']"
-                  i18n:translate="unlimited">
-              Unlimited
-            </span>
-          </div>
-          <div class="btn-group timeranges">
-            <button class="btn btn-default" data-timerange-scope="unlimited">
-              <span i18n:translate="unlimited">Unlimited</span>
-            </button>
-            <button class="btn btn-default" data-timerange-scope="morning">
-              <span i18n:translate="morning">Morning</span>
-            </button>
-            <button class="btn btn-default" data-timerange-scope="afternoon">
-              <span i18n:translate="afternoon">Afternoon</span>
-            </button>
-            <button class="btn btn-default" data-timerange-scope="today">
-              <span i18n:translate="today">Today</span>
-            </button>
-          </div>
-        </li>
-
-        <li class="list-group-item flex-group">
-          <div>
-            <strong i18n:translate="usage_count">Usage Count</strong>:
-            <span tal:condition="model.attrs['usage_count'] > -1"
-                  tal:content="model.attrs['usage_count']">
-              Usage Count
-            </span>
-            <span tal:condition="model.attrs['usage_count'] == -1"
-                  i18n:translate="unlimited">
-              Unlimited
-            </span>
-          </div>
-          <div class="btn-group usage-count">
-            <button class="btn btn-default" data-usage-count="-1">
-              <span i18n:translate="unlimited">Unlimited</span>
-            </button>
-            <button class="btn btn-default" data-usage-count="0">0</button>
-            <button class="btn btn-default" data-usage-count="1">1</button>
-            <button class="btn btn-default" data-usage-count="10">10</button>
-            <button class="btn btn-default" data-usage-count="20">20</button>
-            <button class="btn btn-default" data-usage-count="50">50</button>
-            <button class="btn btn-default" data-usage-count="100">100</button>
-          </div>
-        </li>
-
-        <li class="list-group-item">
-          <strong i18n:translate="lock_time">Lock Time</strong>:
-          <span tal:content="context.lock_time_seconds"></span>
-        </li>
-
-        <li class="list-group-item">
-            <strong i18n:translate="creator">Creator</strong>:
-            <span tal:content="model.attrs['creator']"></span>
-        </li>
-
-        <li class="list-group-item">
-            <strong i18n:translate="created">Created</strong>:
-            <span tal:content="model.attrs['created'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
-        </li>
-
-        <li class="list-group-item">
-            <strong i18n:translate="modified">Modified</strong>:
-            <span tal:content="model.attrs['modified'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
-        </li>
-      </ul>
+    <div class="token-title card-header">
+      <h5 class="mb-0" i18n:translate="token">Token</h5>
     </div>
+    <ul class="card-body list-group list-group-flush p-0 token"
+        data-token-settings='${context.token_settings}'>
+      <div class="list-group-item ${context.cssclass} token-active">
+        <span class="glyphicon glyphicon-off"></span>
+        <span tal:content="context.active_label">Active</span>
+      </div>
+      <li class="list-group-item">
+        <strong i18n:translate="value">Value</strong>:
+        <span tal:content="model.attrs['value']">Value</span>
+      </li>
 
-    <div class="panel panel-default QR" tal:condition="context.qrcode">
+      <li class="list-group-item flex-group">
+        <div>
+          <strong i18n:translate="valid">Valid</strong>:
+          <tal:range condition="model.attrs['valid_from'] or model.attrs['valid_to']">
+            <span tal:content="context.format_date(model.attrs['valid_from'])"></span>
+            <strong> - </strong>
+            <span tal:content="context.format_date(model.attrs['valid_to'])"></span>
+          </tal:range>
+          <span tal:condition="not model.attrs['valid_from'] and not model.attrs['valid_to']"
+                i18n:translate="unlimited">
+            Unlimited
+          </span>
+        </div>
+        <div class="btn-group timeranges mt-2">
+          <button class="btn btn-outline-primary" data-timerange-scope="unlimited">
+            <span i18n:translate="unlimited">Unlimited</span>
+          </button>
+          <button class="btn btn-outline-primary" data-timerange-scope="morning">
+            <span i18n:translate="morning">Morning</span>
+          </button>
+          <button class="btn btn-outline-primary" data-timerange-scope="afternoon">
+            <span i18n:translate="afternoon">Afternoon</span>
+          </button>
+          <button class="btn btn-outline-primary" data-timerange-scope="today">
+            <span i18n:translate="today">Today</span>
+          </button>
+        </div>
+      </li>
+
+      <li class="list-group-item flex-group">
+        <div>
+          <strong i18n:translate="usage_count">Usage Count</strong>:
+          <span tal:condition="model.attrs['usage_count'] > -1"
+                tal:content="model.attrs['usage_count']">
+            Usage Count
+          </span>
+          <span tal:condition="model.attrs['usage_count'] == -1"
+                i18n:translate="unlimited">
+            Unlimited
+          </span>
+        </div>
+        <div class="btn-group usage-count mt-2">
+          <button class="btn btn-outline-primary" data-usage-count="-1">
+            <span i18n:translate="unlimited">Unlimited</span>
+          </button>
+          <button class="btn btn-outline-primary" data-usage-count="0">0</button>
+          <button class="btn btn-outline-primary" data-usage-count="1">1</button>
+          <button class="btn btn-outline-primary" data-usage-count="10">10</button>
+          <button class="btn btn-outline-primary" data-usage-count="20">20</button>
+          <button class="btn btn-outline-primary" data-usage-count="50">50</button>
+          <button class="btn btn-outline-primary" data-usage-count="100">100</button>
+        </div>
+      </li>
+
+      <li class="list-group-item">
+        <strong i18n:translate="lock_time">Lock Time</strong>:
+        <span tal:content="context.lock_time_seconds"></span>
+      </li>
+
+      <li class="list-group-item">
+          <strong i18n:translate="creator">Creator</strong>:
+          <span tal:content="model.attrs['creator']"></span>
+      </li>
+
+      <li class="list-group-item">
+          <strong i18n:translate="created">Created</strong>:
+          <span tal:content="model.attrs['created'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
+      </li>
+
+      <li class="list-group-item">
+          <strong i18n:translate="modified">Modified</strong>:
+          <span tal:content="model.attrs['modified'].strftime('%d.%m.%Y, %H:%M:%S')"></span>
+      </li>
+    </ul>
+
+    <div class="card-footer QR" tal:condition="context.qrcode">
       <div class="stream_image">
         <object data="${context.qrcode}"
+                class="border rounded"
                 type="image/png"
                 height="256px"
                 width="256px" />
