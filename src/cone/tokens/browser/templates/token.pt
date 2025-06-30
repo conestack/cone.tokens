@@ -15,7 +15,7 @@
     <ul class="card-body list-group list-group-flush p-0 token"
         data-token-settings='${context.token_settings}'>
       <div class="list-group-item ${context.cssclass} token-active">
-        <span class="glyphicon glyphicon-off"></span>
+        <span class="bi bi-power"></span>
         <span tal:content="context.active_label">Active</span>
       </div>
       <li class="list-group-item">
