@@ -9,7 +9,7 @@
     "qunit": "^2.24.1",
     "rollup": "^2.79.2",
     "rollup-plugin-cleanup": "^3.2.1",
-    "sass": "^1.89.1",
+    "sass": "^1.89.2",
     "web-test-runner-qunit": "^1.0.0"
   }
 }
