@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cone.tokens 1.0\n"
-"POT-Creation-Date: 2025-07-08 13:27+0200\n"
+"POT-Creation-Date: 2025-10-20 10:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -100,7 +100,7 @@ msgid "lock_time"
 msgstr "Lock Time"
 
 #. Default: Save
-#: src/cone/tokens/browser/token.py:226
+#: src/cone/tokens/browser/token.py:226 src/cone/tokens/browser/settings.py:197
 msgid "save"
 msgstr "Save"
 
@@ -121,60 +121,60 @@ msgid "morning"
 msgstr "Morning"
 
 #. Default: Start Time is required.
-#: src/cone/tokens/browser/settings.py:70
+#: src/cone/tokens/browser/settings.py:72
 msgid "start_time_required"
 msgstr "Start Time is required."
 
 #. Default: End Time is required.
-#: src/cone/tokens/browser/settings.py:71
+#: src/cone/tokens/browser/settings.py:73
 msgid "end_time_required"
 msgstr "End Time is required."
 
 #. Default: Start
-#: src/cone/tokens/browser/settings.py:77
-#: src/cone/tokens/browser/settings.py:107
-#: src/cone/tokens/browser/settings.py:137
+#: src/cone/tokens/browser/settings.py:79
+#: src/cone/tokens/browser/settings.py:113
+#: src/cone/tokens/browser/settings.py:147
 #: src/cone/tokens/browser/templates/tokens_overview.pt:39
 msgid "start"
 msgstr "Start"
 
 #. Default: End
-#: src/cone/tokens/browser/settings.py:87
-#: src/cone/tokens/browser/settings.py:117
-#: src/cone/tokens/browser/settings.py:147
+#: src/cone/tokens/browser/settings.py:90
+#: src/cone/tokens/browser/settings.py:124
+#: src/cone/tokens/browser/settings.py:158
 #: src/cone/tokens/browser/templates/tokens_overview.pt:47
 msgid "end"
 msgstr "End"
 
 #. Default: Afternoon
-#: src/cone/tokens/browser/settings.py:95
+#: src/cone/tokens/browser/settings.py:99
 #: src/cone/tokens/browser/templates/token.pt:47
 msgid "afternoon"
 msgstr "Afternoon"
 
 #. Default: Today
-#: src/cone/tokens/browser/settings.py:125
+#: src/cone/tokens/browser/settings.py:133
 #: src/cone/tokens/browser/templates/token.pt:50
 msgid "today"
 msgstr "Today"
 
 #. Default: Default Locktime is required.
-#: src/cone/tokens/browser/settings.py:158
+#: src/cone/tokens/browser/settings.py:170
 msgid "default_locktime_required"
 msgstr "Default Locktime is required."
 
 #. Default: Default Locktime
-#: src/cone/tokens/browser/settings.py:162
+#: src/cone/tokens/browser/settings.py:174
 msgid "default_locktime"
 msgstr "Default Locktime"
 
 #. Default: Default number of uses required.
-#: src/cone/tokens/browser/settings.py:170
+#: src/cone/tokens/browser/settings.py:183
 msgid "default_usage_count_required"
 msgstr "Default number of uses required."
 
 #. Default: Default Uses
-#: src/cone/tokens/browser/settings.py:174
+#: src/cone/tokens/browser/settings.py:187
 msgid "default_usage_count"
 msgstr "Default Uses"
 
