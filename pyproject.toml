@@ -18,6 +18,7 @@ classifiers = [
 dependencies = [
     "cone.sql",
     "python-dateutil",
+    "qrcode[pil]",
 ]
 
 [project.optional-dependencies]
