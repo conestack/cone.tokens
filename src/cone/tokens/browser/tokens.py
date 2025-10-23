@@ -32,9 +32,10 @@ class TokensContent(ProtectedContentTile):
 @context_menu_item(group='contentviews', name='tokens_overview')
 class TokensOverviewAction(LinkAction):
     text = _('tokens_overview', default='Overview')
-    icon = 'glyphicon glyphicon-list-alt'
+    icon = 'bi bi-list-check'
     action = 'tokens_overview:#content:inner'
     path = 'href'
+    css = 'dropdown-item'
 
     @property
     def href(self):

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cone.tokens 1.0\n"
-"POT-Creation-Date: 2023-09-28 13:05+0200\n"
+"POT-Creation-Date: 2025-10-20 10:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,12 +12,22 @@ msgstr ""
 "Generated-By: Lingua 4.15.0\n"
 
 #. Default: Token Settings
-#: src/cone/tokens/settings.py:55
+#: src/cone/tokens/settings.py:40
+msgid "token_settings"
+msgstr "Token Settings"
+
+#. Default: Token Settings
+#: src/cone/tokens/settings.py:41
+msgid "token_settings_description"
+msgstr "Token Settings"
+
+#. Default: Token Settings
+#: src/cone/tokens/settings.py:61
 msgid "token_settings_node"
 msgstr "Token Settings"
 
 #. Default: Token definition settings
-#: src/cone/tokens/settings.py:56
+#: src/cone/tokens/settings.py:62
 msgid "token_settings_node_description"
 msgstr "Token definition settings"
 
@@ -41,6 +51,16 @@ msgstr "Tokens"
 msgid "token_container_description"
 msgstr "Tokens"
 
+#. Default: Successfully deleted ${count} Tokens.
+#: src/cone/tokens/browser/api.py:169
+msgid "deleted_tokens"
+msgstr "Successfully deleted ${count} Tokens."
+
+#. Default: Overview
+#: src/cone/tokens/browser/tokens.py:34
+msgid "tokens_overview"
+msgstr "Overview"
+
 #. Default: Valid from date must be before valid to date
 #: src/cone/tokens/browser/token.py:120
 msgid "timerange_error"
@@ -53,7 +73,7 @@ msgstr "Value already used by another token"
 
 #. Default: Value
 #: src/cone/tokens/browser/token.py:156
-#: src/cone/tokens/browser/templates/token.pt:28
+#: src/cone/tokens/browser/templates/token.pt:22
 msgid "value"
 msgstr "Value"
 
@@ -69,18 +89,18 @@ msgstr "Valid to"
 
 #. Default: Usage Count
 #: src/cone/tokens/browser/token.py:202
-#: src/cone/tokens/browser/templates/token.pt:63
+#: src/cone/tokens/browser/templates/token.pt:57
 msgid "usage_count"
 msgstr "Usage Count"
 
 #. Default: Lock Time
 #: src/cone/tokens/browser/token.py:214
-#: src/cone/tokens/browser/templates/token.pt:87
+#: src/cone/tokens/browser/templates/token.pt:81
 msgid "lock_time"
 msgstr "Lock Time"
 
 #. Default: Save
-#: src/cone/tokens/browser/token.py:226
+#: src/cone/tokens/browser/token.py:226 src/cone/tokens/browser/settings.py:197
 msgid "save"
 msgstr "Save"
 
@@ -89,122 +109,105 @@ msgstr "Save"
 msgid "cancel"
 msgstr "Cancel"
 
-#. Default: Successfully deleted ${count} Tokens.
-#: src/cone/tokens/browser/api.py:169
-#, fuzzy
-msgid "deleted_tokens"
-msgstr "Add Tokens"
-
-#. Default: Token Settings
-#: src/cone/tokens/browser/settings.py:37
-msgid "token_settings"
-msgstr "Token Settings"
-
 #. Default: Start Time must be before End Time.
-#: src/cone/tokens/browser/settings.py:59
+#: src/cone/tokens/browser/settings.py:41
 msgid "end_time_before_start_time"
 msgstr "Start Time must be before End Time"
 
 #. Default: Morning
-#: src/cone/tokens/browser/settings.py:81
-#: src/cone/tokens/browser/templates/token.pt:50
+#: src/cone/tokens/browser/settings.py:63
+#: src/cone/tokens/browser/templates/token.pt:44
 msgid "morning"
 msgstr "Morning"
 
 #. Default: Start Time is required.
-#: src/cone/tokens/browser/settings.py:88
+#: src/cone/tokens/browser/settings.py:72
 msgid "start_time_required"
 msgstr "Start Time is required."
 
 #. Default: End Time is required.
-#: src/cone/tokens/browser/settings.py:89
+#: src/cone/tokens/browser/settings.py:73
 msgid "end_time_required"
 msgstr "End Time is required."
 
 #. Default: Start
-#: src/cone/tokens/browser/settings.py:95
-#: src/cone/tokens/browser/settings.py:125
-#: src/cone/tokens/browser/settings.py:155
-#: src/cone/tokens/browser/templates/tokens_overview.pt:30
+#: src/cone/tokens/browser/settings.py:79
+#: src/cone/tokens/browser/settings.py:113
+#: src/cone/tokens/browser/settings.py:147
+#: src/cone/tokens/browser/templates/tokens_overview.pt:39
 msgid "start"
 msgstr "Start"
 
 #. Default: End
-#: src/cone/tokens/browser/settings.py:105
-#: src/cone/tokens/browser/settings.py:135
-#: src/cone/tokens/browser/settings.py:165
-#: src/cone/tokens/browser/templates/tokens_overview.pt:38
+#: src/cone/tokens/browser/settings.py:90
+#: src/cone/tokens/browser/settings.py:124
+#: src/cone/tokens/browser/settings.py:158
+#: src/cone/tokens/browser/templates/tokens_overview.pt:47
 msgid "end"
 msgstr "End"
 
 #. Default: Afternoon
-#: src/cone/tokens/browser/settings.py:113
-#: src/cone/tokens/browser/templates/token.pt:53
+#: src/cone/tokens/browser/settings.py:99
+#: src/cone/tokens/browser/templates/token.pt:47
 msgid "afternoon"
 msgstr "Afternoon"
 
 #. Default: Today
-#: src/cone/tokens/browser/settings.py:143
-#: src/cone/tokens/browser/templates/token.pt:56
+#: src/cone/tokens/browser/settings.py:133
+#: src/cone/tokens/browser/templates/token.pt:50
 msgid "today"
 msgstr "Today"
 
 #. Default: Default Locktime is required.
-#: src/cone/tokens/browser/settings.py:176
+#: src/cone/tokens/browser/settings.py:170
 msgid "default_locktime_required"
 msgstr "Default Locktime is required."
 
 #. Default: Default Locktime
-#: src/cone/tokens/browser/settings.py:177
+#: src/cone/tokens/browser/settings.py:174
 msgid "default_locktime"
 msgstr "Default Locktime"
 
 #. Default: Default number of uses required.
-#: src/cone/tokens/browser/settings.py:185
+#: src/cone/tokens/browser/settings.py:183
 msgid "default_usage_count_required"
 msgstr "Default number of uses required."
 
 #. Default: Default Uses
-#: src/cone/tokens/browser/settings.py:186
+#: src/cone/tokens/browser/settings.py:187
 msgid "default_usage_count"
 msgstr "Default Uses"
 
-#. Default: Overview
-#: src/cone/tokens/browser/tokens.py:34
-#: src/cone/tokens/browser/templates/tokens_overview.pt:14
-msgid "tokens_overview"
-msgstr "Overview"
-
 #. Default: Token
-#: src/cone/tokens/browser/templates/token.pt:11
+#: src/cone/tokens/browser/templates/token.pt:13
 msgid "token"
 msgstr "Token"
 
 #. Default: Valid
-#: src/cone/tokens/browser/templates/token.pt:34
+#: src/cone/tokens/browser/templates/token.pt:28
 msgid "valid"
 msgstr "Valid"
 
 #. Default: Unlimited
+#: src/cone/tokens/browser/templates/token.pt:35
 #: src/cone/tokens/browser/templates/token.pt:41
-#: src/cone/tokens/browser/templates/token.pt:47
+#: src/cone/tokens/browser/templates/token.pt:63
 #: src/cone/tokens/browser/templates/token.pt:69
-#: src/cone/tokens/browser/templates/token.pt:75
 msgid "unlimited"
 msgstr "Unlimited"
 
 #. Default: Creator
-#: src/cone/tokens/browser/templates/token.pt:92
+#: src/cone/tokens/browser/templates/token.pt:86
 msgid "creator"
 msgstr "Creator"
 
 #. Default: Created
-#: src/cone/tokens/browser/templates/token.pt:97
+#: src/cone/tokens/browser/templates/token.pt:91
 msgid "created"
 msgstr "Created"
 
 #. Default: Modified
-#: src/cone/tokens/browser/templates/token.pt:102
+#: src/cone/tokens/browser/templates/token.pt:96
 msgid "modified"
 msgstr "Modified"
 
@@ -214,26 +217,26 @@ msgid "scan_token"
 msgstr "Scan Token"
 
 #. Default: Amount
-#: src/cone/tokens/browser/templates/tokens_overview.pt:17
+#: src/cone/tokens/browser/templates/tokens_overview.pt:15
 msgid "amount"
 msgstr "Amount"
 
 #. Default: Add Tokens
-#: src/cone/tokens/browser/templates/tokens_overview.pt:24
+#: src/cone/tokens/browser/templates/tokens_overview.pt:22
 msgid "add_token"
 msgstr "Add Tokens"
 
-#. Default: Filter
-#: src/cone/tokens/browser/templates/tokens_overview.pt:45
-msgid "filter"
-msgstr "Filter"
-
 #. Default: Delete selected Tokens
-#: src/cone/tokens/browser/templates/tokens_overview.pt:53
+#: src/cone/tokens/browser/templates/tokens_overview.pt:30
 msgid "delete_token"
 msgstr "Delete selected Tokens"
 
 #. Default: Token Size
-#: src/cone/tokens/browser/templates/tokens_overview.pt:59
+#: src/cone/tokens/browser/templates/tokens_overview.pt:55
 msgid "token_size"
 msgstr "Token Size"
+
+#. Default: Filter
+#: src/cone/tokens/browser/templates/tokens_overview.pt:66
+msgid "filter"
+msgstr "Filter"

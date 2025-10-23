@@ -4,6 +4,7 @@ __pycache__
 .vscode
 *egg-info
 *pyc
+/dist/
 /requirements-mxdev.txt
 /requirements.txt
 /sources/
