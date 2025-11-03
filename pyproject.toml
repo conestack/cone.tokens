@@ -28,7 +28,10 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "zope.testrunner",
+    "cone.app[test]",
+    "pytest",
+    "yafowil.widget.datetime",
+    "zope.pytestlayer",
 ]
 
 [project.urls]

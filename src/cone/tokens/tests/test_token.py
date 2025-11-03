@@ -34,6 +34,7 @@ class TestTokenViews(NodeTestCase):
         self.assertTrue(data.startswith('data:image/png;base64'))
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @sql_testing.delete_table_records(TokenRecord)
     def test_download_qr_code(self):
         tokens = get_root()['tokens']
         token = TokenNode()
@@ -62,6 +63,7 @@ class TestTokenViews(NodeTestCase):
 class TestTokenForms(NodeTestCase):
     layer = tokens_layer
 
+    @sql_testing.delete_table_records(TokenRecord)
     @testing.temp_directory
     def test_TokenForm(self, tempdir):
         tokens_config.config_file = os.path.join(tempdir, 'tokens.json')

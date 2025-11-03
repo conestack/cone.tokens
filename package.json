@@ -4,12 +4,12 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "@web/dev-server-import-maps": "^0.2.1",
-    "@web/test-runner": "^0.18.2",
+    "@web/test-runner": "^0.18.3",
     "jquery": "github:jquery/jquery#2b6b5e0a3ba3029ec3ad1525a178920765e3adf1",
     "qunit": "^2.20.1",
-    "rollup": "^2.79.1",
+    "rollup": "^2.79.2",
     "rollup-plugin-cleanup": "^3.2.1",
-    "sass": "^1.77.2",
+    "sass": "^1.93.3",
     "web-test-runner-qunit": "^1.0.0"
   }
 }
