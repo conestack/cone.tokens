@@ -23,6 +23,7 @@ classifiers = [
 dependencies = [
     "cone.sql",
     "python-dateutil",
+    "yafowil.widget.datetime",
     "qrcode[pil]",
 ]
 
@@ -30,7 +31,6 @@ dependencies = [
 test = [
     "cone.app[test]",
     "pytest",
-    "yafowil.widget.datetime",
     "zope.pytestlayer",
 ]
 
