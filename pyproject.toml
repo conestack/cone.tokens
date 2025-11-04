@@ -30,8 +30,6 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "cone.app[test]",
-    "pytest",
-    "zope.pytestlayer",
 ]
 
 [project.urls]
