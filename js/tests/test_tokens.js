@@ -386,8 +386,8 @@ QUnit.module('TokenScanner', hooks => {
         tsc.query_token();
         assert.verifySteps(['ajax_fail']);
 
-        // ajax success, not data.token
-        force_data_success = true;
+        // // ajax success, not data.token
+        // force_data_success = true;
         // tsc.query_token();
         // assert.verifySteps(['Token not exists']);
 
