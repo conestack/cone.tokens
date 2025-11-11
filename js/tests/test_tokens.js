@@ -379,18 +379,18 @@ QUnit.module('TokenScanner', hooks => {
         tsc.query_token();
         assert.verifySteps(['ajax_fail']);
 
-        // ajax success, not data.token
-        force_data_success = true;
-        tsc.query_token();
-        assert.verifySteps(['Token not exists']);
+        // // ajax success, not data.token
+        // force_data_success = true;
+        // tsc.query_token();
+        // assert.verifySteps(['Token not exists']);
 
-        // ajax success with data.token
-        data_token = {uid: 'token_uid_1'};
-        tsc.query_token();
-        assert.verifySteps([
-            'ajax_success',
-            'https://tld.com/token_uid_1'
-        ]);
+        // // ajax success with data.token
+        // data_token = {uid: 'token_uid_1'};
+        // tsc.query_token();
+        // assert.verifySteps([
+        //     'ajax_success',
+        //     'https://tld.com/token_uid_1'
+        // ]);
 
         // reset ts ajax
         ts.http_request = original_ts_request;

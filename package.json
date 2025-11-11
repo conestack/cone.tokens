@@ -5,11 +5,14 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@web/dev-server-import-maps": "^0.2.1",
     "@web/test-runner": "^0.18.3",
-    "jquery": "github:jquery/jquery#2b6b5e0a3ba3029ec3ad1525a178920765e3adf1",
+    "@web/test-runner-core": "^0.13.4",
+    "install": "^0.13.0",
+    "jquery": "^4.0.0-beta.2",
     "qunit": "^2.20.1",
     "rollup": "^2.79.2",
     "rollup-plugin-cleanup": "^3.2.1",
-    "sass": "^1.93.3",
-    "web-test-runner-qunit": "^1.0.0"
-  }
+    "sass": "^1.94.0",
+    "web-test-runner-qunit": "^2.0.0"
+  },
+  "packageManager": "pnpm@9.3.0+sha512.ee7b93e0c2bd11409c6424f92b866f31d3ea1bef5fbe47d3c7500cdc3c9668833d2e55681ad66df5b640c61fa9dc25d546efa54d76d7f8bf54b13614ac293631"
 }
