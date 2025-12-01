@@ -31,6 +31,7 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "cone.app[test]",
+    "cone.ugm[test]",
 ]
 
 [project.urls]
@@ -38,15 +39,25 @@ Homepage = "http://github.com/conestack/cone.tokens"
 
 [tool.hatch.metadata.hooks.fancy-pypi-readme]
 content-type = "text/x-rst"
+fragments = [
+    {path = "README.rst"},
+    {text = "\n\n"},
+    {path = "CHANGES.rst"},
+    {text = "\n\n"},
+    {path = "LICENSE.rst"},
+]
 
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "README.rst"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "CHANGES.rst"
-
-[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
-path = "LICENSE.rst"
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github/",
+    "/js/",
+    "/Makefile",
+    "/mx.ini",
+    "/package.json",
+    "/pnpm-lock.yaml",
+    "/scss/",
+    "/tokens.ini",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cone"]
