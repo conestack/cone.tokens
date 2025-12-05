@@ -1,4 +1,4 @@
-name: Test cone.tokens
+name: Python Tests
 
 on: [push]
 
