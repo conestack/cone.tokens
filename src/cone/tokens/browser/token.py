@@ -91,7 +91,7 @@ class TokenContent(ProtectedContentTile):
 
     @property
     def cssclass(self):
-        return 'btn-success' if self.is_active else 'btn-danger'
+        return 'list-group-item-success' if self.is_active else 'list-group-item-danger'
 
     def format_date(self, value):
         if isinstance(value, datetime):
@@ -233,7 +233,8 @@ class TokenForm(Form):
                 'expression': True,
                 'skip': True,
                 'next': self.next,
-                'label': _('cancel', default='Cancel')
+                'label': _('cancel', default='Cancel'),
+                'submit.class_add': 'btn-secondary ms-2'
             }
         )
 

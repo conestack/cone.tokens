@@ -1,69 +1,22 @@
 @media screen {
-    div.token-overview {
-        display: flex;
-        flex-wrap: wrap;
-
-        div.panel.token {
-            flex: 1;
-            min-width: fit-content;
-            border-right: 0;
-            box-shadow: 1px 0px 0px #e5e5e5;
-
-            li.flex-group {
-                display: flex;
-                justify-content: space-between;
-                flex-wrap: wrap;
-            }
-            .token-active {
-                pointer-events: none;
-            }
-        }
-
-        div.QR {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2px;
-
-            .stream_image {
-                margin:auto;
-            }
-        }
-    }
-    .token-title {
-        border-radius: 4px 4px 0 0;
-    }
-
-    // Tokens Overview
+    // // Tokens Overview
     .tokens-overview-container {
-        #tokens-overview {
-            display: grid;
+        .form-inline {
+            flex: 1 1 20%;
+            flex-wrap: nowrap;
+            white-space: nowrap;
         }
-        #tokens-overview-title {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
 
-            .token-size .token-button {
-                color: #000;
-                margin: 0 10px;
-            }
+        .btn {
+            white-space: nowrap;
 
-            button.datepicker-trigger {
-                transform: translateX(-100%);
+            &.filter {
+                min-width: 100px;
             }
+        }
 
-            input.add-tokens-amount {
-                width: 70px;
-            }
-            input.token-button {
-                width: 70px;
-            }
-            > div > * {
-                display: inline-block;
-            }
+        input {
+            min-width: 100px!important;
         }
     }
 
@@ -73,12 +26,6 @@
             width: 100%;
             height: 200px;
             font-size: 500%;
-        }
-        .scan-token.inactive {
-            background-color: #dd0000;
-        }
-        .scan-token.active {
-            background-color: #00dd00;
         }
     }
 }

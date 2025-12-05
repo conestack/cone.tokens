@@ -10,7 +10,7 @@ cone_tokens_resources = wr.ResourceGroup(
 )
 cone_tokens_resources.add(wr.ScriptResource(
     name='cone-tokens-js',
-    depends='cone-app-protected-js',
+    depends='cone-app-js',
     resource='cone.tokens.js',
     compressed='cone.tokens.min.js'
 ))

@@ -13,11 +13,12 @@ export class TokensOverview {
         this.container = container;
         this.tokens_elem = $('#tokens-overview', container);
         this.tokens = $('object.token_qr', this.tokens_elem);
-        this.tokens_title = $('#tokens-overview-title', container);
+        this.filter_options = $('#tokens-filter-options', container);
+        this.create_options = $('#tokens-create-options', container);
         this.token_settings = this.container.data('token-settings');
 
         // add tokens
-        this.add_tokens_container = $('.add-tokens', this.tokens_title);
+        this.add_tokens_container = $('.add-tokens', this.create_options);
         this.add_tokens_input = $(
             'input[name="amount"]',
             this.add_tokens_container
@@ -30,18 +31,18 @@ export class TokensOverview {
         this.add_tokens_btn.on('click', this.add_tokens);
 
         // date filter
-        this.start = $('input[name="start"]', this.tokens_title)
+        this.start = $('input[name="start"]', this.filter_options)
             .addClass('datepicker')
             .data('date-locale', 'de');
-        this.end = $('input[name="end"]', this.tokens_title)
+        this.end = $('input[name="end"]', this.filter_options)
             .addClass('datepicker')
             .data('date-locale', 'de');
-        this.filter = $('button[name="filter"]', this.tokens_title);
+        this.filter = $('button[name="filter"]', this.filter_options);
         this.filter_tokens = this.filter_tokens.bind(this);
         this.filter.on('click', this.filter_tokens);
 
         // delete tokens
-        this.delete_tokens_container = $('.delete-tokens', this.tokens_title);
+        this.delete_tokens_container = $('.delete-tokens', this.create_options);
         this.delete_tokens_btn = $(
             'button[name="delete-tokens"]',
             this.delete_tokens_container
@@ -50,7 +51,7 @@ export class TokensOverview {
         this.delete_tokens_btn.on('click', this.delete_tokens);
 
         this.set_token_size = this.set_token_size.bind(this);
-        this.size_input = $('input[name="token-size"]', this.tokens_title);
+        this.size_input = $('input[name="token-size"]', this.filter_options);
         this.size_input.on('change', this.set_token_size);
         if (this.tokens.length) {
             this.original_size = parseInt($(this.tokens[0]).attr('width'));
@@ -222,13 +223,13 @@ export class TokenScanner {
             let input = this._input = $('<input type="text">');
             wrapper.append(input);
             this.elem.append(wrapper);
-            button.removeClass('inactive').addClass('active');
+            button.removeClass('inactive btn-danger').addClass('active btn-success');
             input[0].focus();
         } else {
             this._input_wrapper.remove();
             this._input_wrapper = null;
             this._input = null;
-            button.removeClass('active').addClass('inactive');
+            button.removeClass('active btn-success').addClass('inactive btn-danger');
         }
     }
 

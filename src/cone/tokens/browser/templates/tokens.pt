@@ -7,9 +7,9 @@
 
   <tal:contextmenu replace="structure tile('contextmenu')" />
 
-  <div class="tokens-container" data-base-url="${context.nodeurl}">
+  <div class="tokens-container mt-4" data-base-url="${context.nodeurl}">
 
-    <button class="scan-token inactive">
+    <button class="btn scan-token inactive btn-danger">
       <span class="label" i18n:translate="scan_token">Scan Token</span>
       <span class="timer"></span>
     </button>
