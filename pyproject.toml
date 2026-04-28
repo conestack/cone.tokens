@@ -67,6 +67,7 @@ packages = ["src/cone"]
 consider_namespace_packages = true
 addopts = ["--import-mode=importlib"]
 pythonpath = "src"
+testpaths = ["src"]
 
 [tool.zest-releaser]
 create-wheel = true
