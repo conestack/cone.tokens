@@ -39,7 +39,7 @@ default_token_settings = {
     name='token_settings',
     title=_('token_settings', default='Token Settings'),
     description=_('token_settings_description', default='Token Settings'),
-    icon='glyphicon glyphicon-asterisk')
+    icon='bi bi-asterisk')
 class TokenSettings(SettingsNode):
 
     @property

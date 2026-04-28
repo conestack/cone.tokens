@@ -14,7 +14,7 @@ import datetime
 import json
 
 
-_ = TranslationStringFactory('cone.ugm')
+_ = TranslationStringFactory('cone.tokens')
 
 
 @settings_form(TokenSettings)
@@ -60,7 +60,9 @@ class TokenSettingsForm(Form):
         form['morning'] = factory(
             '#field:error:*morning:compound',
             props={
-                'label': _('morning', default='Morning')
+                'label': _('morning', default='Morning'),
+                'label.class_add': 'col-12 fw-bold',
+                'class_add': 'd-flex flex-wrap'
             },
             custom = {
                 'morning': {
@@ -77,7 +79,8 @@ class TokenSettingsForm(Form):
                 'label': _('start', default='Start'),
                 'timepicker': True,
                 'time': True,
-                'persist': True
+                'persist': True,
+                'class_add': 'col-6 pe-3'
             })
         form['morning']['end'] = factory(
             '#field:time',
@@ -87,12 +90,15 @@ class TokenSettingsForm(Form):
                 'label': _('end', default='End'),
                 'timepicker': True,
                 'time': True,
-                'persist': True
+                'persist': True,
+                'class_add': 'col-6'
             })
         form['afternoon'] = factory(
             '#field:error:*afternoon:compound',
             props={
-                'label': _('afternoon', default='Afternoon')
+                'label': _('afternoon', default='Afternoon'),
+                'label.class_add': 'col-12 fw-bold',
+                'class_add': 'd-flex flex-wrap'
             },
             custom = {
                 'afternoon': {
@@ -107,7 +113,8 @@ class TokenSettingsForm(Form):
                 'label': _('start', default='Start'),
                 'timepicker': True,
                 'time': True,
-                'persist': True
+                'persist': True,
+                'class_add': 'col-6 pe-3'
             })
         form['afternoon']['end'] = factory(
             '#field:time',
@@ -117,12 +124,15 @@ class TokenSettingsForm(Form):
                 'label': _('end', default='End'),
                 'timepicker': True,
                 'time': True,
-                'persist': True
+                'persist': True,
+                'class_add': 'col-6'
             })
         form['today'] = factory(
             '#field:error:*today:compound',
             props={
-                'label': _('today', default='Today')
+                'label': _('today', default='Today'),
+                'label.class_add': 'col-12 fw-bold',
+                'class_add': 'd-flex flex-wrap'
             },
             custom = {
                 'today': {
@@ -137,7 +147,8 @@ class TokenSettingsForm(Form):
                 'label': _('start', default='Start'),
                 'timepicker': True,
                 'time': True,
-                'persist': True
+                'persist': True,
+                'class_add': 'col-6 pe-3'
             })
         form['today']['end'] = factory(
             '#field:time',
@@ -147,7 +158,8 @@ class TokenSettingsForm(Form):
                 'label': _('end', default='End'),
                 'timepicker': True,
                 'time': True,
-                'persist': True
+                'persist': True,
+                'class_add': 'col-6'
             })
         form['default_locktime'] = factory(
             '#field:number',
@@ -159,7 +171,8 @@ class TokenSettingsForm(Form):
                     'default_locktime_required',
                     default='Default Locktime is required.'
                 ),
-                'label': _('default_locktime', default='Default Locktime')
+                'label': _('default_locktime', default='Default Locktime'),
+                'label.class_add': 'fw-bold'
             })
         form['default_usage_count'] = factory(
             '#field:number',
@@ -171,7 +184,8 @@ class TokenSettingsForm(Form):
                     'default_usage_count_required',
                     default='Default number of uses required.'
                 ),
-                'label': _('default_usage_count', default='Default Uses')
+                'label': _('default_usage_count', default='Default Uses'),
+                'label.class_add': 'fw-bold'
             })
         form['save'] = factory(
             'submit',
@@ -180,7 +194,8 @@ class TokenSettingsForm(Form):
                 'expression': True,
                 'handler': self.save,
                 'next': self.next,
-                'label': 'Save'
+                'label': _('save', default='Save'),
+                'submit.class_add': 'my-3'
             })
 
     def save(self, widget, data):
