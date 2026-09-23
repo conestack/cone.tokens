@@ -112,15 +112,15 @@ class TokenForm(Form):
 
     def timerange_extractor(self, widget, data):
         extracted = data.extracted
-        if extracted is UNSET:
+        # ``datetime_extractor`` extracts an empty value as ``None``
+        if not extracted:
             return extracted
         valid_from = data.fetch('tokenform.valid_from').extracted
-        if valid_from and extracted:
-            if valid_from >= extracted:
-                raise ExtractionError(_(
-                    'timerange_error',
-                    default='Valid from date must be before valid to date'
-                ))
+        if valid_from and valid_from >= extracted:
+            raise ExtractionError(_(
+                'timerange_error',
+                default='Valid from date must be before valid to date'
+            ))
         return extracted
 
     def value_extractor(self, widget, data):

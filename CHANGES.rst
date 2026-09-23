@@ -4,6 +4,25 @@ Changes
 2.0.0 (unreleased)
 ------------------
 
+- ``TokenForm.timerange_extractor`` skips an empty ``valid_to`` by value.
+  It checked for ``UNSET``, but ``yafowil.widget.datetime`` extracts an empty
+  value as ``None``, so the guard never applied.
+  [rnix]
+
+- Modernise the code ruff flags as outdated: ``class X(object)``. Remove
+  unused import. Behaviour unchanged. ``super(Class, self)`` is kept, see
+  ``cone.app``.
+  [rnix]
+
+- Pin the ruff rule selection in ``pyproject.toml``. Remove ``qa.isort``
+  domain from Makefile, ``make check`` runs ``ruff check`` only, like in the
+  other ``cone.*`` packages.
+  [rnix]
+
+- Pin ``setuptools<82.0.0`` in ``mx.ini``. ``pyramid`` 2.0.2 still imports
+  ``pkg_resources``, which ``setuptools`` 82 removed.
+  [rnix]
+
 - Boostrap 5 styles.
 
 

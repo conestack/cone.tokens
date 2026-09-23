@@ -3,20 +3,20 @@ from cone.tokens.browser.settings import TokenSettingsForm
 from cone.tokens.settings import TokenSettings
 from cone.tokens.settings import get_settings_node
 from cone.tokens.settings import tokens_config
+from cone.tokens.tests import temp_config_file
 from cone.tokens.tests import tokens_layer
 from cone.ugm import testing
 from node.tests import NodeTestCase
 from node.utils import UNSET
+from yafowil.base import ExtractionError
 import json
-import os
 
 
 class TestSettings(NodeTestCase):
     layer = tokens_layer
 
-    @testing.temp_directory
-    def test_model_settings(self, tempdir):
-        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
+    @temp_config_file
+    def test_model_settings(self):
 
         # default - no config file exists
         settings = TokenSettings()
@@ -40,10 +40,17 @@ class TestSettings(NodeTestCase):
         self.assertEqual(attrs['morning']['start'], '09:00')
         self.assertEqual(attrs['default_locktime'], '2000')
 
+    def test_model_settings_metadata(self):
+        metadata = TokenSettings().metadata
+        self.assertEqual(metadata.title, 'token_settings_node')
+        self.assertEqual(
+            metadata.description,
+            'token_settings_node_description'
+        )
+
     @testing.principals(users={'admin': {}}, roles={'admin': ['manager']})
-    @testing.temp_directory
-    def test_BrowserSettingsForm(self, tempdir):
-        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
+    @temp_config_file
+    def test_BrowserSettingsForm(self):
         model = get_settings_node(get_root())
         request = self.layer.new_request()
 
@@ -109,3 +116,24 @@ class TestSettings(NodeTestCase):
         self.assertEqual(form_data['today']['end'], '19:00')
         self.assertEqual(form_data['default_locktime'], 2000)
         self.assertEqual(form_data['default_usage_count'], 5)
+
+    @testing.principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @temp_config_file
+    def test_BrowserSettingsForm_start_after_end_is_invalid(self):
+        model = get_settings_node(get_root())
+        request = self.layer.new_request()
+
+        tile = TokenSettingsForm()
+        tile.model = model
+        tile.request = request
+        with self.layer.authenticated('admin'):
+            tile.prepare()
+
+        request.params['tokensettingsform.morning.start'] = '11:00'
+        request.params['tokensettingsform.morning.end'] = '10:00'
+        data = tile.form.extract(request=request)
+        morning = data.fetch('tokensettingsform.morning')
+        self.assertEqual(
+            morning.errors,
+            [ExtractionError('end_time_before_start_time')]
+        )

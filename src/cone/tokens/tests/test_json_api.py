@@ -8,16 +8,15 @@ from cone.tokens.exceptions import TokenException
 from cone.tokens.exceptions import TokenValueError
 from cone.tokens.model import TokenRecord
 from cone.tokens.model import TokenUsageRecord
-from cone.tokens.settings import tokens_config
+from cone.tokens.tests import temp_config_file
 from cone.tokens.tests import tokens_layer
-from cone.ugm import testing
 from cone.ugm.testing import principals
 from datetime import datetime 
 from node.tests import NodeTestCase
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.view import render_view_to_response
 from unittest.mock import patch
-import os
+import json
 import uuid
 
 
@@ -134,9 +133,8 @@ class TestJSONAPI(NodeTestCase):
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
     @sql_testing.delete_table_records(TokenRecord)
-    @testing.temp_directory
-    def test_add_token(self, tempdir):
-        tokens_config.config_file = os.path.join(tempdir, 'tokens.json')
+    @temp_config_file
+    def test_add_token(self):
         tokens = get_root()['tokens']
         request = self.layer.new_request(type='json')
         request.method = 'POST'
@@ -390,6 +388,49 @@ class TestJSONAPI(NodeTestCase):
         with self.layer.authenticated('admin'):
             res = render_view_to_response(token, request, 'delete_token')
         self.assertTrue(res.json['success'])
+        self.assertEqual(tokens.values(), [])
+
+    @principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @sql_testing.delete_table_records(TokenRecord)
+    def test_delete_tokens(self):
+        request = self.layer.new_request(type='json')
+        request.method = 'POST'
+
+        token_api = TokenAPI(request)
+        token_uids = [uuid.uuid4(), uuid.uuid4()]
+        for token_uid in token_uids:
+            token_api.add(token_uid)
+
+        tokens = get_root()['tokens']
+
+        with self.assertRaises(HTTPForbidden) as arc:
+            render_view_to_response(tokens, request, 'delete_tokens')
+        self.assertEqual(
+            str(arc.exception),
+            'Unauthorized: delete_tokens failed permission check'
+        )
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'delete_tokens')
+        self.assertIsNone(res.json)
+
+        request.params['token_uids'] = json.dumps(
+            [str(token_uid) for token_uid in token_uids]
+        )
+        with patch.object(
+            TokenAPI,
+            'delete',
+            side_effect=Exception('Exception')
+        ):
+            with self.layer.authenticated('admin'):
+                res = render_view_to_response(tokens, request, 'delete_tokens')
+            self.assertFalse(res.json['success'])
+            self.assertEqual(res.json['message'], 'Exception')
+
+        with self.layer.authenticated('admin'):
+            res = render_view_to_response(tokens, request, 'delete_tokens')
+        self.assertTrue(res.json['success'])
+        self.assertEqual(res.json['message'], 'Successfully deleted 2 Tokens.')
         self.assertEqual(tokens.values(), [])
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})

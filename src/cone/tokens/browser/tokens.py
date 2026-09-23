@@ -11,7 +11,6 @@ from cone.tile import tile
 from cone.tokens.browser.token import b64_qr_code
 from cone.tokens.model import TokenContainer
 from cone.tokens.model import TokenRecord
-from cone.tokens.settings import get_settings_node
 from pyramid.i18n import TranslationStringFactory
 from pyramid.view import view_config
 import json

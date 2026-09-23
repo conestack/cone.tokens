@@ -20,7 +20,7 @@ import uuid
 _ = TranslationStringFactory('cone.tokens')
 
 
-class TokenAPI(object):
+class TokenAPI:
 
     def __init__(self, request=None):
        self.request = request

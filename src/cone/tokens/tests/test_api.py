@@ -1,6 +1,7 @@
 from cone.sql import get_session
 from cone.sql import testing as sql_testing
 from cone.tokens.api import TokenAPI
+from cone.tokens.exceptions import TokenAPIError
 from cone.tokens.exceptions import TokenLockTimeViolation
 from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
@@ -338,3 +339,14 @@ class TestTokenAPI(NodeTestCase):
         self.assertEqual(token.valid_to, datetime(2023, 9, 22))
         self.assertEqual(token.usage_count, 10)
         self.assertEqual(token.lock_time, 100)
+
+
+class TestExceptions(NodeTestCase):
+
+    def test_TokenAPIError(self):
+        error = TokenAPIError('API failure')
+        self.assertEqual(error.error_code, 6)
+        self.assertEqual(
+            error.as_json(),
+            dict(success=False, message='API failure')
+        )
