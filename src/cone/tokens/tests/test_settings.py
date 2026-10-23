@@ -4,6 +4,7 @@ from cone.tokens.settings import TokenSettings
 from cone.tokens.settings import get_settings_node
 from cone.tokens.settings import tokens_config
 from cone.tokens.tests import temp_config_file
+from cone.tile import render_tile
 from cone.tokens.tests import tokens_layer
 from cone.ugm import testing
 from node.tests import NodeTestCase
@@ -137,3 +138,18 @@ class TestSettings(NodeTestCase):
             morning.errors,
             [ExtractionError('end_time_before_start_time')]
         )
+
+    @testing.principals(users={'admin': {}}, roles={'admin': ['manager']})
+    @temp_config_file
+    def test_BrowserSettingsForm_rendered_in_card(self):
+        model = get_settings_node(get_root())
+        with self.layer.authenticated('admin'):
+            rendered = render_tile(model, self.layer.new_request(), 'editform')
+        self.checkOutput("""
+        <div class="settings-form card mt-3">
+          <h5 class="card-header">Token Settings</h5>
+          <div class="card-body">
+            <form...</form>
+          </div>
+        </div>
+        """, rendered)

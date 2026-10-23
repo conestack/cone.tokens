@@ -4,6 +4,10 @@ Changes
 2.0.0 (unreleased)
 ------------------
 
+- Render ``TokenSettingsForm`` in a card with the title of the settings node
+  as card header, like the settings forms of ``cone.ugm``.
+  [rnix]
+
 - ``TokenForm.timerange_extractor`` skips an empty ``valid_to`` by value.
   It checked for ``UNSET``, but ``yafowil.widget.datetime`` extracts an empty
   value as ``None``, so the guard never applied.

@@ -17,7 +17,10 @@ import json
 _ = TranslationStringFactory('cone.tokens')
 
 
-@settings_form(TokenSettings)
+@settings_form(
+    TokenSettings,
+    path='cone.tokens.browser:templates/settings_form.pt'
+)
 @plumbing(SettingsForm)
 class TokenSettingsForm(Form):
     form_name = 'tokensettingsform'

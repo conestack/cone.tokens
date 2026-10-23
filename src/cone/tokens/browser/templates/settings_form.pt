@@ -1,0 +1,16 @@
+<tal:block xmlns:tal="http://xml.zope.org/namespaces/tal"
+           omit-tag="True">
+
+  <tal:contextmenu condition="context.show_contextmenu"
+                   replace="structure tile('contextmenu')" />
+
+  <div class="settings-form card mt-3">
+
+    <h5 tal:content="context.form_heading" class="card-header">Title</h5>
+
+    <div class="card-body">
+      <tal:form replace="structure context.rendered_form" />
+    </div>
+
+  </div>
+</tal:block>
