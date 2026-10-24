@@ -2,9 +2,8 @@ import $ from 'jquery';
 import ts from 'treibstoff';
 
 export class Token {
-
     static initialize(context) {
-        $('.token', context).each(function() {
+        $('.token', context).each(function () {
             new Token($(this));
         });
     }
@@ -13,15 +12,15 @@ export class Token {
         this.elem = elem;
         this.settings = elem.data('token-settings');
         const that = this;
-        $('.btn-group.timeranges button', elem).each(function() {
-            const button = $(this)
-            button.on('click', function(e) {
+        $('.btn-group.timeranges button', elem).each(function () {
+            const button = $(this);
+            button.on('click', () => {
                 that.set_timerange(button.data('timerange-scope'));
             });
         });
-        $('.btn-group.usage-count button', elem).each(function() {
-            const button = $(this)
-            button.on('click', function(e) {
+        $('.btn-group.usage-count button', elem).each(function () {
+            const button = $(this);
+            button.on('click', () => {
                 that.set_usage_count(button.data('usage-count'));
             });
         });
@@ -34,22 +33,22 @@ export class Token {
             params: params,
             type: 'json',
             method: 'POST',
-            success: (data, status, request) => {
+            success: (data) => {
                 if (data.success) {
                     ts.ajax.action({
                         name: 'content',
                         selector: '#content',
                         mode: 'inner',
                         url: `${settings.base_url}`,
-                        params: {}
+                        params: {},
                     });
                 } else {
                     ts.show_error(data.message);
                 }
             },
-            error: (request, status, error) => {
+            error: (_request, _status, error) => {
                 ts.show_error(`Failed to request JSON API: ${error}`);
-            }
+            },
         });
     }
 
@@ -59,10 +58,10 @@ export class Token {
         let timerange, valid_from, valid_to;
         if (Object.keys(timeranges).includes(scope)) {
             timerange = timeranges[scope];
-            let start = timerange.start.split(':');
+            const start = timerange.start.split(':');
             valid_from = new Date();
             valid_from.setHours(start[0], start[1], 0);
-            let end = timerange.end.split(':');
+            const end = timerange.end.split(':');
             valid_to = new Date();
             valid_to.setHours(end[0], end[1], 0);
         }
@@ -80,7 +79,7 @@ export class Token {
 
     set_usage_count(usage_count) {
         this.request_api({
-            usage_count: usage_count
+            usage_count: usage_count,
         });
     }
 }

@@ -11,41 +11,23 @@
 //
 
 import $ from 'jquery';
-import {TokensOverview} from '../src/tokens.js';
-import {TokenScanner} from '../src/tokens.js';
 import ts from 'treibstoff';
+import { TokenScanner, TokensOverview } from '../src/tokens.js';
 
-QUnit.module('TokensOverview', hooks => {
-    let elem,
-        tokens_filter,
-        tokens_elem,
-        add_tokens_input,
-        token_size_input,
-        start_input,
-        end_input;
+QUnit.module('TokensOverview', (hooks) => {
+    let elem, tokens_filter, tokens_elem, start_input, end_input;
     hooks.beforeEach(() => {
-        elem = $('<div />')
-            .addClass('tokens-overview-container')
-            .appendTo('body');
-        tokens_elem = $('<div id="tokens-overview" />')
-            .appendTo(elem);
+        elem = $('<div />').addClass('tokens-overview-container').appendTo('body');
+        tokens_elem = $('<div id="tokens-overview" />').appendTo(elem);
         // filter
-        tokens_filter = $('<div id="tokens-filter-options" />')
-            .appendTo(elem);
-        token_size_input = $('<input name="token-size" />')
-            .appendTo(tokens_filter);
-        start_input = $('<input name="start" />')
-            .appendTo(tokens_filter);
-        end_input = $('<input name="end" />')
-            .appendTo(tokens_filter);
+        tokens_filter = $('<div id="tokens-filter-options" />').appendTo(elem);
+        $('<input name="token-size" />').appendTo(tokens_filter);
+        start_input = $('<input name="start" />').appendTo(tokens_filter);
+        end_input = $('<input name="end" />').appendTo(tokens_filter);
         // add tokens
-        let add_tokens = $('<div id="tokens-create-options" />')
-            .appendTo(elem);
-        let add_tokens_container = $('<div class="add-tokens" />')
-            .appendTo(add_tokens);
-        add_tokens_input = $('<input name="amount" />')
-            .appendTo(add_tokens_container);
-
+        const add_tokens = $('<div id="tokens-create-options" />').appendTo(elem);
+        const add_tokens_container = $('<div class="add-tokens" />').appendTo(add_tokens);
+        $('<input name="amount" />').appendTo(add_tokens_container);
     });
     hooks.afterEach(() => {
         elem.empty().remove();
@@ -54,26 +36,33 @@ QUnit.module('TokensOverview', hooks => {
         tokens_filter = null;
     });
 
-    QUnit.test('constructor no tokens', assert => {
-        let ov = new TokensOverview(elem);
+    QUnit.test('initialize', (assert) => {
+        TokensOverview.initialize(elem.parent());
+
+        // token size input gets initialized by the created TokensOverview instance
+        assert.strictEqual($('input[name="token-size"]', elem).val(), '100');
+    });
+
+    QUnit.test('constructor no tokens', (assert) => {
+        const ov = new TokensOverview(elem);
         assert.deepEqual(ov.container, elem);
         assert.strictEqual(ov.tokens.length, 0);
         assert.strictEqual(ov.original_size, 256);
         assert.strictEqual(ov.token_size, 100);
     });
 
-    QUnit.test('constructor with tokens', assert => {
+    QUnit.test('constructor with tokens', (assert) => {
         create_tokens(tokens_elem, 2);
-        let ov = new TokensOverview(elem);
+        const ov = new TokensOverview(elem);
         assert.deepEqual(ov.container, elem);
         assert.strictEqual(ov.tokens.length, 2);
         assert.strictEqual(ov.original_size, 200);
         assert.strictEqual(ov.token_size, 100);
     });
 
-    QUnit.test('get/set token_size', assert => {
+    QUnit.test('get/set token_size', (assert) => {
         create_tokens(tokens_elem, 1);
-        let ov = new TokensOverview(elem);
+        const ov = new TokensOverview(elem);
         assert.strictEqual(ov.token_size, 100);
         assert.strictEqual(ov.size_input.val(), '100');
 
@@ -81,7 +70,7 @@ QUnit.module('TokensOverview', hooks => {
         assert.strictEqual(ov.token_size, 50);
         assert.strictEqual(
             ov.tokens_elem.css('grid-template-columns'),
-            'repeat(auto-fit, minmax(100px, 1fr))'
+            'repeat(auto-fit, minmax(100px, 1fr))',
         );
         assert.strictEqual($(ov.tokens[0]).attr('width'), '100px');
         assert.strictEqual($(ov.tokens[0]).attr('height'), '100px');
@@ -91,9 +80,9 @@ QUnit.module('TokensOverview', hooks => {
         assert.strictEqual(ov.token_size, 100);
     });
 
-    QUnit.test('set_token_size', assert => {
+    QUnit.test('set_token_size', (assert) => {
         create_tokens(tokens_elem, 1);
-        let ov = new TokensOverview(elem);
+        const ov = new TokensOverview(elem);
         ov.size_input.val(200);
         ov.size_input.trigger('change');
         assert.strictEqual(ov.token_size, '200');
@@ -101,71 +90,71 @@ QUnit.module('TokensOverview', hooks => {
         assert.strictEqual($(ov.tokens[0]).attr('height'), '400px');
     });
 
-    QUnit.test('filter_tokens', assert => {
+    QUnit.test('filter_tokens', (assert) => {
         // patch ts.http_request and action
         const original_ts_action = ts.ajax.action;
-        ts.ajax.action = function(opts) {
+        ts.ajax.action = (opts) => {
             assert.step('ajax_success');
-            assert.step('start: ' + opts.params.start);
-            assert.step('end: ' + opts.params.end);
-        }
+            assert.step(`start: ${opts.params.start}`);
+            assert.step(`end: ${opts.params.end}`);
+        };
 
         // init TokensOverview
-        elem.data('token-settings', {base_url: 'https://tld.com'});
-        let ov = new TokensOverview(elem);
+        elem.data('token-settings', { base_url: 'https://tld.com' });
+        const ov = new TokensOverview(elem);
 
         // filter tokens
-        ov.filter_tokens({preventDefault: () => {}});
+        ov.filter_tokens({ preventDefault: () => {} });
         assert.verifySteps(['ajax_success', 'start: ', 'end: ']);
 
         // start and end values
         start_input.val('28.09.2023');
         end_input.val('30.09.2023');
-        ov.filter_tokens({preventDefault: () => {}});
+        ov.filter_tokens({ preventDefault: () => {} });
         assert.verifySteps(['ajax_success', 'start: 28.09.2023', 'end: 30.09.2023']);
 
         // reset ts ajax
         ts.ajax.action = original_ts_action;
-        assert.ok(true)
+        assert.ok(true);
     });
 
-    QUnit.test('add_tokens', assert => {
+    QUnit.test('add_tokens', (assert) => {
         let force_success = false;
         let force_data_success = false;
-        let data_token = false;
+        const data_token = false;
 
         // patch ts.http_request and action
         const original_ts_request = ts.http_request;
         const original_ts_action = ts.ajax.action;
         const original_ts_error = ts.show_error;
-        ts.http_request = function(opts) {
+        ts.http_request = (opts) => {
             if (force_success) {
                 if (force_data_success) {
                     opts.success({
                         success: force_data_success,
-                        token: data_token
+                        token: data_token,
                     });
                 } else {
                     opts.success({
                         success: force_data_success,
-                        message: 'ajax_fail'
+                        message: 'ajax_fail',
                     });
                 }
             } else {
                 opts.error(null, null, '');
             }
-        }
-        ts.ajax.action = function(opts) {
+        };
+        ts.ajax.action = (opts) => {
             assert.step('ajax_success');
             assert.step(opts.url);
-        }
-        ts.show_error = function(err) {
+        };
+        ts.show_error = (err) => {
             assert.step(err);
-        }
+        };
 
         // init TokensOverview
-        elem.data('token-settings', {base_url: 'https://tld.com'});
-        let ov = new TokensOverview(elem);
+        elem.data('token-settings', { base_url: 'https://tld.com' });
+        const ov = new TokensOverview(elem);
 
         // no input value
         ov.add_tokens();
@@ -197,49 +186,48 @@ QUnit.module('TokensOverview', hooks => {
         ts.show_error = original_ts_error;
     });
 
-    QUnit.test('delete_tokens', assert => {
+    QUnit.test('delete_tokens', (assert) => {
         create_tokens(tokens_elem, 2);
 
         let force_success = false;
         let force_data_success = false;
-        let token_uids = [];
 
         // patch ts.http_request and action
         const original_ts_request = ts.http_request;
         const original_ts_action = ts.ajax.action;
         const original_ts_error = ts.show_error;
         const original_ts_message = ts.show_message;
-        ts.http_request = function(opts) {
+        ts.http_request = (opts) => {
             if (force_success) {
                 if (force_data_success) {
                     opts.success({
                         success: force_data_success,
-                        message: opts.params.token_uids
+                        message: opts.params.token_uids,
                     });
                 } else {
                     opts.success({
                         success: force_data_success,
-                        message: 'ajax_fail'
+                        message: 'ajax_fail',
                     });
                 }
             } else {
                 opts.error(null, null, '');
             }
-        }
-        ts.ajax.action = function(opts) {
+        };
+        ts.ajax.action = (opts) => {
             assert.step('ajax_success');
             assert.step(opts.url);
-        }
-        ts.show_error = function(err) {
+        };
+        ts.show_error = (err) => {
             assert.step(err);
-        }
-        ts.show_message = function(opts) {
+        };
+        ts.show_message = (opts) => {
             assert.step(opts.message);
-        }
+        };
 
         // init TokensOverview
-        elem.data('token-settings', {base_url: 'https://tld.com'});
-        let ov = new TokensOverview(elem);
+        elem.data('token-settings', { base_url: 'https://tld.com' });
+        const ov = new TokensOverview(elem);
 
         // ajax failure
         ov.delete_tokens();
@@ -254,14 +242,14 @@ QUnit.module('TokensOverview', hooks => {
 
         // force data success
         force_data_success = true;
-        let token_1_uid = $($('.token_qr')[0]).data('token-uid');
-        let token_2_uid = $($('.token_qr')[1]).data('token-uid');
+        const token_1_uid = $($('.token_qr')[0]).data('token-uid');
+        const token_2_uid = $($('.token_qr')[1]).data('token-uid');
         ov.delete_tokens();
         $('.modal button.ok').trigger('click');
         assert.verifySteps([
             'ajax_success',
             'https://tld.com',
-            `[\"${token_1_uid}",\"${token_2_uid}\"]`
+            `["${token_1_uid}","${token_2_uid}"]`,
         ]);
 
         // reset ts ajax
@@ -272,40 +260,50 @@ QUnit.module('TokensOverview', hooks => {
     });
 });
 
-QUnit.module('TokenScanner', hooks => {
-    let elem,
-        btn,
-        input;
+QUnit.module('TokenScanner', (hooks) => {
+    let elem, btn, original_ts, original_console_log;
     hooks.beforeEach(() => {
-        elem = $('<div />')
-            .addClass('tokens-container')
-            .appendTo('body');
-        btn = $('<button />')
-            .addClass('scan-token')
-            .appendTo(elem);
-        input = $('<input />')
-            .attr('name', 'token-uid')
-            .attr('type', 'text')
-            .appendTo(elem);
+        elem = $('<div />').addClass('tokens-container').appendTo('body');
+        btn = $('<button />').addClass('scan-token').appendTo(elem);
+        original_ts = {
+            http_request: ts.http_request,
+            action: ts.ajax.action,
+            show_error: ts.show_error,
+            show_dialog: ts.show_dialog,
+        };
+        original_console_log = console.log;
     });
     hooks.afterEach(() => {
+        ts.http_request = original_ts.http_request;
+        ts.ajax.action = original_ts.action;
+        ts.show_error = original_ts.show_error;
+        ts.show_dialog = original_ts.show_dialog;
+        console.log = original_console_log;
         elem.empty().remove();
         elem = null;
         btn = null;
-        input = null;
     });
 
-    QUnit.test('constructor', assert => {
+    QUnit.test('initialize', (assert) => {
+        TokenScanner.initialize(elem.parent());
+
+        // scan button is bound by the created TokenScanner instance
+        btn.trigger('click');
+        assert.true(btn.hasClass('active'));
+        assert.strictEqual($('input[type="text"]', elem).length, 1);
+    });
+
+    QUnit.test('constructor', (assert) => {
         elem.data('base-url', 'https://tld.com');
-        let tsc = new TokenScanner(elem);
+        const tsc = new TokenScanner(elem);
         assert.strictEqual(tsc.base_url, 'https://tld.com');
         assert.strictEqual(tsc._input_wrapper, null);
         assert.strictEqual(tsc._input, null);
     });
 
-    QUnit.test('get/set active', assert => {
+    QUnit.test('get/set active', (assert) => {
         elem.data('base-url', 'https://tld.com');
-        let tsc = new TokenScanner(elem);
+        const tsc = new TokenScanner(elem);
         // initial
         assert.strictEqual(tsc.active, false);
         // set value true
@@ -321,12 +319,12 @@ QUnit.module('TokenScanner', hooks => {
         assert.true(btn.hasClass('inactive'));
     });
 
-    QUnit.test('scan_token', assert => {
+    QUnit.test('scan_token', (assert) => {
         elem.data('base-url', 'https://tld.com');
-        let tsc = new TokenScanner(elem);
+        const tsc = new TokenScanner(elem);
         tsc.query_token = (val) => {
-            assert.step('query_token ' + val);
-        }
+            assert.step(`query_token ${val}`);
+        };
         assert.strictEqual(tsc.active, false);
 
         // scan token
@@ -338,43 +336,27 @@ QUnit.module('TokenScanner', hooks => {
         assert.verifySteps(['query_token token-1']);
     });
 
-    QUnit.test('query_token', assert => {
+    QUnit.test('query_token', (assert) => {
         let force_success = false;
-        let force_data_success = false;
-        let data_token = false;
 
-        // patch ts.http_request and action
-        const original_ts_request = ts.http_request;
-        const original_ts_action = ts.ajax.action;
-        const original_ts_error = ts.show_error;
-        ts.http_request = function(opts) {
+        // patch ts.http_request
+        ts.http_request = (opts) => {
             if (force_success) {
-                if (force_data_success) {
-                    opts.success({
-                        success: force_data_success,
-                        token: data_token
-                    });
-                } else {
-                    opts.success({
-                        success: force_data_success,
-                        message: 'ajax_fail'
-                    });
-                }
+                opts.success({
+                    success: false,
+                    message: 'ajax_fail',
+                });
             } else {
                 opts.error(null, null, '');
             }
-        }
-        ts.ajax.action = function(opts) {
-            assert.step('ajax_success');
-            assert.step(opts.url);
-        }
-        ts.show_error = function(err) {
+        };
+        ts.show_error = (err) => {
             assert.step(err);
-        }
+        };
 
         // init TokenScanner
         elem.data('base-url', 'https://tld.com');
-        let tsc = new TokenScanner(elem);
+        const tsc = new TokenScanner(elem);
         tsc.active = true;
 
         // ajax failure
@@ -385,31 +367,108 @@ QUnit.module('TokenScanner', hooks => {
         force_success = true;
         tsc.query_token();
         assert.verifySteps(['ajax_fail']);
+    });
 
-        // // ajax success, not data.token
-        // force_data_success = true;
-        // tsc.query_token();
-        // assert.verifySteps(['Token not exists']);
+    QUnit.test('query_token loads existing token', (assert) => {
+        ts.http_request = (opts) => {
+            assert.step(`request ${opts.url} ${opts.params.value}`);
+            opts.success({ success: true, token: { uid: 'token_uid_1' } });
+        };
+        ts.ajax.action = (opts) => {
+            assert.step(`action ${opts.name} ${opts.selector} ${opts.mode} ${opts.url}`);
+        };
+        console.log = (msg) => {
+            assert.step(msg);
+        };
 
-        // // ajax success with data.token
-        // data_token = {uid: 'token_uid_1'};
-        // tsc.query_token();
-        // assert.verifySteps([
-        //     'ajax_success',
-        //     'https://tld.com/token_uid_1'
-        // ]);
+        elem.data('base-url', 'https://tld.com');
+        const tsc = new TokenScanner(elem);
+        tsc.active = true;
 
-        // reset ts ajax
-        ts.http_request = original_ts_request;
-        ts.ajax.action = original_ts_action;
-        ts.show_error = original_ts_error;
+        tsc.query_token('token-1');
+        assert.verifySteps([
+            'request https://tld.com/query_token token-1',
+            'load token: token_uid_1',
+            'action layout #layout replace https://tld.com/token_uid_1',
+        ]);
+    });
+
+    QUnit.test('query_token creates not existing token', (assert) => {
+        ts.http_request = (opts) => {
+            assert.step(`request ${opts.url} ${opts.params.value} ${opts.method}`);
+            if (opts.url.endsWith('/query_token')) {
+                opts.success({ success: true, token: null });
+            } else {
+                opts.success({ success: true, token_uid: 'token_uid_2' });
+            }
+        };
+        ts.show_dialog = (opts) => {
+            assert.step(`dialog ${opts.title} ${opts.message}`);
+            opts.on_confirm();
+        };
+        ts.ajax.action = (opts) => {
+            assert.step(`action ${opts.url}`);
+        };
+        console.log = (msg) => {
+            assert.step(msg);
+        };
+
+        elem.data('base-url', 'https://tld.com');
+        const tsc = new TokenScanner(elem);
+        tsc.active = true;
+
+        tsc.query_token('token-2');
+        assert.false(tsc.active);
+        assert.verifySteps([
+            'request https://tld.com/query_token token-2 undefined',
+            'dialog Token not exists? Do you want to create it?',
+            'request https://tld.com/add_token token-2 POST',
+            'load token: token_uid_2',
+            'action https://tld.com/token_uid_2',
+        ]);
+    });
+
+    QUnit.test('query_token create token failure', (assert) => {
+        let add_token_response;
+        ts.http_request = (opts) => {
+            if (opts.url.endsWith('/query_token')) {
+                opts.success({ success: true, token: null });
+            } else {
+                add_token_response(opts);
+            }
+        };
+        ts.show_dialog = (opts) => {
+            opts.on_confirm();
+        };
+        ts.show_error = (err) => {
+            assert.step(err);
+        };
+
+        elem.data('base-url', 'https://tld.com');
+        const tsc = new TokenScanner(elem);
+
+        // not data success
+        add_token_response = (opts) => {
+            opts.success({ success: false, message: 'add_token_fail' });
+        };
+        tsc.active = true;
+        tsc.query_token('token-3');
+        assert.verifySteps(['add_token_fail']);
+
+        // ajax failure
+        add_token_response = (opts) => {
+            opts.error(null, null, 'Server Error');
+        };
+        tsc.active = true;
+        tsc.query_token('token-3');
+        assert.verifySteps(['Failed to request JSON API: Server Error']);
     });
 });
 
 function create_tokens(container, count) {
     for (let i = 0; i < count; i++) {
-        let uid = crypto.randomUUID();
-        let token = $('<object />')
+        const uid = crypto.randomUUID();
+        $('<object />')
             .addClass('token_qr')
             .attr('width', '200px')
             .attr('height', '200px')

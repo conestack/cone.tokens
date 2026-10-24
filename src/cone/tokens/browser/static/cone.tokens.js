@@ -3,7 +3,7 @@ var cone_tokens = (function (exports, $, ts) {
 
     class Token {
         static initialize(context) {
-            $('.token', context).each(function() {
+            $('.token', context).each(function () {
                 new Token($(this));
             });
         }
@@ -11,15 +11,15 @@ var cone_tokens = (function (exports, $, ts) {
             this.elem = elem;
             this.settings = elem.data('token-settings');
             const that = this;
-            $('.btn-group.timeranges button', elem).each(function() {
+            $('.btn-group.timeranges button', elem).each(function () {
                 const button = $(this);
-                button.on('click', function(e) {
+                button.on('click', () => {
                     that.set_timerange(button.data('timerange-scope'));
                 });
             });
-            $('.btn-group.usage-count button', elem).each(function() {
+            $('.btn-group.usage-count button', elem).each(function () {
                 const button = $(this);
-                button.on('click', function(e) {
+                button.on('click', () => {
                     that.set_usage_count(button.data('usage-count'));
                 });
             });
@@ -31,22 +31,22 @@ var cone_tokens = (function (exports, $, ts) {
                 params: params,
                 type: 'json',
                 method: 'POST',
-                success: (data, status, request) => {
+                success: (data) => {
                     if (data.success) {
                         ts.ajax.action({
                             name: 'content',
                             selector: '#content',
                             mode: 'inner',
                             url: `${settings.base_url}`,
-                            params: {}
+                            params: {},
                         });
                     } else {
                         ts.show_error(data.message);
                     }
                 },
-                error: (request, status, error) => {
+                error: (_request, _status, error) => {
                     ts.show_error(`Failed to request JSON API: ${error}`);
-                }
+                },
             });
         }
         set_timerange(scope) {
@@ -55,10 +55,10 @@ var cone_tokens = (function (exports, $, ts) {
             let timerange, valid_from, valid_to;
             if (Object.keys(timeranges).includes(scope)) {
                 timerange = timeranges[scope];
-                let start = timerange.start.split(':');
+                const start = timerange.start.split(':');
                 valid_from = new Date();
                 valid_from.setHours(start[0], start[1], 0);
-                let end = timerange.end.split(':');
+                const end = timerange.end.split(':');
                 valid_to = new Date();
                 valid_to.setHours(end[0], end[1], 0);
             }
@@ -75,14 +75,14 @@ var cone_tokens = (function (exports, $, ts) {
         }
         set_usage_count(usage_count) {
             this.request_api({
-                usage_count: usage_count
+                usage_count: usage_count,
             });
         }
     }
 
     class TokensOverview {
         static initialize(context) {
-            $('.tokens-overview-container', context).each(function() {
+            $('.tokens-overview-container', context).each(function () {
                 new TokensOverview($(this));
             });
         }
@@ -94,14 +94,8 @@ var cone_tokens = (function (exports, $, ts) {
             this.create_options = $('#tokens-create-options', container);
             this.token_settings = this.container.data('token-settings');
             this.add_tokens_container = $('.add-tokens', this.create_options);
-            this.add_tokens_input = $(
-                'input[name="amount"]',
-                this.add_tokens_container
-            );
-            this.add_tokens_btn = $(
-                'button[name="add-tokens"]',
-                this.add_tokens_container
-            );
+            this.add_tokens_input = $('input[name="amount"]', this.add_tokens_container);
+            this.add_tokens_btn = $('button[name="add-tokens"]', this.add_tokens_container);
             this.add_tokens = this.add_tokens.bind(this);
             this.add_tokens_btn.on('click', this.add_tokens);
             this.start = $('input[name="start"]', this.filter_options)
@@ -114,17 +108,14 @@ var cone_tokens = (function (exports, $, ts) {
             this.filter_tokens = this.filter_tokens.bind(this);
             this.filter.on('click', this.filter_tokens);
             this.delete_tokens_container = $('.delete-tokens', this.create_options);
-            this.delete_tokens_btn = $(
-                'button[name="delete-tokens"]',
-                this.delete_tokens_container
-            );
+            this.delete_tokens_btn = $('button[name="delete-tokens"]', this.delete_tokens_container);
             this.delete_tokens = this.delete_tokens.bind(this);
             this.delete_tokens_btn.on('click', this.delete_tokens);
             this.set_token_size = this.set_token_size.bind(this);
             this.size_input = $('input[name="token-size"]', this.filter_options);
             this.size_input.on('change', this.set_token_size);
             if (this.tokens.length) {
-                this.original_size = parseInt($(this.tokens[0]).attr('width'));
+                this.original_size = parseInt($(this.tokens[0]).attr('width'), 10);
             } else {
                 this.original_size = 256;
             }
@@ -137,13 +128,13 @@ var cone_tokens = (function (exports, $, ts) {
             if (!size) {
                 size = 100;
             }
-            let px_value = this.original_size * (size / 100);
+            const px_value = this.original_size * (size / 100);
             this.tokens_elem.css(
                 'grid-template-columns',
-                `repeat( auto-fit, minmax(${px_value}px, 1fr) )`
+                `repeat( auto-fit, minmax(${px_value}px, 1fr) )`,
             );
-            this.tokens.each(function() {
-                let elem = $(this);
+            this.tokens.each(function () {
+                const elem = $(this);
                 elem.attr('width', `${px_value}px`);
                 elem.attr('height', `${px_value}px`);
             });
@@ -154,19 +145,19 @@ var cone_tokens = (function (exports, $, ts) {
         }
         filter_tokens(evt) {
             evt.preventDefault();
-            let params = {
+            const params = {
                 start: this.start.val(),
-                end: this.end.val()
+                end: this.end.val(),
             };
             ts.ajax.action({
                 name: 'tokens_overview',
                 mode: 'inner',
                 selector: '#content',
                 url: this.token_settings.base_url,
-                params: params
+                params: params,
             });
         }
-        add_tokens(evt) {
+        add_tokens(_evt) {
             const base_url = this.token_settings.base_url;
             function add(amount, count) {
                 ts.http_request({
@@ -174,7 +165,7 @@ var cone_tokens = (function (exports, $, ts) {
                     params: {},
                     type: 'json',
                     method: 'POST',
-                    success: (data, status, request) => {
+                    success: (data) => {
                         if (data.success) {
                             count += 1;
                             if (amount === count) {
@@ -183,7 +174,7 @@ var cone_tokens = (function (exports, $, ts) {
                                     selector: '#content',
                                     mode: 'inner',
                                     url: base_url,
-                                    params: {}
+                                    params: {},
                                 });
                             } else {
                                 add(amount, count);
@@ -192,65 +183,65 @@ var cone_tokens = (function (exports, $, ts) {
                             ts.show_error(data.message);
                         }
                     },
-                    error: (request, status, error) => {
+                    error: (_request, _status, error) => {
                         ts.show_error(`Failed to request JSON API: ${error}`);
-                    }
+                    },
                 });
             }
             let amount = this.add_tokens_input.val();
             if (!amount) {
                 return;
             } else {
-                amount = parseInt(amount);
+                amount = parseInt(amount, 10);
             }
             add(amount, 0);
         }
-        delete_tokens(evt) {
+        delete_tokens(_evt) {
             const base_url = this.token_settings.base_url;
             ts.show_dialog({
                 title: 'Delete tokens?',
                 message: 'Do you really want to delete selected tokens?',
                 on_confirm: () => {
-                    let uids = [];
-                    for (let token of this.tokens) {
-                        let uid = $(token).data('token-uid');
+                    const uids = [];
+                    for (const token of this.tokens) {
+                        const uid = $(token).data('token-uid');
                         uids.push(uid);
                     }
                     ts.http_request({
                         url: `${base_url}/delete_tokens`,
-                        params: {token_uids: JSON.stringify(uids)},
+                        params: { token_uids: JSON.stringify(uids) },
                         type: 'json',
                         method: 'POST',
-                        success: (data, status, request) => {
+                        success: (data) => {
                             if (data.success) {
                                 ts.ajax.action({
                                     name: 'tokens_overview',
                                     selector: '#content',
                                     mode: 'inner',
                                     url: base_url,
-                                    params: {}
+                                    params: {},
                                 });
-                                ts.show_message({message: data.message, flavor:''});
+                                ts.show_message({ message: data.message, flavor: '' });
                             } else {
                                 ts.show_error(data.message);
                             }
                         },
-                        error: (request, status, error) => {
+                        error: (_request, _status, error) => {
                             ts.show_error(`Failed to request JSON API: ${error}`);
-                        }
+                        },
                     });
-                }
+                },
             });
         }
         set_token_size(evt) {
             evt.preventDefault();
-            let size = this.size_input.val();
+            const size = this.size_input.val();
             this.token_size = size;
         }
     }
     class TokenScanner {
         static initialize(context) {
-            $('.tokens-container', context).each(function() {
+            $('.tokens-container', context).each(function () {
                 new TokenScanner($(this));
             });
         }
@@ -261,7 +252,7 @@ var cone_tokens = (function (exports, $, ts) {
             this._input_wrapper = null;
             this._input = null;
             this.scan_token = this.scan_token.bind(this);
-            this.button.on('click', (e) => {
+            this.button.on('click', () => {
                 this.scan_token();
             });
         }
@@ -272,12 +263,12 @@ var cone_tokens = (function (exports, $, ts) {
             if (value == this.value) {
                 return;
             }
-            let button = this.button;
+            const button = this.button;
             if (value) {
-                let wrapper = this._input_wrapper = $('<div/>')
-                    .css('width', 0)
-                    .css('overflow', 'hidden');
-                let input = this._input = $('<input type="text">');
+                const wrapper = $('<div/>').css('width', 0).css('overflow', 'hidden');
+                this._input_wrapper = wrapper;
+                const input = $('<input type="text">');
+                this._input = input;
                 wrapper.append(input);
                 this.elem.append(wrapper);
                 button.removeClass('inactive btn-danger').addClass('active btn-success');
@@ -291,27 +282,27 @@ var cone_tokens = (function (exports, $, ts) {
         }
         scan_token() {
             this.active = true;
-            let input = this._input;
+            const input = this._input;
             input.one('change', () => {
                 this.query_token(input.val());
             });
         }
         load_token(token_uid) {
-            console.log('load token: ' + token_uid);
+            console.log(`load token: ${token_uid}`);
             ts.ajax.action({
                 name: 'layout',
                 selector: '#layout',
                 mode: 'replace',
                 url: `${this.base_url}/${token_uid}`,
-                params: {}
+                params: {},
             });
         }
         query_token(value) {
             ts.http_request({
                 url: `${this.base_url}/query_token`,
-                params: {value: value},
+                params: { value: value },
                 type: 'json',
-                success: (data, status, request) => {
+                success: (data) => {
                     if (data.success) {
                         if (!data.token) {
                             this.active = false;
@@ -321,21 +312,21 @@ var cone_tokens = (function (exports, $, ts) {
                                 on_confirm: () => {
                                     ts.http_request({
                                         url: `${this.base_url}/add_token`,
-                                        params: {value: value},
+                                        params: { value: value },
                                         type: 'json',
                                         method: 'POST',
-                                        success: (data, status, request) => {
+                                        success: (data) => {
                                             if (data.success) {
                                                 this.load_token(data.token_uid);
                                             } else {
                                                 ts.show_error(data.message);
                                             }
                                         },
-                                        error: (request, status, error) => {
+                                        error: (_request, _status, error) => {
                                             ts.show_error(`Failed to request JSON API: ${error}`);
-                                        }
+                                        },
                                     });
-                                }
+                                },
                             });
                         } else {
                             this.load_token(data.token.uid);
@@ -344,14 +335,14 @@ var cone_tokens = (function (exports, $, ts) {
                         ts.show_error(data.message);
                     }
                 },
-                error: (request, status, error) => {
+                error: (_request, _status, error) => {
                     ts.show_error(`Failed to request JSON API: ${error}`);
-                }
+                },
             });
         }
     }
 
-    $(function() {
+    $(() => {
         ts.ajax.register(Token.initialize, true);
         ts.ajax.register(TokenScanner.initialize, true);
         ts.ajax.register(TokensOverview.initialize, true);

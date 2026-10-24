@@ -2,9 +2,8 @@ import $ from 'jquery';
 import ts from 'treibstoff';
 
 export class TokensOverview {
-
     static initialize(context) {
-        $('.tokens-overview-container', context).each(function() {
+        $('.tokens-overview-container', context).each(function () {
             new TokensOverview($(this));
         });
     }
@@ -19,14 +18,8 @@ export class TokensOverview {
 
         // add tokens
         this.add_tokens_container = $('.add-tokens', this.create_options);
-        this.add_tokens_input = $(
-            'input[name="amount"]',
-            this.add_tokens_container
-        );
-        this.add_tokens_btn = $(
-            'button[name="add-tokens"]',
-            this.add_tokens_container
-        );
+        this.add_tokens_input = $('input[name="amount"]', this.add_tokens_container);
+        this.add_tokens_btn = $('button[name="add-tokens"]', this.add_tokens_container);
         this.add_tokens = this.add_tokens.bind(this);
         this.add_tokens_btn.on('click', this.add_tokens);
 
@@ -43,10 +36,7 @@ export class TokensOverview {
 
         // delete tokens
         this.delete_tokens_container = $('.delete-tokens', this.create_options);
-        this.delete_tokens_btn = $(
-            'button[name="delete-tokens"]',
-            this.delete_tokens_container
-        );
+        this.delete_tokens_btn = $('button[name="delete-tokens"]', this.delete_tokens_container);
         this.delete_tokens = this.delete_tokens.bind(this);
         this.delete_tokens_btn.on('click', this.delete_tokens);
 
@@ -54,7 +44,7 @@ export class TokensOverview {
         this.size_input = $('input[name="token-size"]', this.filter_options);
         this.size_input.on('change', this.set_token_size);
         if (this.tokens.length) {
-            this.original_size = parseInt($(this.tokens[0]).attr('width'));
+            this.original_size = parseInt($(this.tokens[0]).attr('width'), 10);
         } else {
             this.original_size = 256;
         }
@@ -69,13 +59,13 @@ export class TokensOverview {
         if (!size) {
             size = 100;
         }
-        let px_value = this.original_size * (size / 100);
+        const px_value = this.original_size * (size / 100);
         this.tokens_elem.css(
             'grid-template-columns',
-            `repeat( auto-fit, minmax(${px_value}px, 1fr) )`
+            `repeat( auto-fit, minmax(${px_value}px, 1fr) )`,
         );
-        this.tokens.each(function() {
-            let elem = $(this);
+        this.tokens.each(function () {
+            const elem = $(this);
             elem.attr('width', `${px_value}px`);
             elem.attr('height', `${px_value}px`);
         });
@@ -87,20 +77,20 @@ export class TokensOverview {
 
     filter_tokens(evt) {
         evt.preventDefault();
-        let params = {
+        const params = {
             start: this.start.val(),
-            end: this.end.val()
+            end: this.end.val(),
         };
         ts.ajax.action({
             name: 'tokens_overview',
             mode: 'inner',
             selector: '#content',
             url: this.token_settings.base_url,
-            params: params
+            params: params,
         });
     }
 
-    add_tokens(evt) {
+    add_tokens(_evt) {
         const base_url = this.token_settings.base_url;
         function add(amount, count) {
             ts.http_request({
@@ -108,7 +98,7 @@ export class TokensOverview {
                 params: {},
                 type: 'json',
                 method: 'POST',
-                success: (data, status, request) => {
+                success: (data) => {
                     if (data.success) {
                         count += 1;
                         if (amount === count) {
@@ -117,7 +107,7 @@ export class TokensOverview {
                                 selector: '#content',
                                 mode: 'inner',
                                 url: base_url,
-                                params: {}
+                                params: {},
                             });
                         } else {
                             add(amount, count);
@@ -126,70 +116,69 @@ export class TokensOverview {
                         ts.show_error(data.message);
                     }
                 },
-                error: (request, status, error) => {
+                error: (_request, _status, error) => {
                     ts.show_error(`Failed to request JSON API: ${error}`);
-                }
+                },
             });
         }
         let amount = this.add_tokens_input.val();
         if (!amount) {
             return;
         } else {
-            amount = parseInt(amount);
+            amount = parseInt(amount, 10);
         }
         add(amount, 0);
     }
 
-    delete_tokens(evt) {
+    delete_tokens(_evt) {
         const base_url = this.token_settings.base_url;
 
         ts.show_dialog({
             title: 'Delete tokens?',
             message: 'Do you really want to delete selected tokens?',
             on_confirm: () => {
-                let uids = [];
-                for (let token of this.tokens) {
-                    let uid = $(token).data('token-uid');
+                const uids = [];
+                for (const token of this.tokens) {
+                    const uid = $(token).data('token-uid');
                     uids.push(uid);
                 }
                 ts.http_request({
                     url: `${base_url}/delete_tokens`,
-                    params: {token_uids: JSON.stringify(uids)},
+                    params: { token_uids: JSON.stringify(uids) },
                     type: 'json',
                     method: 'POST',
-                    success: (data, status, request) => {
+                    success: (data) => {
                         if (data.success) {
                             ts.ajax.action({
                                 name: 'tokens_overview',
                                 selector: '#content',
                                 mode: 'inner',
                                 url: base_url,
-                                params: {}
+                                params: {},
                             });
-                            ts.show_message({message: data.message, flavor:''})
+                            ts.show_message({ message: data.message, flavor: '' });
                         } else {
                             ts.show_error(data.message);
                         }
                     },
-                    error: (request, status, error) => {
+                    error: (_request, _status, error) => {
                         ts.show_error(`Failed to request JSON API: ${error}`);
-                    }
+                    },
                 });
-            }
+            },
         });
     }
 
     set_token_size(evt) {
         evt.preventDefault();
-        let size = this.size_input.val();
+        const size = this.size_input.val();
         this.token_size = size;
     }
 }
 
 export class TokenScanner {
-
     static initialize(context) {
-        $('.tokens-container', context).each(function() {
+        $('.tokens-container', context).each(function () {
             new TokenScanner($(this));
         });
     }
@@ -202,7 +191,7 @@ export class TokenScanner {
         this._input = null;
 
         this.scan_token = this.scan_token.bind(this);
-        this.button.on('click', (e) => {
+        this.button.on('click', () => {
             this.scan_token();
         });
     }
@@ -212,15 +201,16 @@ export class TokenScanner {
     }
 
     set active(value) {
+        // biome-ignore lint/suspicious/noDoubleEquals: this.value is never set, strict comparison would change behavior for null
         if (value == this.value) {
             return;
         }
-        let button = this.button;
+        const button = this.button;
         if (value) {
-            let wrapper = this._input_wrapper = $('<div/>')
-                .css('width', 0)
-                .css('overflow', 'hidden');
-            let input = this._input = $('<input type="text">');
+            const wrapper = $('<div/>').css('width', 0).css('overflow', 'hidden');
+            this._input_wrapper = wrapper;
+            const input = $('<input type="text">');
+            this._input = input;
             wrapper.append(input);
             this.elem.append(wrapper);
             button.removeClass('inactive btn-danger').addClass('active btn-success');
@@ -235,29 +225,29 @@ export class TokenScanner {
 
     scan_token() {
         this.active = true;
-        let input = this._input;
+        const input = this._input;
         input.one('change', () => {
             this.query_token(input.val());
         });
     }
 
     load_token(token_uid) {
-        console.log('load token: ' + token_uid);
+        console.log(`load token: ${token_uid}`);
         ts.ajax.action({
             name: 'layout',
             selector: '#layout',
             mode: 'replace',
             url: `${this.base_url}/${token_uid}`,
-            params: {}
+            params: {},
         });
     }
 
     query_token(value) {
         ts.http_request({
             url: `${this.base_url}/query_token`,
-            params: {value: value},
+            params: { value: value },
             type: 'json',
-            success: (data, status, request) => {
+            success: (data) => {
                 if (data.success) {
                     if (!data.token) {
                         this.active = false;
@@ -267,21 +257,21 @@ export class TokenScanner {
                             on_confirm: () => {
                                 ts.http_request({
                                     url: `${this.base_url}/add_token`,
-                                    params: {value: value},
+                                    params: { value: value },
                                     type: 'json',
                                     method: 'POST',
-                                    success: (data, status, request) => {
+                                    success: (data) => {
                                         if (data.success) {
                                             this.load_token(data.token_uid);
                                         } else {
                                             ts.show_error(data.message);
                                         }
                                     },
-                                    error: (request, status, error) => {
+                                    error: (_request, _status, error) => {
                                         ts.show_error(`Failed to request JSON API: ${error}`);
-                                    }
+                                    },
                                 });
-                            }
+                            },
                         });
                     } else {
                         this.load_token(data.token.uid);
@@ -290,9 +280,9 @@ export class TokenScanner {
                     ts.show_error(data.message);
                 }
             },
-            error: (request, status, error) => {
+            error: (_request, _status, error) => {
                 ts.show_error(`Failed to request JSON API: ${error}`);
-            }
+            },
         });
     }
 }
