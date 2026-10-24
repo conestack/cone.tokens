@@ -11,7 +11,7 @@ from cone.tokens.model import TokenUsageRecord
 from cone.tokens.tests import temp_config_file
 from cone.tokens.tests import tokens_layer
 from cone.ugm.testing import principals
-from datetime import datetime 
+from datetime import datetime
 from node.tests import NodeTestCase
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.view import render_view_to_response
@@ -96,8 +96,7 @@ class TestJSONAPI(NodeTestCase):
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(tokens, request, 'query_token')
         self.assertEqual(
-            str(arc.exception),
-            'Unauthorized: query_token failed permission check'
+            str(arc.exception), 'Unauthorized: query_token failed permission check'
         )
 
         with self.layer.authenticated('admin'):
@@ -106,11 +105,7 @@ class TestJSONAPI(NodeTestCase):
         self.assertEqual(res.json['message'], 'Missing ``value`` parameter')
 
         request.params['value'] = 'token value'
-        with patch.object(
-            TokenAPI,
-            'query_token',
-            side_effect=Exception('Exception')
-        ):
+        with patch.object(TokenAPI, 'query_token', side_effect=Exception('Exception')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(tokens, request, 'query_token')
             self.assertFalse(res.json['success'])
@@ -142,8 +137,7 @@ class TestJSONAPI(NodeTestCase):
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(tokens, request, 'add_token')
         self.assertEqual(
-            str(arc.exception),
-            'Unauthorized: add_token failed permission check'
+            str(arc.exception), 'Unauthorized: add_token failed permission check'
         )
 
         request.params['valid_from'] = 'foo'
@@ -179,28 +173,17 @@ class TestJSONAPI(NodeTestCase):
         with self.layer.authenticated('admin'):
             res = render_view_to_response(tokens, request, 'add_token')
         self.assertFalse(res.json['success'])
-        self.assertEqual(
-            res.json['message'],
-            'valid_from must be before valid_to'
-        )
+        self.assertEqual(res.json['message'], 'valid_from must be before valid_to')
         del request.params['valid_from']
         del request.params['valid_to']
 
-        with patch.object(
-            TokenAPI,
-            'add',
-            side_effect=TokenException('TokenException')
-        ):
+        with patch.object(TokenAPI, 'add', side_effect=TokenException('TokenException')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(tokens, request, 'add_token')
             self.assertFalse(res.json['success'])
             self.assertEqual(res.json['message'], 'TokenException')
 
-        with patch.object(
-            TokenAPI,
-            'add',
-            side_effect=Exception('Exception')
-        ):
+        with patch.object(TokenAPI, 'add', side_effect=Exception('Exception')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(tokens, request, 'add_token')
             self.assertFalse(res.json['success'])
@@ -268,8 +251,7 @@ class TestJSONAPI(NodeTestCase):
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(token, request, 'update_token')
         self.assertEqual(
-            str(arc.exception),
-            'Unauthorized: update_token failed permission check'
+            str(arc.exception), 'Unauthorized: update_token failed permission check'
         )
 
         request.params['valid_from'] = 'foo'
@@ -305,28 +287,19 @@ class TestJSONAPI(NodeTestCase):
         with self.layer.authenticated('admin'):
             res = render_view_to_response(token, request, 'update_token')
         self.assertFalse(res.json['success'])
-        self.assertEqual(
-            res.json['message'],
-            'valid_from must be before valid_to'
-        )
+        self.assertEqual(res.json['message'], 'valid_from must be before valid_to')
         del request.params['valid_from']
         del request.params['valid_to']
 
         with patch.object(
-            TokenAPI,
-            'update',
-            side_effect=TokenException('TokenException')
+            TokenAPI, 'update', side_effect=TokenException('TokenException')
         ):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(token, request, 'update_token')
             self.assertFalse(res.json['success'])
             self.assertEqual(res.json['message'], 'TokenException')
 
-        with patch.object(
-            TokenAPI,
-            'update',
-            side_effect=Exception('Exception')
-        ):
+        with patch.object(TokenAPI, 'update', side_effect=Exception('Exception')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(token, request, 'update_token')
             self.assertFalse(res.json['success'])
@@ -371,15 +344,10 @@ class TestJSONAPI(NodeTestCase):
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(token, request, 'delete_token')
         self.assertEqual(
-            str(arc.exception),
-            'Unauthorized: delete_token failed permission check'
+            str(arc.exception), 'Unauthorized: delete_token failed permission check'
         )
 
-        with patch.object(
-            TokenAPI,
-            'delete',
-            side_effect=Exception('Exception')
-        ):
+        with patch.object(TokenAPI, 'delete', side_effect=Exception('Exception')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(token, request, 'delete_token')
             self.assertFalse(res.json['success'])
@@ -406,8 +374,7 @@ class TestJSONAPI(NodeTestCase):
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(tokens, request, 'delete_tokens')
         self.assertEqual(
-            str(arc.exception),
-            'Unauthorized: delete_tokens failed permission check'
+            str(arc.exception), 'Unauthorized: delete_tokens failed permission check'
         )
 
         with self.layer.authenticated('admin'):
@@ -417,11 +384,7 @@ class TestJSONAPI(NodeTestCase):
         request.params['token_uids'] = json.dumps(
             [str(token_uid) for token_uid in token_uids]
         )
-        with patch.object(
-            TokenAPI,
-            'delete',
-            side_effect=Exception('Exception')
-        ):
+        with patch.object(TokenAPI, 'delete', side_effect=Exception('Exception')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(tokens, request, 'delete_tokens')
             self.assertFalse(res.json['success'])
@@ -450,25 +413,18 @@ class TestJSONAPI(NodeTestCase):
         with self.assertRaises(HTTPForbidden) as arc:
             render_view_to_response(token, request, 'consume_token')
         self.assertEqual(
-            str(arc.exception),
-            'Unauthorized: consume_token failed permission check'
+            str(arc.exception), 'Unauthorized: consume_token failed permission check'
         )
 
         with patch.object(
-            TokenAPI,
-            'consume',
-            side_effect=TokenException('TokenException')
+            TokenAPI, 'consume', side_effect=TokenException('TokenException')
         ):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(token, request, 'consume_token')
             self.assertFalse(res.json['success'])
             self.assertEqual(res.json['message'], 'TokenException')
 
-        with patch.object(
-            TokenAPI,
-            'consume',
-            side_effect=Exception('Exception')
-        ):
+        with patch.object(TokenAPI, 'consume', side_effect=Exception('Exception')):
             with self.layer.authenticated('admin'):
                 res = render_view_to_response(token, request, 'consume_token')
             self.assertFalse(res.json['success'])
@@ -485,6 +441,5 @@ class TestJSONAPI(NodeTestCase):
             res = render_view_to_response(token, request, 'consume_token')
         self.assertFalse(res.json['success'])
         self.assertEqual(
-            res.json['message'],
-            f'Token {str(token_uid)} usage count exceeded'
+            res.json['message'], f'Token {str(token_uid)} usage count exceeded'
         )

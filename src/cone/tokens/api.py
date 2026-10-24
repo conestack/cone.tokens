@@ -6,12 +6,12 @@ from cone.tokens.exceptions import TokenNotExists
 from cone.tokens.exceptions import TokenTimeRangeViolation
 from cone.tokens.exceptions import TokenUsageCountExceeded
 from cone.tokens.exceptions import TokenValueError
-from cone.tokens.model import TokenUsageRecord
 from cone.tokens.model import TokenRecord
+from cone.tokens.model import TokenUsageRecord
 from datetime import datetime
 from datetime import timedelta
-from node.utils import UNSET
 from node.utils import instance_property
+from node.utils import UNSET
 from pyramid.i18n import TranslationStringFactory
 from pyramid.threadlocal import get_current_request
 import uuid
@@ -21,9 +21,8 @@ _ = TranslationStringFactory('cone.tokens')
 
 
 class TokenAPI:
-
     def __init__(self, request=None):
-       self.request = request
+        self.request = request
 
     def __enter__(self):
         return self
@@ -39,33 +38,28 @@ class TokenAPI:
 
     def flush_or_commit(self):
         if use_tm() and self.request is not None:
-            self.session.flush() # pragma: no cover
+            self.session.flush()  # pragma: no cover
         else:
             self.session.commit()
 
     def get_token(self, token_uid):
         session = self.session
-        token = session\
-            .query(TokenRecord)\
-            .filter(TokenRecord.uid == token_uid)\
-            .one_or_none()
+        token = (
+            session.query(TokenRecord).filter(TokenRecord.uid == token_uid).one_or_none()
+        )
         if not token:
             raise TokenNotExists(token_uid)
         return token
 
     def query_token(self, value):
         session = self.session
-        return session\
-            .query(TokenRecord)\
-            .filter(TokenRecord.value == value)\
-            .one_or_none()
+        return session.query(TokenRecord).filter(TokenRecord.value == value).one_or_none()
 
     def token_values(self, token_uids):
         session = self.session
-        res = session\
-            .query(TokenRecord.value)\
-            .filter(TokenRecord.uid.in_(token_uids))\
-            .all()
+        res = (
+            session.query(TokenRecord.value).filter(TokenRecord.uid.in_(token_uids)).all()
+        )
         return [it[0] for it in res]
 
     @property
@@ -120,7 +114,7 @@ class TokenAPI:
         valid_from=None,
         valid_to=None,
         usage_count=0,
-        lock_time=0
+        lock_time=0,
     ):
         try:
             self.get_token(token_uid)
@@ -152,7 +146,7 @@ class TokenAPI:
         valid_from=UNSET,
         valid_to=UNSET,
         usage_count=UNSET,
-        lock_time=UNSET
+        lock_time=UNSET,
     ):
         token = self.get_token(token_uid)
         session = self.session

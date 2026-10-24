@@ -1,10 +1,10 @@
 from cone.app import get_root
+from cone.tile import render_tile
 from cone.tokens.browser.settings import TokenSettingsForm
-from cone.tokens.settings import TokenSettings
 from cone.tokens.settings import get_settings_node
 from cone.tokens.settings import tokens_config
+from cone.tokens.settings import TokenSettings
 from cone.tokens.tests import temp_config_file
-from cone.tile import render_tile
 from cone.tokens.tests import tokens_layer
 from cone.ugm import testing
 from node.tests import NodeTestCase
@@ -44,10 +44,7 @@ class TestSettings(NodeTestCase):
     def test_model_settings_metadata(self):
         metadata = TokenSettings().metadata
         self.assertEqual(metadata.title, 'token_settings_node')
-        self.assertEqual(
-            metadata.description,
-            'token_settings_node_description'
-        )
+        self.assertEqual(metadata.description, 'token_settings_node_description')
 
     @testing.principals(users={'admin': {}}, roles={'admin': ['manager']})
     @temp_config_file
@@ -62,15 +59,18 @@ class TestSettings(NodeTestCase):
             tile.prepare()
 
         form = tile.form
-        self.assertEqual(form.keys(), [
-            'morning',
-            'afternoon',
-            'today',
-            'default_locktime',
-            'default_usage_count',
-            'save',
-            'came_from'
-        ])
+        self.assertEqual(
+            form.keys(),
+            [
+                'morning',
+                'afternoon',
+                'today',
+                'default_locktime',
+                'default_usage_count',
+                'save',
+                'came_from',
+            ],
+        )
         self.assertEqual(form['morning'].keys(), ['start', 'end'])
         self.assertEqual(form['afternoon'].keys(), ['start', 'end'])
         self.assertEqual(form['today'].keys(), ['start', 'end'])
@@ -87,12 +87,10 @@ class TestSettings(NodeTestCase):
         self.assertEqual(today.extracted['start'], UNSET)
         self.assertEqual(today.extracted['end'], UNSET)
         self.assertEqual(
-            data.fetch('tokensettingsform.default_locktime').extracted,
-            UNSET
+            data.fetch('tokensettingsform.default_locktime').extracted, UNSET
         )
         self.assertEqual(
-            data.fetch('tokensettingsform.default_usage_count').extracted,
-            UNSET
+            data.fetch('tokensettingsform.default_usage_count').extracted, UNSET
         )
 
         # save
@@ -134,10 +132,7 @@ class TestSettings(NodeTestCase):
         request.params['tokensettingsform.morning.end'] = '10:00'
         data = tile.form.extract(request=request)
         morning = data.fetch('tokensettingsform.morning')
-        self.assertEqual(
-            morning.errors,
-            [ExtractionError('end_time_before_start_time')]
-        )
+        self.assertEqual(morning.errors, [ExtractionError('end_time_before_start_time')])
 
     @testing.principals(users={'admin': {}}, roles={'admin': ['manager']})
     @temp_config_file
@@ -145,11 +140,14 @@ class TestSettings(NodeTestCase):
         model = get_settings_node(get_root())
         with self.layer.authenticated('admin'):
             rendered = render_tile(model, self.layer.new_request(), 'editform')
-        self.checkOutput("""
+        self.checkOutput(
+            """
         <div class="settings-form card mt-3">
           <h5 class="card-header">Token Settings</h5>
           <div class="card-body">
             <form...</form>
           </div>
         </div>
-        """, rendered)
+        """,
+            rendered,
+        )

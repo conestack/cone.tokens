@@ -59,7 +59,8 @@ def format_datetime(dt):
     accept='application/json',
     renderer='json',
     context=TokenContainer,
-    permission='view')
+    permission='view',
+)
 def query_token(model, request):
     api = TokenAPI(request)
     try:
@@ -79,8 +80,8 @@ def query_token(model, request):
                 lock_time=token.lock_time,
                 creator=token.creator,
                 created=format_datetime(token.created),
-                modified=format_datetime(token.modified)
-            )
+                modified=format_datetime(token.modified),
+            ),
         )
     except KeyError:
         return dict(success=False, message='Missing ``value`` parameter')
@@ -94,7 +95,8 @@ def query_token(model, request):
     accept='application/json',
     renderer='json',
     context=TokenNode,
-    permission='view')  # XXX: ``consume`` permission
+    permission='view',
+)  # XXX: ``consume`` permission
 def consume_token(model, request):
     api = TokenAPI(request)
     uid = uuid.UUID(model.name)
@@ -113,7 +115,8 @@ def consume_token(model, request):
     accept='application/json',
     renderer='json',
     context=TokenContainer,
-    permission='add')
+    permission='add',
+)
 def add_token(model, request):
     settings = get_settings_node(model)
     api = TokenAPI(request)
@@ -124,17 +127,9 @@ def add_token(model, request):
         read_datetime(request, 'valid_from', kw)
         read_datetime(request, 'valid_to', kw)
         read_int(
-            request,
-            'usage_count',
-            kw,
-            default=settings.attrs['default_usage_count']
+            request, 'usage_count', kw, default=settings.attrs['default_usage_count']
         )
-        read_int(
-            request,
-            'lock_time',
-            kw,
-            default=settings.attrs['default_locktime']
-        )
+        read_int(request, 'lock_time', kw, default=settings.attrs['default_locktime'])
     except TokenValueError as e:
         return e.as_json()
     try:
@@ -152,7 +147,8 @@ def add_token(model, request):
     accept='application/json',
     renderer='json',
     context=TokenContainer,
-    permission='delete')
+    permission='delete',
+)
 def delete_tokens(model, request):
     api = TokenAPI(request)
     token_uids = request.params.get('token_uids', None)
@@ -169,7 +165,7 @@ def delete_tokens(model, request):
     ts = _(
         'deleted_tokens',
         default='Successfully deleted ${count} Tokens.',
-        mapping={'count': token_count}
+        mapping={'count': token_count},
     )
     localizer = get_localizer(request)
     message = localizer.translate(ts)
@@ -182,7 +178,8 @@ def delete_tokens(model, request):
     accept='application/json',
     renderer='json',
     context=TokenNode,
-    permission='edit')
+    permission='edit',
+)
 def update_token(model, request):
     api = TokenAPI(request)
     uid = uuid.UUID(model.name)
@@ -210,7 +207,8 @@ def update_token(model, request):
     accept='application/json',
     renderer='json',
     context=TokenNode,
-    permission='delete')
+    permission='delete',
+)
 def delete_token(model, request):
     api = TokenAPI(request)
     uid = uuid.UUID(model.name)

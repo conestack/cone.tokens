@@ -4,21 +4,23 @@ import webresource as wr
 
 resources_dir = os.path.join(os.path.dirname(__file__), 'static')
 cone_tokens_resources = wr.ResourceGroup(
-    name='cone.tokens-tokens',
-    directory=resources_dir,
-    path='tokens'
+    name='cone.tokens-tokens', directory=resources_dir, path='tokens'
 )
-cone_tokens_resources.add(wr.ScriptResource(
-    name='cone-tokens-js',
-    depends='cone-app-js',
-    resource='cone.tokens.js',
-    compressed='cone.tokens.min.js'
-))
-cone_tokens_resources.add(wr.StyleResource(
-    name='cone-tokens-css',
-    resource='cone.tokens.css',
-    compressed='cone.tokens.min.css'
-))
+cone_tokens_resources.add(
+    wr.ScriptResource(
+        name='cone-tokens-js',
+        depends='cone-app-js',
+        resource='cone.tokens.js',
+        compressed='cone.tokens.min.js',
+    )
+)
+cone_tokens_resources.add(
+    wr.StyleResource(
+        name='cone-tokens-css',
+        resource='cone.tokens.css',
+        compressed='cone.tokens.min.css',
+    )
+)
 
 
 def configure_resources(config, settings):

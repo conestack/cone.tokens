@@ -1,6 +1,6 @@
 from cone.app.model import Metadata
-from cone.app.model import SettingsNode
 from cone.app.model import node_info
+from cone.app.model import SettingsNode
 from node.utils import instance_property
 from pyramid.i18n import TranslationStringFactory
 import json
@@ -39,9 +39,9 @@ default_token_settings = {
     name='token_settings',
     title=_('token_settings', default='Token Settings'),
     description=_('token_settings_description', default='Token Settings'),
-    icon='bi bi-asterisk')
+    icon='bi bi-asterisk',
+)
 class TokenSettings(SettingsNode):
-
     @property
     def attrs(self):
         config_file = tokens_config.config_file
@@ -60,7 +60,6 @@ class TokenSettings(SettingsNode):
         metadata = Metadata()
         metadata.title = _('token_settings_node', default='Token Settings')
         metadata.description = _(
-            'token_settings_node_description',
-            default='Token definition settings'
+            'token_settings_node_description', default='Token definition settings'
         )
         return metadata

@@ -2,12 +2,12 @@ from cone.app import get_root
 from cone.app.browser.actions import ActionContext
 from cone.sql import get_session
 from cone.sql import testing as sql_testing
+from cone.tokens.browser.token import b64_qr_code
+from cone.tokens.browser.token import qr_code
 from cone.tokens.browser.token import TokenAddForm
 from cone.tokens.browser.token import TokenContent
 from cone.tokens.browser.token import TokenEditForm
 from cone.tokens.browser.token import TokenForm
-from cone.tokens.browser.token import b64_qr_code
-from cone.tokens.browser.token import qr_code
 from cone.tokens.browser.tokens import TokensOverview
 from cone.tokens.browser.tokens import TokensOverviewAction
 from cone.tokens.model import TokenNode
@@ -16,7 +16,7 @@ from cone.tokens.settings import default_token_settings
 from cone.tokens.tests import temp_config_file
 from cone.tokens.tests import tokens_layer
 from cone.ugm.testing import principals
-from datetime import datetime 
+from datetime import datetime
 from datetime import timedelta
 from node.tests import NodeTestCase
 from node.utils import UNSET
@@ -50,10 +50,7 @@ class TestTokenViews(NodeTestCase):
             res = render_view_to_response(token, request, 'qr_code')
         self.assertTrue(res.body.startswith(b'\x89PNG'))
         self.assertEqual(res.content_type, 'image/png')
-        self.assertEqual(
-            res.content_disposition,
-            f'attachment;filename={token.name}.png'
-        )
+        self.assertEqual(res.content_disposition, f'attachment;filename={token.name}.png')
 
     @temp_config_file
     def test_TokenContent_token_settings(self):
@@ -62,10 +59,13 @@ class TestTokenViews(NodeTestCase):
         token_tile = TokenContent()
         token_tile.model = token
         token_tile.request = self.layer.new_request()
-        self.assertEqual(json.loads(token_tile.token_settings), {
-            'base_url': 'http://example.com/tokens/token',
-            'timeranges': default_token_settings
-        })
+        self.assertEqual(
+            json.loads(token_tile.token_settings),
+            {
+                'base_url': 'http://example.com/tokens/token',
+                'timeranges': default_token_settings,
+            },
+        )
 
     def test_TokenContent_displays_token_value_as_qr_code(self):
         token_tile = self._token_content_tile(value='value')
@@ -86,7 +86,7 @@ class TestTokenViews(NodeTestCase):
         token_tile = self._token_content_tile(
             usage_count=1,
             valid_from=now - timedelta(days=1),
-            valid_to=now + timedelta(days=1)
+            valid_to=now + timedelta(days=1),
         )
         self.assertTrue(token_tile.is_active)
 
@@ -98,15 +98,13 @@ class TestTokenViews(NodeTestCase):
 
     def test_TokenContent_expired_token_is_inactive(self):
         token_tile = self._token_content_tile(
-            usage_count=-1,
-            valid_to=datetime.now() - timedelta(days=1)
+            usage_count=-1, valid_to=datetime.now() - timedelta(days=1)
         )
         self.assertFalse(token_tile.is_active)
 
     def test_TokenContent_not_yet_valid_token_is_inactive(self):
         token_tile = self._token_content_tile(
-            usage_count=-1,
-            valid_from=datetime.now() + timedelta(days=1)
+            usage_count=-1, valid_from=datetime.now() + timedelta(days=1)
         )
         self.assertFalse(token_tile.is_active)
 
@@ -114,7 +112,7 @@ class TestTokenViews(NodeTestCase):
         token_tile = self._token_content_tile()
         self.assertEqual(
             token_tile.format_date(datetime(2023, 9, 21, 10, 30, 15)),
-            '21.09.2023, 10:30:15'
+            '21.09.2023, 10:30:15',
         )
         self.assertEqual(token_tile.format_date(None), 'Unlimited')
 
@@ -140,8 +138,7 @@ class TestTokenForms(NodeTestCase):
         token = TokenNode(parent=tokens)
 
         class TestTokenForm(TokenForm):
-            def next(self, request):
-                ...
+            def next(self, request): ...
 
         # prepare token form
         form_tile = TestTokenForm(attribute='render')
@@ -152,7 +149,8 @@ class TestTokenForms(NodeTestCase):
 
         # token form structure
         self.assertEqual(form_tile.form.name, 'tokenform')
-        self.checkOutput("""
+        self.checkOutput(
+            """
         <class 'yafowil.base.Widget'>: tokenform
         __<class 'yafowil.base.Widget'>: value
         __<class 'yafowil.base.Widget'>: valid_from
@@ -161,7 +159,9 @@ class TestTokenForms(NodeTestCase):
         __<class 'yafowil.base.Widget'>: lock_time
         __<class 'yafowil.base.Widget'>: save
         __<class 'yafowil.base.Widget'>: cancel
-        """, form_tile.form.treerepr(prefix='_'))
+        """,
+            form_tile.form.treerepr(prefix='_'),
+        )
 
         # empty extraction
         data = form_tile.form.extract(request=request)
@@ -200,12 +200,10 @@ class TestTokenForms(NodeTestCase):
         data = form_tile.form.extract(request=request)
         self.assertEqual(data.fetch('tokenform.value').extracted, 'token value')
         self.assertEqual(
-            data.fetch('tokenform.valid_from').extracted,
-            datetime(2023, 9, 21, 10, 0)
+            data.fetch('tokenform.valid_from').extracted, datetime(2023, 9, 21, 10, 0)
         )
         self.assertEqual(
-            data.fetch('tokenform.valid_to').extracted,
-            datetime(2023, 9, 21, 16, 0)
+            data.fetch('tokenform.valid_to').extracted, datetime(2023, 9, 21, 16, 0)
         )
         self.assertEqual(data.fetch('tokenform.usage_count').extracted, 1)
         self.assertEqual(data.fetch('tokenform.lock_time').extracted, 100)
@@ -222,8 +220,7 @@ class TestTokenForms(NodeTestCase):
         request.params['tokenform.value'] = 'value'
         data = form_tile.form.extract(request=request)
         self.assertEqual(
-            data.fetch('tokenform.value').errors,
-            [ExtractionError('value_already_used')]
+            data.fetch('tokenform.value').errors, [ExtractionError('value_already_used')]
         )
         request.params['tokenform.value'] = 'token value'
 
@@ -235,8 +232,7 @@ class TestTokenForms(NodeTestCase):
 
         data = form_tile.form.extract(request=request)
         self.assertEqual(
-            data.fetch('tokenform.valid_from').extracted,
-            datetime(2023, 9, 21, 10, 0)
+            data.fetch('tokenform.valid_from').extracted, datetime(2023, 9, 21, 10, 0)
         )
         self.assertEqual(data.fetch('tokenform.valid_to').extracted, None)
 
@@ -248,8 +244,7 @@ class TestTokenForms(NodeTestCase):
         data = form_tile.form.extract(request=request)
         self.assertEqual(data.fetch('tokenform.valid_from').extracted, None)
         self.assertEqual(
-            data.fetch('tokenform.valid_to').extracted,
-            datetime(2023, 9, 21, 16, 0)
+            data.fetch('tokenform.valid_to').extracted, datetime(2023, 9, 21, 16, 0)
         )
 
         request.params['tokenform.valid_from'] = '22.9.2023'
@@ -260,8 +255,7 @@ class TestTokenForms(NodeTestCase):
         data = form_tile.form.extract(request=request)
         self.assertEqual(data.fetch('tokenform.valid_from').errors, [])
         self.assertEqual(
-            data.fetch('tokenform.valid_to').errors,
-            [ExtractionError('timerange_error')]
+            data.fetch('tokenform.valid_to').errors, [ExtractionError('timerange_error')]
         )
 
         # valid to must be after valid from, same time is invalid too
@@ -269,8 +263,7 @@ class TestTokenForms(NodeTestCase):
 
         data = form_tile.form.extract(request=request)
         self.assertEqual(
-            data.fetch('tokenform.valid_to').errors,
-            [ExtractionError('timerange_error')]
+            data.fetch('tokenform.valid_to').errors, [ExtractionError('timerange_error')]
         )
 
     @principals(users={'admin': {}}, roles={'admin': ['manager']})
@@ -393,10 +386,7 @@ class TestTokensOverview(NodeTestCase):
         action = TokensOverviewAction()
         action.model = tokens
         action.request = request
-        self.assertEqual(
-            action.href,
-            'http://example.com/tokens/tokens_overview'
-        )
+        self.assertEqual(action.href, 'http://example.com/tokens/tokens_overview')
         self.assertTrue(action.display)
         self.assertFalse(action.selected)
 
@@ -419,14 +409,11 @@ class TestTokensOverview(NodeTestCase):
         overview_tile = self._tokens_overview_tile()
         self.assertEqual(
             json.loads(overview_tile.token_settings),
-            {'base_url': 'http://example.com/tokens'}
+            {'base_url': 'http://example.com/tokens'},
         )
 
     def test_TokensOverview_parses_start_and_end_dates(self):
-        overview_tile = self._tokens_overview_tile(
-            start='21.9.2023',
-            end='22.9.2023'
-        )
+        overview_tile = self._tokens_overview_tile(start='21.9.2023', end='22.9.2023')
         self.assertEqual(overview_tile.start, datetime(2023, 9, 21))
         self.assertEqual(overview_tile.end, datetime(2023, 9, 22))
 
@@ -446,7 +433,7 @@ class TestTokensOverview(NodeTestCase):
         for value, created in [
             ('first', datetime(2023, 9, 20)),
             ('second', datetime(2023, 9, 21)),
-            ('third', datetime(2023, 9, 22))
+            ('third', datetime(2023, 9, 22)),
         ]:
             token = TokenRecord()
             token.uid = uuid.uuid4()
@@ -457,24 +444,14 @@ class TestTokensOverview(NodeTestCase):
 
         def token_values(**params):
             overview_tile = self._tokens_overview_tile(
-                **{'ajax.action': 'tokens_overview'},
-                **params
+                **{'ajax.action': 'tokens_overview'}, **params
             )
             return sorted(token.value for token in overview_tile.tokens)
 
         self.assertEqual(token_values(), ['first', 'second', 'third'])
-        self.assertEqual(
-            token_values(start='21.9.2023'),
-            ['second', 'third']
-        )
-        self.assertEqual(
-            token_values(end='21.9.2023'),
-            ['first', 'second']
-        )
-        self.assertEqual(
-            token_values(start='21.9.2023', end='21.9.2023'),
-            ['second']
-        )
+        self.assertEqual(token_values(start='21.9.2023'), ['second', 'third'])
+        self.assertEqual(token_values(end='21.9.2023'), ['first', 'second'])
+        self.assertEqual(token_values(start='21.9.2023', end='21.9.2023'), ['second'])
 
     def test_TokensOverview_qrcode(self):
         overview_tile = self._tokens_overview_tile()
@@ -482,10 +459,7 @@ class TestTokensOverview(NodeTestCase):
 
     def test_TokensOverview_format_date(self):
         overview_tile = self._tokens_overview_tile()
-        self.assertEqual(
-            overview_tile.format_date(datetime(2023, 9, 21)),
-            '21.09.2023'
-        )
+        self.assertEqual(overview_tile.format_date(datetime(2023, 9, 21)), '21.09.2023')
         self.assertEqual(overview_tile.format_date(None), '')
         self.assertEqual(overview_tile.format_date(None, default='-'), '-')
 

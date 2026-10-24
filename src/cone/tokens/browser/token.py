@@ -44,26 +44,18 @@ def b64_qr_code(value):
 def download_qr_code(model, request):
     response = Response(
         content_type='image/png',
-        content_disposition=f'attachment;filename={model.name}.png'
+        content_disposition=f'attachment;filename={model.name}.png',
     )
     response.body = qr_code(model.attrs['value'])
     return response
 
 
-@tile(
-    name='content',
-    path='templates/token.pt',
-    interface=TokenNode,
-    permission='view')
+@tile(name='content', path='templates/token.pt', interface=TokenNode, permission='view')
 class TokenContent(ProtectedContentTile):
-
     @property
     def token_settings(self):
         attrs = get_settings_node(self.model).attrs
-        return json.dumps({
-            'base_url': self.nodeurl,
-            'timeranges': attrs
-        })
+        return json.dumps({'base_url': self.nodeurl, 'timeranges': attrs})
 
     @request_property
     def qrcode(self):
@@ -71,7 +63,7 @@ class TokenContent(ProtectedContentTile):
 
     @property
     def lock_time_seconds(self):
-        return f"{self.model.attrs.get('lock_time')} sec"
+        return f'{self.model.attrs.get("lock_time")} sec'
 
     @property
     def is_active(self):
@@ -104,11 +96,7 @@ class TokenForm(Form):
 
     @property
     def form_action(self):
-        return make_url(
-            self.request,
-            node=self.model,
-            resource=self.action_resource
-        )
+        return make_url(self.request, node=self.model, resource=self.action_resource)
 
     def timerange_extractor(self, widget, data):
         extracted = data.extracted
@@ -117,10 +105,12 @@ class TokenForm(Form):
             return extracted
         valid_from = data.fetch('tokenform.valid_from').extracted
         if valid_from and valid_from >= extracted:
-            raise ExtractionError(_(
-                'timerange_error',
-                default='Valid from date must be before valid to date'
-            ))
+            raise ExtractionError(
+                _(
+                    'timerange_error',
+                    default='Valid from date must be before valid to date',
+                )
+            )
         return extracted
 
     def value_extractor(self, widget, data):
@@ -128,39 +118,30 @@ class TokenForm(Form):
         if not extracted:
             return extracted
         session = get_session(self.request)
-        existing_value = session.query(TokenRecord) \
-            .filter(TokenRecord.value == extracted) \
-            .filter(TokenRecord.uid != self.model.record.uid) \
+        existing_value = (
+            session.query(TokenRecord)
+            .filter(TokenRecord.value == extracted)
+            .filter(TokenRecord.uid != self.model.record.uid)
             .one_or_none()
+        )
         if existing_value:
-            raise ExtractionError(_(
-                'value_already_used',
-                default='Value already used by another token'
-            ))
+            raise ExtractionError(
+                _('value_already_used', default='Value already used by another token')
+            )
         return extracted
 
     def prepare(self):
         form = self.form = factory(
             '#form',
             name=self.form_name,
-            props={
-                'action': self.form_action,
-                'persist_writer': node_attribute_writer
-            }
+            props={'action': self.form_action, 'persist_writer': node_attribute_writer},
         )
         attrs = self.model.attrs
         form['value'] = factory(
             '#field:*value:text',
             value=attrs.get('value', UNSET),
-            props={
-                'label': _('value', default='Value'),
-                'persist': False
-            },
-            custom={
-                'value': {
-                    'extractors': [self.value_extractor]
-                }
-            }
+            props={'label': _('value', default='Value'), 'persist': False},
+            custom={'value': {'extractors': [self.value_extractor]}},
         )
         form['valid_from'] = factory(
             '#field:datetime',
@@ -171,8 +152,8 @@ class TokenForm(Form):
                 'timepicker': True,
                 'time': True,
                 'locale': 'de',
-                'persist': True
-            }
+                'persist': True,
+            },
         )
         form['valid_to'] = factory(
             '#field:*valid_to:datetime',
@@ -183,13 +164,9 @@ class TokenForm(Form):
                 'timepicker': True,
                 'time': True,
                 'locale': 'de',
-                'persist': True
+                'persist': True,
             },
-            custom={
-                'valid_to': {
-                    'extractors': [self.timerange_extractor]
-                }
-            }
+            custom={'valid_to': {'extractors': [self.timerange_extractor]}},
         )
         settings = get_settings_node(self.model)
         usage_count = attrs['usage_count']
@@ -201,8 +178,8 @@ class TokenForm(Form):
             props={
                 'label': _('usage_count', default='Usage Count'),
                 'datatype': int,
-                'emptyvalue': 0
-            }
+                'emptyvalue': 0,
+            },
         )
         lock_time = attrs['lock_time']
         if lock_time is None:
@@ -213,8 +190,8 @@ class TokenForm(Form):
             props={
                 'label': _('lock_time', default='Lock Time'),
                 'datatype': int,
-                'emptyvalue': 0
-            }
+                'emptyvalue': 0,
+            },
         )
         form['save'] = factory(
             'submit',
@@ -223,8 +200,8 @@ class TokenForm(Form):
                 'expression': True,
                 'handler': self.save,
                 'next': self.next,
-                'label': _('save', default='Save')
-            }
+                'label': _('save', default='Save'),
+            },
         )
         form['cancel'] = factory(
             'submit',
@@ -234,8 +211,8 @@ class TokenForm(Form):
                 'skip': True,
                 'next': self.next,
                 'label': _('cancel', default='Cancel'),
-                'submit.class_add': 'btn-secondary ms-2'
-            }
+                'submit.class_add': 'btn-secondary ms-2',
+            },
         )
 
     def save(self, widget, data):
@@ -250,7 +227,6 @@ class TokenForm(Form):
 @tile(name='addform', interface=TokenNode, permission='add')
 @plumbing(ContentAddForm)
 class TokenAddForm(TokenForm):
-
     def save(self, widget, data):
         super(TokenAddForm, self).save(widget, data)
         self.model.parent[str(self.model.uuid)] = self.model
@@ -261,7 +237,6 @@ class TokenAddForm(TokenForm):
 @tile(name='editform', interface=TokenNode, permission='edit')
 @plumbing(ContentEditForm)
 class TokenEditForm(TokenForm):
-
     def save(self, widget, data):
         super(TokenEditForm, self).save(widget, data)
         update_creation_metadata(self.request, self.model.attrs)

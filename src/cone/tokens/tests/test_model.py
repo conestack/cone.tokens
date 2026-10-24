@@ -18,20 +18,14 @@ class TestModel(NodeTestCase):
 
         self.assertEqual(tokens.record_class, TokenRecord)
         self.assertEqual(tokens.child_factory, TokenNode)
-        self.assertEqual(
-            tokens.uuid,
-            uuid.UUID('c40ef458-832f-42e6-9add-2dda2afb8920')
-        )
+        self.assertEqual(tokens.uuid, uuid.UUID('c40ef458-832f-42e6-9add-2dda2afb8920'))
 
         self.assertEqual(tokens.metadata.title, 'token_container_title')
-        self.assertEqual(
-            tokens.metadata.description,
-            'token_container_description'
-        )
+        self.assertEqual(tokens.metadata.description, 'token_container_description')
 
         self.assertTrue(tokens.properties.in_navtree)
         self.assertTrue(tokens.properties.action_up)
-        #self.assertTrue(tokens.properties.action_sharing)
+        # self.assertTrue(tokens.properties.action_sharing)
         self.assertTrue(tokens.properties.action_view)
         self.assertTrue(tokens.properties.action_list)
 

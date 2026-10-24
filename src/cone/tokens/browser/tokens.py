@@ -1,5 +1,5 @@
-from bda.intellidatetime import DateTimeConversionError
 from bda.intellidatetime import convert
+from bda.intellidatetime import DateTimeConversionError
 from cone.app.browser import render_main_template
 from cone.app.browser.actions import LinkAction
 from cone.app.browser.contextmenu import context_menu_item
@@ -23,9 +23,9 @@ _ = TranslationStringFactory('cone.tokens')
     name='content',
     path='templates/tokens.pt',
     interface=TokenContainer,
-    permission='view')
-class TokensContent(ProtectedContentTile):
-    ...
+    permission='view',
+)
+class TokensContent(ProtectedContentTile): ...
 
 
 @context_menu_item(group='contentviews', name='tokens_overview')
@@ -58,14 +58,12 @@ def tokens_overview(model, request):
     name='tokens_overview',
     path='templates/tokens_overview.pt',
     interface=TokenContainer,
-    permission='view')
+    permission='view',
+)
 class TokensOverview(ProtectedContentTile):
-
     @request_property
     def token_settings(self):
-        return json.dumps({
-            'base_url': self.nodeurl
-        })
+        return json.dumps({'base_url': self.nodeurl})
 
     @request_property
     def start(self):

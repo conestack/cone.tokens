@@ -2,8 +2,8 @@ from cone.app import import_from_string
 from cone.app import main_hook
 from cone.app import register_config
 from cone.tokens.browser import configure_resources
-from cone.tokens.settings import TokenSettings
 from cone.tokens.settings import tokens_config
+from cone.tokens.settings import TokenSettings
 import cone.app
 import logging
 
@@ -17,14 +17,12 @@ def initialize_tokens(config, global_config, settings):
 
     tokens_config.config_file = settings['cone.tokens.config_file']
     tokens_config.settings_node_path = settings.get(
-        'cone.tokens.settings_node_path',
-        'settings/token_settings'
+        'cone.tokens.settings_node_path', 'settings/token_settings'
     ).split('/')
 
     # register entry node
     tokens_entry_factory = settings.get(
-        'cone.tokens.entryfactory',
-        'cone.tokens.model.TokenContainer'
+        'cone.tokens.entryfactory', 'cone.tokens.model.TokenContainer'
     )
     cone.app.register_entry('tokens', import_from_string(tokens_entry_factory))
 
