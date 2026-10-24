@@ -121,11 +121,9 @@ export class TokensOverview {
                 },
             });
         }
-        let amount = this.add_tokens_input.val();
-        if (!amount) {
+        const amount = parseInt(this.add_tokens_input.val(), 10);
+        if (Number.isNaN(amount) || amount < 1) {
             return;
-        } else {
-            amount = parseInt(amount, 10);
         }
         add(amount, 0);
     }
@@ -201,8 +199,7 @@ export class TokenScanner {
     }
 
     set active(value) {
-        // biome-ignore lint/suspicious/noDoubleEquals: this.value is never set, strict comparison would change behavior for null
-        if (value == this.value) {
+        if (value === this.active) {
             return;
         }
         const button = this.button;
@@ -224,6 +221,8 @@ export class TokenScanner {
     }
 
     scan_token() {
+        // Start with a fresh input, a previous scan consumed the change handler.
+        this.active = false;
         this.active = true;
         const input = this._input;
         input.one('change', () => {

@@ -4,8 +4,19 @@ Changes
 2.0.1 (unreleased)
 ------------------
 
-- Extend the JS tests, all modules are loaded by the tests now. Code paths
-  behind known bugs stay uncovered.
+- Fix ``TokenScanner`` creating an additional hidden input on each click of the
+  scan button, orphaning the previous one. Setting ``active`` to its current
+  state does nothing now instead of failing when deactivating an inactive
+  scanner.
+  [rnix]
+
+- Fix adding tokens with an amount of 0, a negative or a non-numeric amount
+  sending ``add_token`` requests endlessly. Only a positive amount adds tokens,
+  the amount input requires a minimum of 1.
+  [rnix]
+
+- Extend the JS tests to 100 % coverage, all modules including bundles are
+  loaded by the tests now.
   [rnix]
 
 - Lint and format the JS code with biome. ``make check`` runs ``biome check``,

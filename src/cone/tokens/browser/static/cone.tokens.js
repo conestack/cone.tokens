@@ -188,11 +188,9 @@ var cone_tokens = (function (exports, $, ts) {
                     },
                 });
             }
-            let amount = this.add_tokens_input.val();
-            if (!amount) {
+            const amount = parseInt(this.add_tokens_input.val(), 10);
+            if (Number.isNaN(amount) || amount < 1) {
                 return;
-            } else {
-                amount = parseInt(amount, 10);
             }
             add(amount, 0);
         }
@@ -260,7 +258,7 @@ var cone_tokens = (function (exports, $, ts) {
             return this._input !== null;
         }
         set active(value) {
-            if (value == this.value) {
+            if (value === this.active) {
                 return;
             }
             const button = this.button;
@@ -281,6 +279,7 @@ var cone_tokens = (function (exports, $, ts) {
             }
         }
         scan_token() {
+            this.active = false;
             this.active = true;
             const input = this._input;
             input.one('change', () => {

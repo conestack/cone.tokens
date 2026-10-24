@@ -15,7 +15,7 @@
         <label for="amount" class="input-group-text" i18n:translate="amount">Amount</label>
         <input type="number"
                name="amount"
-               min=0
+               min=1
                class="form-control form-control-sm add-tokens-amount" />
         <button name="add-tokens"
                 class="btn btn-sm btn-primary input-group-text"

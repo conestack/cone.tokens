@@ -15,8 +15,12 @@ import ts from 'treibstoff';
 import { TokenScanner, TokensOverview } from '../src/tokens.js';
 
 QUnit.module('TokensOverview', (hooks) => {
-    let elem, tokens_filter, tokens_elem, start_input, end_input;
+    let elem, tokens_filter, tokens_elem, start_input, end_input, original_ts;
     hooks.beforeEach(() => {
+        original_ts = {
+            http_request: ts.http_request,
+            action: ts.ajax.action,
+        };
         elem = $('<div />').addClass('tokens-overview-container').appendTo('body');
         tokens_elem = $('<div id="tokens-overview" />').appendTo(elem);
         // filter
@@ -30,6 +34,8 @@ QUnit.module('TokensOverview', (hooks) => {
         $('<input name="amount" />').appendTo(add_tokens_container);
     });
     hooks.afterEach(() => {
+        ts.http_request = original_ts.http_request;
+        ts.ajax.action = original_ts.action;
         elem.empty().remove();
         elem = null;
         tokens_elem = null;
@@ -186,6 +192,30 @@ QUnit.module('TokensOverview', (hooks) => {
         ts.show_error = original_ts_error;
     });
 
+    QUnit.test('add_tokens ignores amount which is not a positive integer', (assert) => {
+        let requests = 0;
+        ts.http_request = (opts) => {
+            requests += 1;
+            // stop an endless add_token request loop
+            if (requests < 10) {
+                opts.success({ success: true });
+            }
+        };
+        ts.ajax.action = (_opts) => {
+            assert.step('ajax_action');
+        };
+        elem.data('token-settings', { base_url: 'https://tld.com' });
+        const ov = new TokensOverview(elem);
+
+        for (const amount of ['0', '-1', 'abc']) {
+            ov.add_tokens_input.val(amount);
+            ov.add_tokens();
+        }
+
+        assert.strictEqual(requests, 0);
+        assert.verifySteps([]);
+    });
+
     QUnit.test('delete_tokens', (assert) => {
         create_tokens(tokens_elem, 2);
 
@@ -317,6 +347,52 @@ QUnit.module('TokenScanner', (hooks) => {
         assert.strictEqual(tsc._input, null);
         assert.strictEqual(tsc._input_wrapper, null);
         assert.true(btn.hasClass('inactive'));
+    });
+
+    QUnit.test('set active to current state does nothing', (assert) => {
+        elem.data('base-url', 'https://tld.com');
+        const tsc = new TokenScanner(elem);
+
+        tsc.active = false;
+        assert.false(tsc.active);
+        assert.false(btn.hasClass('inactive'));
+
+        tsc.active = true;
+        const input = tsc._input;
+        tsc.active = true;
+        assert.strictEqual(tsc._input, input);
+        assert.strictEqual($('input', elem).length, 1);
+    });
+
+    QUnit.test('scan_token twice keeps a single input', (assert) => {
+        elem.data('base-url', 'https://tld.com');
+        const tsc = new TokenScanner(elem);
+        tsc.query_token = (val) => {
+            assert.step(`query_token ${val}`);
+        };
+
+        tsc.button.trigger('click');
+        tsc.button.trigger('click');
+        assert.strictEqual($('input', elem).length, 1);
+
+        tsc._input.val('token-1').trigger('change');
+        assert.verifySteps(['query_token token-1']);
+    });
+
+    QUnit.test('scan_token after a scan queries the next value', (assert) => {
+        elem.data('base-url', 'https://tld.com');
+        const tsc = new TokenScanner(elem);
+        tsc.query_token = (val) => {
+            assert.step(`query_token ${val}`);
+        };
+
+        tsc.button.trigger('click');
+        tsc._input.val('token-1').trigger('change');
+        tsc.button.trigger('click');
+        assert.strictEqual($('input', elem).length, 1);
+
+        tsc._input.val('token-2').trigger('change');
+        assert.verifySteps(['query_token token-1', 'query_token token-2']);
     });
 
     QUnit.test('scan_token', (assert) => {
