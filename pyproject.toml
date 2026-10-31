@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cone.tokens"
-version = "2.0.1"
+version = "2.0.2.dev0"
 description = "cone token api"
 dynamic = ["readme"]
 requires-python = ">=3.10"
